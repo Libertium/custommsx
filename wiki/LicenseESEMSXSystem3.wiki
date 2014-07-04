@@ -3,7 +3,7 @@
 = Introduction =
 
 *ESE MSX-SYSTEM3 / MSX clone on a Cyclone FPGA (ALTERA)*
- Revision 1.00
+Revision 1.00
  
 = Details =
 
