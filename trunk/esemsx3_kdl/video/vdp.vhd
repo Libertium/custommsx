@@ -77,6 +77,9 @@
 -------------------------------------------------------------------------------
 -- Revision History
 --
+-- 27th,July,2014 modified by KdL
+--  - Fixed H-SYNC interrupt reset control
+--
 -- 23th,January,2013 modified by KdL
 --  - Fixed V-SYNC and H-SYNC interrupt
 --  - Added an extra signal to force NTSC/PAL modes
@@ -1055,7 +1058,7 @@ BEGIN
                     REQ_HSYNC_INT_N;
 
     INT_N       <=  '0' WHEN( (VSYNCINT_N = '0') OR (HSYNCINT_N = '0') )ELSE
-                    '1';
+                    'Z';
 
     U_INTERRUPT: VDP_INTERRUPT
     PORT MAP (

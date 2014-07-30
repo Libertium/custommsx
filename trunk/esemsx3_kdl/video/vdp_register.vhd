@@ -424,7 +424,7 @@ BEGIN
                     CLR_HSYNC_INT <= '0';
                 END IF;
             ELSIF( VDPREGWRPULSE = '1' )THEN
-                IF( VDPREGPTR = "010011" OR VDPREGPTR = "000000" )THEN
+                IF( VDPREGPTR = "010011" OR (VDPREGPTR = "000000" AND VDPP1DATA(4) = '1') )THEN
                     -- CLEAR HSYNC INTERRUPT BY WRITE R#19, R#0
                     CLR_HSYNC_INT <= '1';
                 ELSE
