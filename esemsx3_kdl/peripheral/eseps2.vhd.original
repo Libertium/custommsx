@@ -32,7 +32,6 @@
 --------------------------------------------------------------------------------
 -- Update note
 --------------------------------------------------------------------------------
--- Mar 15 2008 - Added CMT switch (by KdL).
 -- Oct 05 2006 - Removed 101/106 toggle switch. 
 -- Sep 23 2006 - Fixed a problem where some key events are lost after 101/106 
 --               keyboard type switching.
@@ -44,9 +43,6 @@
 --               pause key.
 -- Jan 23 2004 - Added a 101 keyboard table.
 --------------------------------------------------------------------------------
---
-
---	modified by KdL
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -74,11 +70,8 @@ entity eseps2 is
     pPs2Dat  : inout std_logic;
 
     PpiPortC : in  std_logic_vector(7 downto 0);
-    pKeyX    : out std_logic_vector(7 downto 0);
-
-	CmtScro   : in std_logic
-
-	);
+    pKeyX    : out std_logic_vector(7 downto 0)
+  );
 end eseps2;
 
 architecture RTL of eseps2 is
@@ -128,8 +121,7 @@ begin
     variable Ps2Caps : std_logic;
     variable Ps2Kana : std_logic;
     variable Ps2Paus : std_logic;
---    variable Ps2Scro : std_logic; -- used for 101/106 key table switching
-    variable Ps2Scro : std_logic; -- used for CMT switching by KdL
+    variable Ps2Scro : std_logic; -- used for 101/106 key table switching
     variable Ps2Shif : std_logic; -- real shift status 
     variable Ps2Vshi : std_logic; -- virtual shift status
     variable oFkeys  : std_logic_vector(7 downto 0);
@@ -165,9 +157,8 @@ begin
       
       oFkeys  := (others=>'0');
       
---      Scro    <= Kmap; -- default keyboard layout / '0': Japanese-106, '1': English-101
-	  Scro    <= '0'; -- CMT off by KdL
-	
+      Scro    <= Kmap; -- default keyboard layout / '0': Japanese-106, '1': English-101
+
       MtxSeq := MtxIdle;
 
       pPs2Dat <= 'Z';
@@ -187,7 +178,7 @@ begin
             if Ps2Chg = '1' then 
  
               KeyId := Ps2xE0 & Ps2Dat;
-              if Kmap = '1' then  -- by KdL
+              if Scro = '1' then
                 MtxSeq := MtxSettle;
                 MtxIdx <= "0" & (not Ps2Shif) & KeyId;
               else
@@ -206,7 +197,7 @@ begin
                 end if;
               end loop;
               if PpiPortC(3 downto 0) = "0110" then
-                if (Kmap = '0' and oKeyCol(0) = '1') or (Kmap = '1' and Ps2Vshi = '1') then  -- by KdL
+                if (Scro = '0' and oKeyCol(0) = '1') or (Scro = '1' and Ps2Vshi = '1') then
                   pKeyX(0) <= '0';
                 else
                   pKeyX(0) <= '1';
@@ -352,17 +343,16 @@ begin
               Ps2Chg := '1';
             elsif (Ps2Dat = X"07" and Ps2xE0 = '0' and Ps2xE1 = '0') then -- F12 make
               if Ps2brk = '0' then
-                oFkeys(0) := not oFkeys(0);  -- ex toggle OnScreenDisplay enable.
+                oFkeys(0) := not oFkeys(0);  -- toggle OnScreenDisplay enable.
               end if;
               Ps2Chg := '1';
-            elsif (Ps2Dat = X"7E" and Ps2xE0 = '0' and Ps2xE1 = '0') then -- scroll-lock make
-              if Ps2brk ='0' then
-				Scro <= not Scro;  -- toggle scroll lock (currently used for CMT switch)
+            -- elsif (Ps2Dat = X"7E" and Ps2xE0 = '0' and Ps2xE1 = '0') then -- scroll-lock make
+            --  if Ps2brk ='0' then
             --    Scro <= not Scro;  -- toggle scroll lock (currently used for 101/106 keyboard switch)
             --    MtxTmp := "0000";
             --    MtxSeq := MtxReset;
-              end if;
-              Ps2Chg := '1';
+            --  end if;
+            --  Ps2Chg := '1';
             elsif ((Ps2Dat = X"12" or Ps2Dat = X"59") and Ps2xE0 = '0' and Ps2xE1 ='0' ) then -- shift make
               Ps2Shif:= not Ps2brk;
               oFkeys(7) := Ps2Shif;
@@ -397,10 +387,10 @@ begin
               pPs2Dat <= '0';
 
               --Ps2Led := (Caps xor Kana xor Paus xor '1') & "00000" & (not Caps) & (not Kana) & Paus;
-              Ps2Led := (Caps xor Kana xor CmtScro xor '1') & "00000" & (not Caps) & (not Kana) & CmtScro;
+              Ps2Led := (Caps xor Kana xor Paus xor '1') & "00000" & (not Caps) & Paus & (not Kana);
               timout := X"FFFF";        -- countdown timeout (18.3ms = 279ns x 65536clk, exceed 1ms)
 
-            elsif (Caps /= Ps2Caps or Kana /= Ps2Kana or Scro /= Ps2Scro) then
+            elsif (Caps /= Ps2Caps or Kana /= Ps2Kana or Paus /= Ps2Paus) then
               Ps2Seq := Ps2Txd;         -- Tx data state
               pPs2Dat <= '0';
               Ps2Led := "111101101";    -- Command EDh

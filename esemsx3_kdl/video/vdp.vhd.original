@@ -230,7 +230,6 @@
 -- JP: Ç¢Ç‹Ç∑ÅB
 --
 
--- modified by KdL
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -283,11 +282,7 @@ entity vdp is
     osdLocateY    : in std_logic_vector( 4 downto 0);
     osdCharCodeIn : in std_logic_vector( 7 downto 0);
     osdCharWrReq  : in std_logic;
-    osdCharWrAck  : out std_logic;
-	
-	-- by KdL
-    ntsc_forced : in std_logic
-
+    osdCharWrAck  : out std_logic
     );
 end vdp;
 
@@ -651,8 +646,8 @@ begin
   ----------------------------------------------------------------
   -- Display Components
   ----------------------------------------------------------------
-  VdpR9PALMode <= VdpR9PALModeX when ntsc_forced = '0' else '0';	-- VGA 60Hz forced by KdL
---  VdpR9PALMode <= VdpR9PALModeX;	-- by KdL
+--  VdpR9PALMode <= VdpR9PALModeX when dispModeVGA = '0' else '0';
+  VdpR9PALMode <= VdpR9PALModeX;
   
   iVideoR <= (others => '0') when bwindow = '0' else
              iVideoR_debwin & iVideoR_vdp(5 downto 2) when debWindow = '1' else

@@ -76,315 +76,378 @@
 -- 12th,August,2006 created by Kunihiko Ohnaka
 -- JP: VDPのコアの実装とスクリーンモードの実装を分離した
 --
+-- 13th,March,2008
+-- Fixed Blink by caro
+--
+-- 22th,March,2008
+-- JP: タイミング緩和と、リファクタリング by t.hara
+--
 -------------------------------------------------------------------------------
 -- Document
 --
 -- JP: TEXTモード1,2のメイン処理回路です。
 --
+-------------------------------------------------------------------------------
 
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
-use work.vdp_package.all;
+LIBRARY IEEE;
+	USE IEEE.STD_LOGIC_1164.ALL;
+	USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+	USE WORK.VDP_PACKAGE.ALL;
 
-entity text12 is
-  port(
-    -- VDP clock ... 21.477MHz
-    clk21m  : in std_logic;
-    reset   : in std_logic;
+ENTITY TEXT12 IS
+	PORT(
+		-- VDP CLOCK ... 21.477MHZ
+		CLK21M						: IN	STD_LOGIC;
+		RESET	 					: IN	STD_LOGIC;
 
-    dotState : in std_logic_vector(1 downto 0);
-    dotCounterX : in std_logic_vector(8 downto 0);
-    dotCounterY : in std_logic_vector(8 downto 0);
+		DOTSTATE					: IN	STD_LOGIC_VECTOR(  1 DOWNTO 0 );
+		DOTCOUNTERX					: IN	STD_LOGIC_VECTOR(  8 DOWNTO 0 );
+		DOTCOUNTERY					: IN	STD_LOGIC_VECTOR(  8 DOWNTO 0 );
 
-    vdpModeText1: in std_logic;
-    vdpModeText2: in std_logic;
+		VDPMODETEXT1				: IN	STD_LOGIC;
+		VDPMODETEXT2				: IN	STD_LOGIC;
 
-    -- registers
-    vdpR7FrameColor : in std_logic_vector( 7 downto 0);
-    vdpR12BlinkColor : in std_logic_vector( 7 downto 0);
-    vdpR13BlinkPeriod : in std_logic_vector( 7 downto 0);
-    
-    vdpR2PtnNameTblBaseAddr : in std_logic_vector(6 downto 0);
-    vdpR4PtnGeneTblBaseAddr : in std_logic_vector(5 downto 0);
-    VdpR10R3ColorTblBaseAddr : in std_logic_vector(10 downto 0);
-    --
-    pRamDat : in std_logic_vector(7 downto 0);
-    pRamAdr : out std_logic_vector(16 downto 0);
-    txVramReadEn : out std_logic;
+		-- REGISTERS
+		VDPR7FRAMECOLOR			: IN	STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+		VDPR12BLINKCOLOR			: IN	STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+		VDPR13BLINKPERIOD		: IN	STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+		
+		VDPR2PTNNAMETBLBASEADDR			: IN	STD_LOGIC_VECTOR(  6 DOWNTO 0 );
+		VDPR4PTNGENETBLBASEADDR			: IN	STD_LOGIC_VECTOR(  5 DOWNTO 0 );
+		VDPR10R3COLORTBLBASEADDR			: IN	STD_LOGIC_VECTOR( 10 DOWNTO 0 );
+		--
+		PRAMDAT						: IN	STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+		PRAMADR						: OUT	STD_LOGIC_VECTOR( 16 DOWNTO 0 );
+		TXVRAMREADEN				: OUT	STD_LOGIC;
 
-    pColorCode : out std_logic_vector(3 downto 0)
-    );
-end text12;
-architecture rtl of text12 is
-  signal iTxVramReadEn : std_logic;
-  signal iTxVramReadEn2 : std_logic;
-  signal dotCounter24 : std_logic_vector(4 downto 0);
-  signal txWindowX : std_logic;
-  signal txPreWindowX : std_logic;
+		PCOLORCODE					: OUT	STD_LOGIC_VECTOR(  3 DOWNTO 0 )
+	);
+END TEXT12;
 
-  signal logicalVramAddrNam : std_logic_vector(16 downto 0);
-  signal logicalVramAddrGen : std_logic_vector(16 downto 0);
-  signal logicalVramAddrCol : std_logic_vector(16 downto 0);
+ARCHITECTURE RTL OF TEXT12 IS
+	SIGNAL ITXVRAMREADEN			: STD_LOGIC;
+	SIGNAL ITXVRAMREADEN2			: STD_LOGIC;
+	SIGNAL DOTCOUNTER24				: STD_LOGIC_VECTOR(  4 DOWNTO 0 );
+	SIGNAL TXWINDOWX				: STD_LOGIC;
+	SIGNAL TXPREWINDOWX				: STD_LOGIC;
 
-  signal txCharCounter  : std_logic_vector(11 downto 0);
-  signal txCharCounterX : std_logic_vector(6 downto 0);
-  signal txCharCounterStartOfLine : std_logic_vector(11 downto 0);
+	SIGNAL LOGICALVRAMADDRNAM		: STD_LOGIC_VECTOR( 16 DOWNTO 0 );
+	SIGNAL LOGICALVRAMADDRGEN		: STD_LOGIC_VECTOR( 16 DOWNTO 0 );
+	SIGNAL LOGICALVRAMADDRCOL		: STD_LOGIC_VECTOR( 16 DOWNTO 0 );
 
-  signal patternNum : std_logic_vector( 7 downto 0);
-  signal prePattern : std_logic_vector( 7 downto 0);
-  signal preBlink : std_logic_vector( 7 downto 0);
-  signal pattern : std_logic_vector( 7 downto 0);
-  signal blink : std_logic_vector( 7 downto 0);
-  signal txColorCode : std_logic;       -- only 2 colors
-  signal txColor : std_logic_vector( 7 downto 0);
+	SIGNAL TXCHARCOUNTER			: STD_LOGIC_VECTOR( 11 DOWNTO 0 );
+	SIGNAL TXCHARCOUNTERX			: STD_LOGIC_VECTOR(  6 DOWNTO 0 );
+	SIGNAL TXCHARCOUNTERSTARTOFLINE	: STD_LOGIC_VECTOR( 11 DOWNTO 0 );
 
-  -- for blink
-  signal blinkFrameCount :std_logic_vector( 3 downto 0);
-  signal blinkState : std_logic;
-  signal blinkPeriodCount : std_logic_vector( 3 downto 0);
-begin
+	SIGNAL PATTERNNUM				: STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+	SIGNAL PREPATTERN				: STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+	SIGNAL PREBLINK					: STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+	SIGNAL PATTERN					: STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+	SIGNAL BLINK					: STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+	SIGNAL TXCOLORCODE				: STD_LOGIC;			 -- ONLY 2 COLORS
+	SIGNAL TXCOLOR					: STD_LOGIC_VECTOR(  7 DOWNTO 0 );
 
-  -- JP: RAMは dotStateが"10","00"の時にアドレスを出して"01"でアクセスする。
-  -- JP: eightDotStateで見ると、
-  -- JP:  0-1    Read pattern num.
-  -- JP:  1-2    Read pattern
-  -- JP: となる。
-  --
+	SIGNAL FF_BLINK_FRAME_CNT		: STD_LOGIC_VECTOR(  3 DOWNTO 0 );
+	SIGNAL FF_BLINK_STATE			: STD_LOGIC;
+	SIGNAL FF_BLINK_PERIOD_CNT		: STD_LOGIC_VECTOR(  3 DOWNTO 0 );
+	SIGNAL W_BLINK_CNT_MAX			: STD_LOGIC_VECTOR( 3 DOWNTO 0 );
+	SIGNAL W_FRAME_SYNC				: STD_LOGIC;
 
-  ----------------------------------------------------------------
-  -- 
-  ----------------------------------------------------------------
+BEGIN
 
-  txCharCounter <= txCharCounterStartOfLine + txCharCounterX;
-  -- JP: 各エリアのVRAMマッピング
-  logicalVramAddrNam <=  (VdpR2PtnNameTblBaseAddr & txCharCounter(9 downto 0)) when vdpModeText1 = '1' else
-                         (VdpR2PtnNameTblBaseAddr(6 downto 2) & txCharCounter);
+	-- JP: RAMは DOTSTATEが"10","00"の時にアドレスを出して"01"でアクセスする。
+	-- JP: EIGHTDOTSTATEで見ると、
+	-- JP:	0-1		READ PATTERN NUM.
+	-- JP:	1-2		READ PATTERN
+	-- JP: となる。
+	--
 
-  logicalVramAddrGen <=  VdpR4PtnGeneTblBaseAddr & patternNum & dotCounterY(2 downto 0);
+	----------------------------------------------------------------
+	-- 
+	----------------------------------------------------------------
+	TXCHARCOUNTER		<=	TXCHARCOUNTERSTARTOFLINE + TXCHARCOUNTERX;
 
-  logicalVramAddrCol <=  VdpR10R3ColorTblBaseAddr(10 downto 3) & TXCharCounter(11 downto 3);
+	LOGICALVRAMADDRNAM	<=	(VDPR2PTNNAMETBLBASEADDR & TXCHARCOUNTER(9 DOWNTO 0)) WHEN( VDPMODETEXT1 = '1' )ELSE
+							(VDPR2PTNNAMETBLBASEADDR(6 DOWNTO 2) & TXCHARCOUNTER);
 
-  txVramReadEn <= iTxVramReadEn when vdpModeText1 = '1' else
-                  iTxVramReadEn or iTxVramReadEn2 when vdpModeText2 = '1' else
-                  '0';
-  --
-  txColor <= vdpR12BlinkColor when (vdpModeText2 = '1') and (blinkState = '1') and (blink(7) = '1') else
-             vdpR7FrameColor;
-  pColorCode <= txColor(7 downto 4) when (txWindowX = '1') and (txColorCode = '1') else
-                txColor(3 downto 0) when (txWindowX = '1') and (txColorCode = '0') else
-                vdpR7FrameColor(3 downto 0);
+	LOGICALVRAMADDRGEN	<=	VDPR4PTNGENETBLBASEADDR & PATTERNNUM & DOTCOUNTERY(2 DOWNTO 0);
 
-  --
-  --
-  process( clk21m, reset )
-    variable blinkFrameCountIsMax : std_logic;
-  begin
-    if(reset = '1' ) then
-      txCharCounterX <= (others => '0');
-      txCharCounterStartOfLine <= (others => '0');
-      patternNum <= (others => '0');
-      pattern <= (others => '0');
-      prePattern <= (others => '0');
-      preBlink <= (others => '0');
-      txWindowX <= '0';
-      txPreWindowX <= '0';
-      pRamAdr <= (others => '0');
-      iTxVramReadEn <= '0';
-      iTxVramReadEn2 <= '0';
-      blinkFrameCount <= (others => '0');
-      dotCounter24 <= (others => '0');
-    elsif (clk21m'event and clk21m = '1') then
+	LOGICALVRAMADDRCOL	<=	VDPR10R3COLORTBLBASEADDR(10 DOWNTO 3) & TXCHARCOUNTER(11 DOWNTO 3);
 
-      -- timing generation
-      case dotState is
-        when "10" =>
-          if( dotCounterX = 12 ) then
-            -- JP: dotcounterは"10"のタイミングでは既にカウントアップしているので注意
-            txPreWindowX <= '1';
-            dotCounter24 <= (others => '0');
-          else
-            if( dotCounterX = 240+12 ) then
-              txPreWindowX <= '0';
-            end if;
-            -- The dotCounter24(2 downto 0) counts up 0 to 5,
-            -- and the dotCounter24(4 downto 3) counts up 0 to 3.
-            if( dotCounter24(2 downto 0) = "101" ) then
-              dotCounter24(4 downto 3) <= dotCounter24(4 downto 3) + 1;
-              dotCounter24(2 downto 0) <= "000";
-            else
-              dotCounter24(2 downto 0) <= dotCounter24(2 downto 0) + 1;
-            end if;
-          end if;
-        when "00" =>
-          null;
-        when "01" =>
-          if( dotCounterX = 16 ) then
-            txWindowX <= '1';
-          elsif( dotCounterX = 240+16) then
-            txWindowX <= '0';
-          end if;
-        when "11" =>
-          null;
-        when others => null;
-      end case;
-      
-      
-      case dotState is
-        when "11" =>
-          if( txPreWindowX = '1' ) then
-            -- VRAM read address output.
-            case dotCounter24(2 downto 0) is
-              when "000" =>
-                if( dotCounter24(4 downto 3) = "00" ) then
-                  -- read color table(TEXT2 BLINK)
-                  -- It is used only one time per 8 characters.
-                  pRamAdr <= logicalVramAddrCol;
-                  iTxVramReadEn2 <= '1';
-                end if;
-              when "001" =>
-                -- read pattern name table
-                pRamAdr <= logicalVramAddrNam;
-                iTxVramReadEn <= '1';
-                txCharCounterX <= txCharCounterX + 1;
-              when "010" =>
-                -- read pattern generator table
-                pRamAdr <= logicalVramAddrGen;
-                iTxVramReadEn <= '1';
-              when "100" =>
-                -- read pattern name table
-                -- It is used if vdpmode is TEST2.
-                pRamAdr <= logicalVramAddrNam;
-                iTxVramReadEn2 <= '1';
-                if( vdpModeText2 = '1' ) then
-                  txCharCounterX <= txCharCounterX + 1;
-                end if;
-              when "101" =>
-                -- read pattern generator table
-                -- It is used if vdpmode is TEST2.
-                pRamAdr <= logicalVramAddrGen;
-                iTxVramReadEn2 <= '1';
-              when others =>
-                null;
-            end case;
-          end if;
-        when "10" =>
-          iTxVramReadEn <= '0';
-          iTxVramReadEn2 <= '0';
-        when "00" =>
-          if( dotCounterX = 11) then
-            txCharCounterX <= (others => '0');
-            if( dotCounterY = 0 )  then
-              txCharCounterStartOfLine <= (others => '0');
-            end if;
-          elsif( (dotCounterX = 240+11) and (dotCounterY(2 downto 0) = "111") ) then
-              txCharCounterStartOfLine <= txCharCounterStartOfLine + txCharCounterX;
-          end if;
-        when "01" =>
-          case dotCounter24(2 downto 0) is
-            when "001" =>
-              -- read color table(TEXT2 BLINK)
-              -- It is used only one time per 8 characters.
-              if( dotCounter24(4 downto 3) = "00" ) then
-                preBlink <= pRamDat;
-              end if;
-            when "010" =>
-              -- read pattern name table
-              patternNum <= pRamDat;
-            when "011" =>
-              -- read pattern generator table
-              prePattern <= pRamDat;
-            when "101" =>
-              -- read pattern name table
-              -- It is used if vdpmode is TEST2.
-              patternNum <= pRamDat;
-            when "000" =>
-              -- read pattern generator table
-              -- It is used if vdpmode is TEST2.
-              if( vdpModeText2 = '1' ) then
-                prePattern <= pRamDat;
-              end if;
-            when others =>
-              null;
-          end case;
-        when others => null;
-      end case;
+	TXVRAMREADEN		<=	ITXVRAMREADEN					WHEN( VDPMODETEXT1 = '1' )ELSE
+							ITXVRAMREADEN OR ITXVRAMREADEN2	WHEN( VDPMODETEXT2 = '1' )ELSE
+							'0';
 
-      -- Color code decision
-      -- JP: "01"と"10"のタイミングでかラーコードを出力してあげれば、
-      -- JP: VDPエンティティの方でパレットをデコードして色を出力してくれる。
-      -- JP: "01"と"10"で同じ色を出力すれば横256ドットになり、違う色を
-      -- JP: 出力すれば横512ドット表示となる。
-      case dotState is
-        when "00" =>
-          if( dotCounter24(2 downto 0) = "100" ) then
-            -- load next 8 dot data
-            -- JP: キャラクタの描画は dotCounter24が、
-            -- JP:   "0:4"から"1:3"の6ドット
-            -- JP:   "1:4"から"2:3"の6ドット
-            -- JP:   "2:4"から"3:3"の6ドット
-            -- JP:   "3:4"から"0:3"の6ドット
-            -- JP: で行われるので"100"のタイミングでロードする
-            pattern <= prePattern;
-          elsif( (dotCounter24(2 downto 0) = "001") and (vdpModeText2 = '1') ) then
-            -- JP: TEXT2では"001"のタイミングでもロードする。
-            pattern <= prePattern;
-          end if;
-          if( (dotCounter24(2 downto 0) = "100") or
-              (dotCounter24(2 downto 0) = "001") ) then
-            -- evaluate blink signal
-            if(dotCounter24(4 downto 0) = "00100") then
-              blink <= preBlink;
-            else
-              blink <= blink(6 downto 0) & "0";
-            end if;
-          end if;
-        when "01" =>
-          -- パターンに応じてカラーコードを決定
-          txColorCode <= pattern(7);
-          -- パターンをシフト
-          pattern <= pattern(6 downto 0) & '0';
-        when "11" =>
-          null;
-        when "10" =>
-          if( vdpModeText2 = '1' ) then
-            txColorCode <= pattern(7);
-            -- パターンをシフト
-            pattern <= pattern(6 downto 0) & '0';
-          end if;
+	TXCOLOR				<=	VDPR12BLINKCOLOR		WHEN( ( VDPMODETEXT2 = '1') AND (FF_BLINK_STATE = '1') AND (BLINK(7) = '1') )ELSE
+						 	VDPR7FRAMECOLOR;
+	PCOLORCODE			<=	TXCOLOR(7 DOWNTO 4)		WHEN( (TXWINDOWX = '1') AND (TXCOLORCODE = '1') )ELSE
+							TXCOLOR(3 DOWNTO 0)		WHEN( (TXWINDOWX = '1') AND (TXCOLORCODE = '0') )ELSE
+							VDPR7FRAMECOLOR(3 DOWNTO 0);
 
-        when others => null;
-      end case;
-    end if;
+	---------------------------------------------------------------------------
+	-- TIMING GENERATOR
+	---------------------------------------------------------------------------
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			DOTCOUNTER24	<= (OTHERS => '0');
+		ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( DOTSTATE = "10" )THEN
+				IF( DOTCOUNTERX = 12 )THEN
+					-- JP: DOTCOUNTERは"10"のタイミングでは既にカウントアップしているので注意
+					DOTCOUNTER24 <= (OTHERS => '0');
+				ELSE
+					-- THE DOTCOUNTER24(2 DOWNTO 0) COUNTS UP 0 TO 5,
+					-- AND THE DOTCOUNTER24(4 DOWNTO 3) COUNTS UP 0 TO 3.
+					IF( DOTCOUNTER24(2 DOWNTO 0) = "101" ) THEN
+						DOTCOUNTER24(4 DOWNTO 3) <= DOTCOUNTER24(4 DOWNTO 3) + 1;
+						DOTCOUNTER24(2 DOWNTO 0) <= "000";
+					ELSE
+						DOTCOUNTER24(2 DOWNTO 0) <= DOTCOUNTER24(2 DOWNTO 0) + 1;
+					END IF;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-    --
-    -- Blink timing generation
-    --
-    if( (dotCounterX = 0) and (dotCounterY = 0) and (dotState = "00") ) then
-      if (blinkFrameCount = "1001") then
-        blinkFrameCountIsMax := '1';
-        blinkFrameCount <= (others => '0');
-      else
-        blinkFrameCountIsMax := '0';
-        blinkFrameCount <= blinkFrameCount + 1;
-      end if;
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			TXPREWINDOWX	<= '0';
+		ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( DOTSTATE = "10" )THEN
+				IF( DOTCOUNTERX = 12 )THEN
+					TXPREWINDOWX <= '1';
+				ELSIF( DOTCOUNTERX = 240+12 )THEN
+					TXPREWINDOWX <= '0';
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-      if (blinkFrameCountIsMax = '1') then
-        if( VdpR13BlinkPeriod(7 downto 4) = "0000" ) then
-          -- When ON period is 0, the blink color is always OFF
-          blinkState <= '0';
-        elsif( VdpR13BlinkPeriod(3 downto 0) = "0000") then
-          -- When OFF period is 0, the blink color is always ON
-          blinkState <= '1';
-        elsif( (blinkState = '0') and (blinkPeriodCount >= VdpR13BlinkPeriod(3 downto 0)) ) then
-          blinkState <= '1';
-          blinkPeriodCount <= (others => '0');
-        elsif( (blinkState = '1') and (blinkPeriodCount >= VdpR13BlinkPeriod(7 downto 4)) ) then
-          blinkState <= '0';
-          blinkPeriodCount <= (others => '0');
-        end if;
-      end if;
-    end if;
-    
-  end process;
-end rtl;
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			TXWINDOWX		<= '0';
+		ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( DOTSTATE = "01" )THEN
+				IF( DOTCOUNTERX = 16 )THEN
+					TXWINDOWX <= '1';
+				ELSIF( DOTCOUNTERX = 240+16 )THEN
+					TXWINDOWX <= '0';
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+
+	---------------------------------------------------------------------------
+	-- 
+	---------------------------------------------------------------------------
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			PATTERNNUM					<= (OTHERS => '0');
+			PRAMADR						<= (OTHERS => '0');
+			ITXVRAMREADEN				<= '0';
+			ITXVRAMREADEN2				<= '0';
+			TXCHARCOUNTERX				<= (OTHERS => '0');
+			PREBLINK					<= (OTHERS => '0');
+			TXCHARCOUNTERSTARTOFLINE	<= (OTHERS => '0');
+		ELSIF (CLK21M'EVENT AND CLK21M = '1') THEN
+			CASE DOTSTATE IS
+				WHEN "11" =>
+					IF( TXPREWINDOWX = '1' ) THEN
+						-- VRAM READ ADDRESS OUTPUT.
+						CASE DOTCOUNTER24(2 DOWNTO 0) IS
+							WHEN "000" =>
+								IF( DOTCOUNTER24(4 DOWNTO 3) = "00" ) THEN
+									-- READ COLOR TABLE(TEXT2 BLINK)
+									-- IT IS USED ONLY ONE TIME PER 8 CHARACTERS.
+									PRAMADR <= LOGICALVRAMADDRCOL;
+									ITXVRAMREADEN2 <= '1';
+								END IF;
+							WHEN "001" =>
+								-- READ PATTERN NAME TABLE
+								PRAMADR <= LOGICALVRAMADDRNAM;
+								ITXVRAMREADEN <= '1';
+								TXCHARCOUNTERX <= TXCHARCOUNTERX + 1;
+							WHEN "010" =>
+								-- READ PATTERN GENERATOR TABLE
+								PRAMADR <= LOGICALVRAMADDRGEN;
+								ITXVRAMREADEN <= '1';
+							WHEN "100" =>
+								-- READ PATTERN NAME TABLE
+								-- IT IS USED IF VDPMODE IS TEST2.
+								PRAMADR <= LOGICALVRAMADDRNAM;
+								ITXVRAMREADEN2 <= '1';
+								IF( VDPMODETEXT2 = '1' ) THEN
+									TXCHARCOUNTERX <= TXCHARCOUNTERX + 1;
+								END IF;
+							WHEN "101" =>
+								-- READ PATTERN GENERATOR TABLE
+								-- IT IS USED IF VDPMODE IS TEST2.
+								PRAMADR <= LOGICALVRAMADDRGEN;
+								ITXVRAMREADEN2 <= '1';
+							WHEN OTHERS =>
+								NULL;
+						END CASE;
+					END IF;
+				WHEN "10" =>
+					ITXVRAMREADEN <= '0';
+					ITXVRAMREADEN2 <= '0';
+				WHEN "00" =>
+					IF( DOTCOUNTERX = 11) THEN
+						TXCHARCOUNTERX <= (OTHERS => '0');
+						IF( DOTCOUNTERY = 0 )	THEN
+							TXCHARCOUNTERSTARTOFLINE <= (OTHERS => '0');
+						END IF;
+					ELSIF( (DOTCOUNTERX = 240+11) AND (DOTCOUNTERY(2 DOWNTO 0) = "111") ) THEN
+							TXCHARCOUNTERSTARTOFLINE <= TXCHARCOUNTERSTARTOFLINE + TXCHARCOUNTERX;
+					END IF;
+				WHEN "01" =>
+					CASE DOTCOUNTER24(2 DOWNTO 0) IS
+						WHEN "001" =>
+							-- READ COLOR TABLE(TEXT2 BLINK)
+							-- IT IS USED ONLY ONE TIME PER 8 CHARACTERS.
+							IF( DOTCOUNTER24(4 DOWNTO 3) = "00" ) THEN
+								PREBLINK <= PRAMDAT;
+							END IF;
+						WHEN "010" =>
+							-- READ PATTERN NAME TABLE
+							PATTERNNUM <= PRAMDAT;
+						WHEN "011" =>
+							-- READ PATTERN GENERATOR TABLE
+							PREPATTERN <= PRAMDAT;
+						WHEN "101" =>
+							-- READ PATTERN NAME TABLE
+							-- IT IS USED IF VDPMODE IS TEST2.
+							PATTERNNUM <= PRAMDAT;
+						WHEN "000" =>
+							-- READ PATTERN GENERATOR TABLE
+							-- IT IS USED IF VDPMODE IS TEST2.
+							IF( VDPMODETEXT2 = '1' ) THEN
+								PREPATTERN <= PRAMDAT;
+							END IF;
+						WHEN OTHERS =>
+							NULL;
+					END CASE;
+				WHEN OTHERS => NULL;
+			END CASE;
+		END IF;
+	END PROCESS;
+
+	----------------------------------------------------------------
+	-- 
+	----------------------------------------------------------------
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF(RESET = '1' ) THEN
+			PATTERN			<= (OTHERS => '0');
+			TXCOLORCODE		<= '0';
+			BLINK			<= (OTHERS => '0');
+		ELSIF (CLK21M'EVENT AND CLK21M = '1') THEN
+			-- COLOR CODE DECISION
+			-- JP: "01"と"10"のタイミングでかラーコードを出力してあげれば、
+			-- JP: VDPエンティティの方でパレットをデコードして色を出力してくれる。
+			-- JP: "01"と"10"で同じ色を出力すれば横256ドットになり、違う色を
+			-- JP: 出力すれば横512ドット表示となる。
+			CASE DOTSTATE IS
+				WHEN "00" =>
+					IF( DOTCOUNTER24(2 DOWNTO 0) = "100" ) THEN
+						-- LOAD NEXT 8 DOT DATA
+						-- JP: キャラクタの描画は DOTCOUNTER24が、
+						-- JP:	 "0:4"から"1:3"の6ドット
+						-- JP:	 "1:4"から"2:3"の6ドット
+						-- JP:	 "2:4"から"3:3"の6ドット
+						-- JP:	 "3:4"から"0:3"の6ドット
+						-- JP: で行われるので"100"のタイミングでロードする
+						PATTERN <= PREPATTERN;
+					ELSIF( (DOTCOUNTER24(2 DOWNTO 0) = "001") AND (VDPMODETEXT2 = '1') ) THEN
+						-- JP: TEXT2では"001"のタイミングでもロードする。
+						PATTERN <= PREPATTERN;
+					END IF;
+					IF( (DOTCOUNTER24(2 DOWNTO 0) = "100") OR
+							(DOTCOUNTER24(2 DOWNTO 0) = "001") ) THEN
+						-- EVALUATE BLINK SIGNAL
+						IF(DOTCOUNTER24(4 DOWNTO 0) = "00100") THEN
+							BLINK <= PREBLINK;
+						ELSE
+							BLINK <= BLINK(6 DOWNTO 0) & "0";
+						END IF;
+					END IF;
+				WHEN "01" =>
+					-- パターンに応じてカラーコードを決定
+					TXCOLORCODE <= PATTERN(7);
+					-- パターンをシフト
+					PATTERN <= PATTERN(6 DOWNTO 0) & '0';
+				WHEN "11" =>
+					NULL;
+				WHEN "10" =>
+					IF( VDPMODETEXT2 = '1' ) THEN
+						TXCOLORCODE <= PATTERN(7);
+						-- パターンをシフト
+						PATTERN <= PATTERN(6 DOWNTO 0) & '0';
+					END IF;
+
+				WHEN OTHERS => NULL;
+			END CASE;
+		END IF;
+	END PROCESS;
+
+	--------------------------------------------------------------------------
+	-- BLINK TIMING GENERATION FIXED BY CARO AND T.HARA
+	--------------------------------------------------------------------------
+	W_BLINK_CNT_MAX	<=	VDPR13BLINKPERIOD( 3 DOWNTO 0 )	WHEN( FF_BLINK_STATE = '0' )ELSE
+						VDPR13BLINKPERIOD( 7 DOWNTO 4 );
+	W_FRAME_SYNC	<=	'1'	WHEN( (DOTCOUNTERX = 0) AND (DOTCOUNTERY = 0) AND (DOTSTATE = "00") )ELSE
+						'0';
+
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			FF_BLINK_FRAME_CNT <= (OTHERS => '0');
+		ELSIF (CLK21M'EVENT AND CLK21M = '1') THEN
+			IF( W_FRAME_SYNC = '1' )THEN
+				IF (FF_BLINK_FRAME_CNT = "1001") THEN
+					FF_BLINK_FRAME_CNT <= (OTHERS => '0');
+				ELSE
+					FF_BLINK_FRAME_CNT <= FF_BLINK_FRAME_CNT + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			FF_BLINK_STATE <= '0';
+		ELSIF (CLK21M'EVENT AND CLK21M = '1') THEN
+			IF( (W_FRAME_SYNC = '1') AND (FF_BLINK_FRAME_CNT = "1001") )THEN
+				IF(    VDPR13BLINKPERIOD( 7 DOWNTO 4 ) = "0000" )THEN
+					-- WHEN ON PERIOD IS 0, THE BLINK COLOR IS ALWAYS OFF
+					FF_BLINK_STATE <= '0';
+				ELSIF( VDPR13BLINKPERIOD( 3 DOWNTO 0 ) = "0000" )THEN
+					-- WHEN OFF PERIOD IS 0, THE BLINK COLOR IS ALWAYS ON
+					FF_BLINK_STATE <= '1';
+				ELSIF( FF_BLINK_PERIOD_CNT >= W_BLINK_CNT_MAX )THEN
+					FF_BLINK_STATE <= NOT FF_BLINK_STATE;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			FF_BLINK_PERIOD_CNT <= (OTHERS => '0');
+		ELSIF (CLK21M'EVENT AND CLK21M = '1') THEN
+			IF( (W_FRAME_SYNC = '1') AND (FF_BLINK_FRAME_CNT = "1001") )THEN
+				IF( FF_BLINK_PERIOD_CNT >= W_BLINK_CNT_MAX )THEN
+					FF_BLINK_PERIOD_CNT <= (OTHERS => '0');
+				ELSE
+					FF_BLINK_PERIOD_CNT <= FF_BLINK_PERIOD_CNT + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+END RTL;
