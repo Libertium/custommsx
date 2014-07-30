@@ -1,7 +1,7 @@
 --
 -- Z80 compatible microprocessor core, asynchronous top level
 --
--- Version : 0247a
+-- Version : 0247a (+k01)
 --
 -- Copyright (c) 2001-2002 Daniel Wallner (jesus@opencores.org)
 --
@@ -60,6 +60,11 @@
 --
 --  0247a: 7th of September, 2003 by Kazuhiro Tsujikawa (tujikawa@hat.hi-ho.ne.jp)
 --         Fixed IORQ_n, RD_n, WR_n bus timing
+--
+-------------------------------------------------------------------------------
+--  +k01 : 2010.10.25  by KdL
+--         Added RstKeyLock and swioRESET_n
+--
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -71,7 +76,10 @@ entity T80a is
         Mode : integer := 0 -- 0 => Z80, 1 => Fast Z80, 2 => 8080, 3 => GB
     );
     port(
+
         RESET_n     : in std_logic;
+        RstKeyLock	: inout std_logic;
+        swioRESET_n	: inout std_logic;
         CLK_n       : in std_logic;
         WAIT_n      : in std_logic;
         INT_n       : in std_logic;
@@ -136,7 +144,7 @@ begin
 
     process (RESET_n, CLK_n)
     begin
-        if RESET_n = '0' then
+        if( (RESET_n = '0' and RstKeyLock = '0') or swioRESET_n = '0' )then
             Reset_s <= '0';
         elsif CLK_n'event and CLK_n = '1' then
             Reset_s <= '1';

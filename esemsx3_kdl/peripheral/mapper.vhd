@@ -80,7 +80,7 @@ begin
 
     elsif (clk21m'event and clk21m = '1') then
 
-      -- I/O port access on FC-FFh ... Mapper bank resister write
+      -- I/O port access on FC-FFh ... Mapper bank register write
       if (req = '1' and mem = '0' and wrt = '1') then
         case adr(1 downto 0) is
           when "00"   => MapBank0 <= dbo;
