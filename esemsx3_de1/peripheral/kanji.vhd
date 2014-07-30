@@ -70,7 +70,7 @@ BEGIN
 	----------------------------------------------------------------
 	-- RAM ACCESS
 	----------------------------------------------------------------
-	RAMREQ	<=	REQ				WHEN( WRT = '0' AND ADR(0) = '1' )ELSE
+	RAMREQ	<=	REQ	WHEN( WRT = '0' AND ADR(0) = '1' )ELSE
 				'0';
 	RAMADR	<=	('0' & KANJIPTR1) WHEN( KANJISEL = '0' )ELSE
 				('1' & KANJIPTR2);
@@ -127,7 +127,7 @@ BEGIN
 				ELSE
 					KANJIPTR1( 16 DOWNTO 11 ) <= DBO( 5 DOWNTO 0 );
 				END IF;
-				KANJIPTR1(  4 DOWNTO  0 ) <= (OTHERS => '0');
+				KANJIPTR1( 4 DOWNTO 0 ) <= (OTHERS => '0');
 			ELSIF( REQ = '0' AND (UPDATEREQ /= UPDATEACK) AND KANJISEL = '0' )THEN
 				KANJIPTR1( 4 DOWNTO 0 ) <= KANJIPTR1( 4 DOWNTO 0 ) + 1;
 			END IF;
@@ -154,7 +154,8 @@ BEGIN
 
 	PROCESS( CLK21M )
 	BEGIN
-		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+		IF( CLK21M'EVENT AND CLK21M = '0' )THEN -- modified by caro for TURBO-mode
+--		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
 			IF( REQ = '0' AND (UPDATEREQ /= UPDATEACK) )THEN
 				DBI <= RAMDBI;
 			END IF;

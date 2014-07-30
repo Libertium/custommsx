@@ -47,7 +47,7 @@ entity psg_wave is
 		adr		: in	std_logic_vector( 15 downto 0 );
 		dbi		: out	std_logic_vector(  7 downto 0 );
 		dbo		: in	std_logic_vector(  7 downto 0 );
-		wave		: out	std_logic_vector(  7 downto 0 );
+		wave		: out	std_logic_vector(  9 downto 0 );
 		reg_index	: in	std_logic_vector(  3 downto 0 )
 	);
 end psg_wave;
@@ -86,20 +86,20 @@ architecture rtl of psg_wave is
 	signal ff_env_ptr	: std_logic_vector(  4 downto 0 );
 	signal w_env_pat	: std_logic_vector(  3 downto 0 );
 
-	alias state		: std_logic_vector(  1 downto 0 ) is clk_div_cnt(  1 downto 0 );
+	alias state			: std_logic_vector(  1 downto 0 ) is clk_div_cnt(  1 downto 0 );
 	signal w_tone_off	: std_logic;
 	signal w_cur_edge	: std_logic;
 	signal w_noise_off	: std_logic;
 	signal w_cur_vol	: std_logic_vector(  4 downto 0 );
 	signal ff_mixer		: std_logic_vector(  9 downto 0 );
-	signal ff_wave		: std_logic_vector(  7 downto 0 );
+	signal ff_wave		: std_logic_vector(  9 downto 0 );
 
 	signal w_cur_vol_level	: std_logic_vector(  3 downto 0 );
 	signal w_cur_vol_log	: std_logic_vector(  7 downto 0 );
 
 	alias hold		: std_logic is ff_env_pat( 0 );
 	alias alter		: std_logic is ff_env_pat( 1 );
-	alias attack		: std_logic is ff_env_pat( 2 );
+	alias attack	: std_logic is ff_env_pat( 2 );
 	alias cont		: std_logic is ff_env_pat( 3 );
 
 	constant all_zero	: std_logic_vector( 15 downto 0 ) := (others => '0');
@@ -133,18 +133,18 @@ begin
 	----------------------------------------------------------------
 	dbi <=		 ff_ch_a_freq( 7 downto 0)	when( reg_index = "0000" and adr( 1 downto 0 ) = "10" )else
 		"0000" & ff_ch_a_freq(11 downto 8)	when( reg_index = "0001" and adr( 1 downto 0 ) = "10" )else
-			 ff_ch_b_freq( 7 downto 0)	when( reg_index = "0010" and adr( 1 downto 0 ) = "10" )else
+				ff_ch_b_freq( 7 downto 0)	when( reg_index = "0010" and adr( 1 downto 0 ) = "10" )else
 		"0000" & ff_ch_b_freq(11 downto 8)	when( reg_index = "0011" and adr( 1 downto 0 ) = "10" )else
-			 ff_ch_c_freq( 7 downto 0)	when( reg_index = "0100" and adr( 1 downto 0 ) = "10" )else
+				ff_ch_c_freq( 7 downto 0)	when( reg_index = "0100" and adr( 1 downto 0 ) = "10" )else
 		"0000" & ff_ch_c_freq(11 downto 8)	when( reg_index = "0101" and adr( 1 downto 0 ) = "10" )else
 		"000"  & ff_noise_freq			when( reg_index = "0110" and adr( 1 downto 0 ) = "10" )else
-		"10"   & ff_ch_off			when( reg_index = "0111" and adr( 1 downto 0 ) = "10" )else
+		"10"   & ff_ch_off				when( reg_index = "0111" and adr( 1 downto 0 ) = "10" )else
 		"000"  & ff_ch_a_vol			when( reg_index = "1000" and adr( 1 downto 0 ) = "10" )else
 		"000"  & ff_ch_b_vol			when( reg_index = "1001" and adr( 1 downto 0 ) = "10" )else
 		"000"  & ff_ch_c_vol			when( reg_index = "1010" and adr( 1 downto 0 ) = "10" )else
 			 ff_env_freq(7 downto 0)	when( reg_index = "1011" and adr( 1 downto 0 ) = "10" )else
 			 ff_env_freq(15 downto 8)	when( reg_index = "1100" and adr( 1 downto 0 ) = "10" )else
-		"0000" & ff_env_pat			when( reg_index = "1101" and adr( 1 downto 0 ) = "10" )else
+		"0000" & ff_env_pat				when( reg_index = "1101" and adr( 1 downto 0 ) = "10" )else
 		(others => '1');
 
 	----------------------------------------------------------------
@@ -469,7 +469,7 @@ begin
 		elsif( clk21m'event and clk21m = '1' )then
 			if( clkena = '1' ) then
 				if( state = "00" )then
-					ff_wave	<= ff_mixer(9 downto 2);
+					ff_wave	<= ff_mixer(9 downto 0);
 				else
 					-- hold
 				end if;
