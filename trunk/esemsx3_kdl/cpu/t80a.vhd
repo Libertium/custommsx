@@ -78,8 +78,8 @@ entity T80a is
     port(
 
         RESET_n     : in std_logic;
-        RstKeyLock	: inout std_logic;
-        swioRESET_n	: inout std_logic;
+        RstKeyLock  : inout std_logic;
+        swioRESET_n : inout std_logic;
         CLK_n       : in std_logic;
         WAIT_n      : in std_logic;
         INT_n       : in std_logic;
@@ -108,14 +108,14 @@ architecture rtl of T80a is
     signal Write        : std_logic;
     signal MREQ         : std_logic;
     signal MReq_Inhibit : std_logic;
-    signal IReq_Inhibit : std_logic;			    -- 0247a
+    signal IReq_Inhibit : std_logic;                -- 0247a
     signal Req_Inhibit  : std_logic;
     signal RD           : std_logic;
     signal MREQ_n_i     : std_logic;
     signal IORQ_n_i     : std_logic;
     signal RD_n_i       : std_logic;
     signal WR_n_i       : std_logic;
-    signal WR_n_j       : std_logic;			    -- 0247a
+    signal WR_n_j       : std_logic;                -- 0247a
     signal RFSH_n_i     : std_logic;
     signal BUSAK_n_i    : std_logic;
     signal A_i          : std_logic_vector(15 downto 0);
@@ -132,12 +132,12 @@ begin
     BUSAK_n <= BUSAK_n_i;
     MREQ_n_i <= not MREQ or (Req_Inhibit and MReq_Inhibit);
     RD_n_i <= not RD or Req_Inhibit;
-    WR_n_j <= WR_n_i;					    		-- 0247a
+    WR_n_j <= WR_n_i;                               -- 0247a
 
     MREQ_n <= MREQ_n_i when BUSAK_n_i = '1' else 'Z';
-    IORQ_n <= IORQ_n_i or IReq_Inhibit when BUSAK_n_i = '1' else 'Z';	-- 0247a
+    IORQ_n <= IORQ_n_i or IReq_Inhibit when BUSAK_n_i = '1' else 'Z';   -- 0247a
     RD_n <= RD_n_i when BUSAK_n_i = '1' else 'Z';
-    WR_n <= WR_n_j when BUSAK_n_i = '1' else 'Z';			-- 0247a
+    WR_n <= WR_n_j when BUSAK_n_i = '1' else 'Z';           -- 0247a
     RFSH_n <= RFSH_n_i when BUSAK_n_i = '1' else 'Z';
     A <= A_i when BUSAK_n_i = '1' else (others => 'Z');
     D <= DO when Write = '1' and BUSAK_n_i = '1' else (others => 'Z');
@@ -188,14 +188,14 @@ begin
         end if;
     end process;
 
-    process (CLK_n)		-- 0247a
+    process (CLK_n)     -- 0247a
     begin
         if CLK_n'event and CLK_n = '1' then
             IReq_Inhibit <= not IORQ;
         end if;
     end process;
 
-    process (Reset_s,CLK_n)	-- 0247a
+    process (Reset_s,CLK_n) -- 0247a
     begin
         if Reset_s = '0' then
             WR_n_i <= '1';
@@ -216,7 +216,7 @@ begin
         end if;
     end process;
 
-    process (Reset_s,CLK_n)	-- 0247a
+    process (Reset_s,CLK_n) -- 0247a
     begin
         if Reset_s = '0' then
             Req_Inhibit <= '0';
@@ -242,7 +242,7 @@ begin
         end if;
     end process;
 
-    process(Reset_s,CLK_n)	-- 0247a
+    process(Reset_s,CLK_n)  -- 0247a
     begin
         if Reset_s = '0' then
             RD <= '0';

@@ -1,34 +1,34 @@
---
+-- 
 -- emsx_top.vhd
 --   ESE MSX-SYSTEM3 / MSX clone on a Cyclone FPGA (ALTERA)
 --   Revision 1.00
---
+-- 
 -- Copyright (c) 2006 Kazuhiro Tsujikawa (ESE Artists' factory)
 -- All rights reserved.
---
--- Redistribution and use of this source code or any derivative works, are
+-- 
+-- Redistribution and use of this source code or any derivative works, are 
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice,
+-- 1. Redistributions of source code must retain the above copyright notice, 
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright
---    notice, this list of conditions and the following disclaimer in the
+-- 2. Redistributions in binary form must reproduce the above copyright 
+--    notice, this list of conditions and the following disclaimer in the 
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial
+-- 3. Redistributions may not be sold, nor may they be used in a commercial 
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
---
+-- 
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -38,10 +38,10 @@ use work.vdp_package.all;
 entity emsx_top is
   port(
     -- Clock, Reset ports
-    pClk21m     : in std_logic;             -- VDP clock ... 21.48MHz
-    pExtClk     : in std_logic;             -- Reserved (for multi FPGAs)
-    pCpuClk     : out std_logic;            -- CPU clock ... 3.58MHz (up to 10.74MHz/21.48MHz)
---  pCpuRst_n   : out std_logic;            -- CPU reset
+    pClk21m     : in std_logic;				-- VDP clock ... 21.48MHz
+    pExtClk     : in std_logic;				-- Reserved (for multi FPGAs)
+    pCpuClk     : out std_logic;			-- CPU clock ... 3.58MHz (up to 10.74MHz/21.48MHz)
+--  pCpuRst_n   : out std_logic;			-- CPU reset
 
     -- MSX cartridge slot ports
     pSltClk     : in std_logic;                         -- pCpuClk returns here, for Z80, etc.
@@ -209,13 +209,13 @@ architecture rtl of emsx_top is
     );
   end component;
 
-  component cyclone_asmiblock       -- Altera specific component
+  component cyclone_asmiblock   	-- Altera specific component
     port (
-      dclkin   : in std_logic;      -- DCLK
-      scein    : in std_logic;      -- nCSO
-      sdoin    : in std_logic;      -- ASDO
-      oe       : in std_logic;      --(1=disable(Hi-Z))
-      data0out : out std_logic      -- DATA0
+      dclkin   : in std_logic;  	-- DCLK
+      scein    : in std_logic;  	-- nCSO
+      sdoin    : in std_logic;  	-- ASDO
+      oe       : in std_logic;  	--(1=disable(Hi-Z))
+      data0out : out std_logic  	-- DATA0
     );
   end component;
 
@@ -247,13 +247,13 @@ architecture rtl of emsx_top is
     clkena : in std_logic;
 
     Kmap   : in std_logic;
-
+    
     Caps    : inout std_logic;
     Kana    : inout std_logic;
     Paus    : inout std_logic;
     Scro    : inout std_logic;
     Reso    : inout std_logic;
-
+    
     FKeys   : out std_logic_vector(7 downto 0);
 
     pPs2Clk  : inout std_logic;
@@ -807,7 +807,7 @@ begin
         RstEna   <= '1';
       end if;
 
-      if (cnt = "000000000000000000000") then   -- 21.48MHz / 2^21(approx:2M) => 10Hz
+      if (cnt = "000000000000000000000") then	-- 21.48MHz / 2^21(approx:2M) => 10Hz
         case seq is
           when "0010"  => pLed <= "000000Z1";  iDipLed(2) <= not pDip(2);
           when "0011"  => pLed <= "0000001Z";  iDipLed(1) <= not pDip(1);
@@ -849,10 +849,10 @@ begin
   ----------------------------------------------------------------
   pSltCs1_n   <= 'Z'      when SelfMode = '0'               else
                  pSltRd_n when pSltAdr(15 downto 14) = "01" else '1';
-  pSltCs2_n   <= 'Z'      when SelfMode = '0'               else
+  pSltCs2_n   <= 'Z'      when SelfMode = '0'               else 
                  pSltRd_n when pSltAdr(15 downto 14) = "10" else '1';
-  pSltCs12_n  <= 'Z'      when SelfMode = '0'               else
-                 pSltRd_n when pSltAdr(15 downto 14) = "01" else
+  pSltCs12_n  <= 'Z'      when SelfMode = '0'               else 
+                 pSltRd_n when pSltAdr(15 downto 14) = "01" else 
                  pSltRd_n when pSltAdr(15 downto 14) = "10" else '1';
   pSltM1_n    <= CpuM1_n   when SelfMode = '1' else 'Z';
   pSltRfsh_n  <= CpuRfsh_n when SelfMode = '1' else 'Z';
@@ -1408,9 +1408,9 @@ begin
       if (reset = '1') then
         MstrVol <= "000";
       elsif Fkeys(5) /= vFkeys(5) then -- Master Volume Up
-        if "000" < MstrVol then MstrVol <= MstrVol-'1'; end if;
+        if "000" < MstrVol then MstrVol <= MstrVol-'1'; end if;        
       elsif Fkeys(4) /= vFkeys(4) then -- Master Volume Down
-        if MstrVol < "111" then MstrVol <= MstrVol+'1'; end if;
+        if MstrVol < "111" then MstrVol <= MstrVol+'1'; end if;        
       end if;
 
       if (reset = '1') then
@@ -1441,7 +1441,7 @@ begin
         else
           if OpllVol < "111" then OpllVol <= OpllVol+'1'; end if;
         end if;
-      end if;
+      end if;      
       vFkeys := Fkeys;
 
       Amp := (Amp'high=>'1', others=>'0');
@@ -1451,7 +1451,7 @@ begin
       -- SCC
       chAmp := "000" & SHR((SccAmpL * SccVol)&"00", MstrVol);
       Amp := Amp - chAmp;
-      -- OPLL
+      -- OPLL 
       if OpllAmp < OPLL_ZERO then
         chAmp := "00" & SHR(((OPLL_ZERO - OpllAmp) * OpllVol)&"0", MstrVol);
         Amp := Amp - (chAmp - chAmp(chAmp'high downto 3));
@@ -1779,9 +1779,9 @@ begin
     port map(clk21m, adr, RomDbi);
 
   U03 : megasd
-    port map(clk21m, reset, clkena, ErmReq, ErmAck, wrt, adr, ErmDbi, dbo,
-             ErmRam, ErmWrt, ErmAdr, RamDbi, ErmDbo,
-             MmcDbi, MmcEna, MmcAct, pSd_Ck, pSd_Dt(3), pSd_Cm, pSd_Dt(0),
+    port map(clk21m, reset, clkena, ErmReq, ErmAck, wrt, adr, ErmDbi, dbo, 
+             ErmRam, ErmWrt, ErmAdr, RamDbi, ErmDbo, 
+             MmcDbi, MmcEna, MmcAct, pSd_Ck, pSd_Dt(3), pSd_Cm, pSd_Dt(0), 
              EPC_CK, EPC_CS, EPC_OE, EPC_DI, EPC_DO);
     pSd_Dt(2 downto 0) <= (others => 'Z');
 
@@ -1789,25 +1789,25 @@ begin
     port map(EPC_CK, EPC_CS, EPC_DI, EPC_OE, EPC_DO);
 
   U05 : mapper
-    port map(clk21m, reset, clkena, MapReq, MapAck, mem, wrt, adr, MapDbi, dbo,
+    port map(clk21m, reset, clkena, MapReq, MapAck, mem, wrt, adr, MapDbi, dbo, 
              MapRam, MapWrt, MapAdr, RamDbi, MapDbo);
 
   U06 : eseps2
-    port map (clk21m, reset, clkena, Kmap, Caps, Kana, Paus, open, Reso, Fkeys,
+    port map (clk21m, reset, clkena, Kmap, Caps, Kana, Paus, open, Reso, Fkeys, 
               pPs2Clk, pPs2Dat, PpiPortC, PpiPortB);
 
   U07 : rtc
     port map(clk21m, reset, clkena, RtcReq, RtcAck, wrt, adr, RtcDbi, dbo);
 
   U08 : kanji
-    port map(clk21m, reset, clkena, KanReq, KanAck, wrt, adr, KanDbi, dbo,
+    port map(clk21m, reset, clkena, KanReq, KanAck, wrt, adr, KanDbi, dbo, 
              KanRom, KanAdr, RamDbi, KanDbo);
 
   U20 : vdp
     port map(
-      clk21m, reset, VdpReq, VdpAck, wrt, adr, VdpDbi, dbo, pVdpInt_n,
+      clk21m, reset, VdpReq, VdpAck, wrt, adr, VdpDbi, dbo, pVdpInt_n, 
       OeVdp_n, WeVdp_n, VdpAdr, VrmDbi, VrmDbo,
-      VideoR, VideoG, VideoB, VideoHS_n, VideoVS_n, VideoCS_n,
+      VideoR, VideoG, VideoB, VideoHS_n, VideoVS_n, VideoCS_n, 
       VideoDHClk, VideoDLClk, open, open, Reso_v, Fkeys(0),
       osdLocateX, osdLocateY, osdCharCodeIn, osdCharWrReq, osdCharWrAck
     );
@@ -1819,11 +1819,11 @@ begin
     );
 
   U30 : psg
-    port map(clk21m, reset, clkena, PsgReq, PsgAck, wrt, adr, PsgDbi, dbo,
+    port map(clk21m, reset, clkena, PsgReq, PsgAck, wrt, adr, PsgDbi, dbo, 
              pJoyA, pStrA, pJoyB, pStrB, Kana, CmtIn, KeyMode, PsgAmp);
 
   U31 : megaram
-    port map(clk21m, reset, clkena, SccReq, SccAck, wrt, adr, SccDbi, dbo,
+    port map(clk21m, reset, clkena, SccReq, SccAck, wrt, adr, SccDbi, dbo, 
              SccRam, SccWrt, SccAdr, RamDbi, SccDbo, MegType, SccAmpL, SccAmpR);
 
   U32 : eseopll

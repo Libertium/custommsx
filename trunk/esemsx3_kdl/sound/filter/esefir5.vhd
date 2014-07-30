@@ -38,137 +38,137 @@
 --   assumed for streaming sample rate of 'wavin' and 'wavout'. 
 --------------------------------------------------------------------------------
 
---	修正 t.hara
---	TAP-RAM の読み出し用アドレスと、描き込み用アドレスが共通の FF になっているが 
---	この気持ちがずれていて、フィルタ係数の掛かり方がおかしかったのを修正 
+--  修正 t.hara
+--  TAP-RAM の読み出し用アドレスと、描き込み用アドレスが共通の FF になっているが 
+--  この気持ちがずれていて、フィルタ係数の掛かり方がおかしかったのを修正 
 
-library	ieee;
-	use	ieee.std_logic_1164.all;
-	use	ieee.std_logic_arith.all;
-	use	ieee.std_logic_unsigned.all;
+library ieee;
+    use ieee.std_logic_1164.all;
+    use ieee.std_logic_arith.all;
+    use ieee.std_logic_unsigned.all;
 
 entity esefir5 is
-	generic (
-		msbi	: integer
-	);
-	port ( 
-		clk		: in	std_logic;
-		reset	: in	std_logic;
-		wavin	: in	std_logic_vector ( msbi downto 0 );
-		wavout	: out	std_logic_vector ( msbi downto 0 )  
-	);
+    generic (
+        msbi    : integer
+    );
+    port ( 
+        clk     : in    std_logic;
+        reset   : in    std_logic;
+        wavin   : in    std_logic_vector ( msbi downto 0 );
+        wavout  : out   std_logic_vector ( msbi downto 0 )  
+    );
 end esefir5;
 
 architecture rtl of esefir5 is
 
-	component tapram is
-		generic (
-			msbi : integer
-		);
-		port(
-			clk		: in	std_logic;
-			tapidx	: in	integer range 0 to 4;
-			wr		: in	std_logic;
-			tapin	: in	std_logic_vector( msbi downto 0 );
-			tapout	: out	std_logic_vector( msbi downto 0 )
-		);
-	end component;
+    component tapram is
+        generic (
+            msbi : integer
+        );
+        port(
+            clk     : in    std_logic;
+            tapidx  : in    integer range 0 to 4;
+            wr      : in    std_logic;
+            tapin   : in    std_logic_vector( msbi downto 0 );
+            tapout  : out   std_logic_vector( msbi downto 0 )
+        );
+    end component;
 
-	subtype h_type	is std_logic_vector( 7 downto 0 );
-	type h_array	is array( 0 to 5 ) of h_type;
+    subtype h_type  is std_logic_vector( 7 downto 0 );
+    type h_array    is array( 0 to 5 ) of h_type;
 
-	constant h			: h_array := ( X"09", X"3d", X"72", X"3d", X"09", X"00" );
-	signal tapout		: std_logic_vector( msbi downto 0 );
-	signal ff_state		: std_logic_vector( 2 downto 0 );
-	signal ff_tapidx	: integer range 0 to 4;
-	signal ff_sum		: std_logic_vector( msbi + 8 downto 0 );
-	signal ff_wavout	: std_logic_vector( msbi downto 0 );
-	signal w_we			: std_logic;
-	signal w_mul		: std_logic_vector( msbi + 8 downto 0 );
+    constant h          : h_array := ( X"09", X"3d", X"72", X"3d", X"09", X"00" );
+    signal tapout       : std_logic_vector( msbi downto 0 );
+    signal ff_state     : std_logic_vector( 2 downto 0 );
+    signal ff_tapidx    : integer range 0 to 4;
+    signal ff_sum       : std_logic_vector( msbi + 8 downto 0 );
+    signal ff_wavout    : std_logic_vector( msbi downto 0 );
+    signal w_we         : std_logic;
+    signal w_mul        : std_logic_vector( msbi + 8 downto 0 );
 begin
 
-	---------------------------------------------------------------------------
-	--	出力
-	---------------------------------------------------------------------------
-	wavout	<=	ff_wavout;
+    ---------------------------------------------------------------------------
+    --  出力
+    ---------------------------------------------------------------------------
+    wavout  <=  ff_wavout;
 
-	---------------------------------------------------------------------------
-	--	内部ステート 
-	---------------------------------------------------------------------------
-	process( reset, clk )
-	begin
-		if( reset = '1' )then
-			ff_state <= "000";
-		elsif( clk'event and clk = '1' )then
-			if( ff_state = "101" )then
-				ff_state <= "000";
-			else
-				ff_state <= ff_state + 1;
-			end if;
-		end if;
-	end process;
+    ---------------------------------------------------------------------------
+    --  内部ステート 
+    ---------------------------------------------------------------------------
+    process( reset, clk )
+    begin
+        if( reset = '1' )then
+            ff_state <= "000";
+        elsif( clk'event and clk = '1' )then
+            if( ff_state = "101" )then
+                ff_state <= "000";
+            else
+                ff_state <= ff_state + 1;
+            end if;
+        end if;
+    end process;
 
-	process( reset, clk )
-	begin
-		if( reset = '1' )then
-			ff_tapidx <= 0;
-		elsif( clk'event and clk = '1' )then
-			if( ff_tapidx = 4 )then
-				ff_tapidx <= 0;
-			else
-				ff_tapidx <= ff_tapidx + 1;
-			end if;
-		end if;
-	end process;
+    process( reset, clk )
+    begin
+        if( reset = '1' )then
+            ff_tapidx <= 0;
+        elsif( clk'event and clk = '1' )then
+            if( ff_tapidx = 4 )then
+                ff_tapidx <= 0;
+            else
+                ff_tapidx <= ff_tapidx + 1;
+            end if;
+        end if;
+    end process;
 
-	---------------------------------------------------------------------------
-	--	積分器 
-	---------------------------------------------------------------------------
-	w_mul <= tapout * h( conv_integer( ff_state ) );
+    ---------------------------------------------------------------------------
+    --  積分器 
+    ---------------------------------------------------------------------------
+    w_mul <= tapout * h( conv_integer( ff_state ) );
 
-	process( reset, clk )
-	begin
-		if( reset = '1' )then
-			ff_sum <= (others => '0');
-		elsif( clk'event and clk = '1' )then
-			if( ff_state = "101" )then
-				ff_sum <= (others => '0');
-			else
-				ff_sum <= ff_sum + w_mul;
-			end if;
-		end if;
-	end process;
+    process( reset, clk )
+    begin
+        if( reset = '1' )then
+            ff_sum <= (others => '0');
+        elsif( clk'event and clk = '1' )then
+            if( ff_state = "101" )then
+                ff_sum <= (others => '0');
+            else
+                ff_sum <= ff_sum + w_mul;
+            end if;
+        end if;
+    end process;
 
-	process( reset, clk )
-	begin
-		if( reset = '1' )then
-			ff_wavout <= (others => '0');
-		elsif( clk'event and clk = '1' )then
-			if( ff_state = "101" )then
-				ff_wavout <= ff_sum( ff_sum'high downto 8 );
-			else
-				-- hold
-			end if;
-		end if;
-	end process;
+    process( reset, clk )
+    begin
+        if( reset = '1' )then
+            ff_wavout <= (others => '0');
+        elsif( clk'event and clk = '1' )then
+            if( ff_state = "101" )then
+                ff_wavout <= ff_sum( ff_sum'high downto 8 );
+            else
+                -- hold
+            end if;
+        end if;
+    end process;
 
-	---------------------------------------------------------------------------
-	--	タップメモリ書き込み制御 
-	---------------------------------------------------------------------------
-	w_we <=	'1'	when( ff_state = "101" )else
-			'0';
-	
-	---------------------------------------------------------------------------
-	--	タップメモリインスタンス 
-	---------------------------------------------------------------------------
-	u0 : tapram	generic map (
-		msbi	=> msbi
-	)
-	port map (
-		clk		=> clk		,
-		tapidx	=> ff_tapidx,
-		wr		=> w_we		,
-		tapin	=> wavin	,
-		tapout	=> tapout	
-	);
+    ---------------------------------------------------------------------------
+    --  タップメモリ書き込み制御 
+    ---------------------------------------------------------------------------
+    w_we <= '1' when( ff_state = "101" )else
+            '0';
+    
+    ---------------------------------------------------------------------------
+    --  タップメモリインスタンス 
+    ---------------------------------------------------------------------------
+    u0 : tapram generic map (
+        msbi    => msbi
+    )
+    port map (
+        clk     => clk      ,
+        tapidx  => ff_tapidx,
+        wr      => w_we     ,
+        tapin   => wavin    ,
+        tapout  => tapout   
+    );
 end rtl;

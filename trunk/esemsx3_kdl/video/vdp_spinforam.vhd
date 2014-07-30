@@ -1,8 +1,8 @@
 --
---  vdp_package.vhd
---   Package file of ESE-VDP.
+--  vdp_spinforam.vhd
+--   Sprite information table memory.
 --
---  Copyright (C) 2000-2006 Kunihiko Ohnaka
+--  Copyright (C) 2006 Kunihiko Ohnaka
 --  All rights reserved.
 --                                     http://www.ohnaka.jp/ese-vdp/
 --
@@ -70,51 +70,47 @@
 -------------------------------------------------------------------------------
 -- Document
 --
--- JP: ESE-VDPのパッケージファイルです。
--- JP: ESE-VDPに含まれるモジュールのコンポーネント宣言や、定数宣言、
--- JP: 型変換用の関数などが定義されています。
+-- JP: 次の行で表示するスプライトの情報を保持するテーブルです。
+-- JP: テーブルには以下の情報を保持します。
+--
+-- Sprite informations. (Total 31bits)
+--   X        (9bit)
+--   pattern  (16 bit)
+--   color    (4bit)
+--   cc       (1bit)
+--   ic       (1bit)
 --
 
 LIBRARY IEEE;
     USE IEEE.STD_LOGIC_1164.ALL;
     USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-PACKAGE VDP_PACKAGE IS
+ENTITY VDP_SPINFORAM IS
+     PORT (
+         ADDRESS    : IN    STD_LOGIC_VECTOR(  2 DOWNTO 0 );
+         INCLOCK    : IN    STD_LOGIC;
+         WE         : IN    STD_LOGIC;
+         DATA       : IN    STD_LOGIC_VECTOR( 31 DOWNTO 0 );
+         Q          : OUT   STD_LOGIC_VECTOR( 31 DOWNTO 0 )
+    );
+END VDP_SPINFORAM;
 
-    -- VDP ID
---  CONSTANT VDP_ID : STD_LOGIC_VECTOR(4 DOWNTO 0) := "00000";  -- V9938
-    CONSTANT VDP_ID : STD_LOGIC_VECTOR(4 DOWNTO 0) := "00010";  -- V9958
+ARCHITECTURE RTL OF VDP_SPINFORAM IS
+    TYPE MEM IS ARRAY ( 7 DOWNTO 0 ) OF STD_LOGIC_VECTOR( 31 DOWNTO 0 );
+    SIGNAL IMEM     : MEM;
+    SIGNAL IADDRESS : STD_LOGIC_VECTOR( 2 DOWNTO 0 );
 
-    -- display start position ( when adjust=(0,0) )
-    -- [from V9938 Technical Data Book]
-    -- Horaizontal Display Parameters
-    --  [non TEXT]
-    --   * Total Display      1368 clks  - a
-    --   * Right Border         59 clks  - b
-    --   * Right Blanking       27 clks  - c
-    --   * H-Sync Pulse Width  100 clks  - d
-    --   * Left Blanking       102 clks  - e
-    --   * Left Border          56 clks  - f
-    -- OFFSET_X is the position when preDotCounter_x is -8. So,
-    --    => (d+e+f-8*4-8*4)/4 => (100+102+56)/4 - 16 => 49
-    --
-    -- Vertical Display Parameters (NTSC)
-    --                            [192 Lines]  [212 Lines]
-    --                            [Even][Odd]  [Even][Odd]
-    --   * V-Sync Pulse Width          3    3       3    3 lines - g
-    --   * Top Blanking               13 13.5      13 13.5 lines - h
-    --   * Top Border                 26   26      16   16 lines - i
-    --   * Display Time              192  192     212  212 lines - j
-    --   * Bottom Border            25.5   25    15.5   15 lines - k
-    --   * Bottom Blanking             3    3       3    3 lines - l
-    -- OFFSET_Y is the start line of Top Border (192 LInes Mode)
-    --    => l+g+h => 3 + 3 + 13 = 19
-    --
-    -- CLOCK PER LINE
-    -- JP: 4の倍数でなければならない
-    CONSTANT CLOCKS_PER_LINE    : INTEGER := 1368;                              -- = 342*4
+BEGIN
+    PROCESS( INCLOCK )
+    BEGIN
+        IF( INCLOCK'EVENT AND INCLOCK ='1' )THEN
+            IF (WE = '1') THEN
+                IMEM(CONV_INTEGER(ADDRESS)) <= DATA;
+            END IF;
+            IADDRESS <= ADDRESS;
+        END IF;
+    END PROCESS;
 
-    -- LEFT-TOP POSITION OF VISIBLE AREA
-    CONSTANT OFFSET_X           : STD_LOGIC_VECTOR( 6 DOWNTO 0) := "0110001";   -- = 49
-    CONSTANT OFFSET_Y           : STD_LOGIC_VECTOR( 6 DOWNTO 0) := "0010011";   -- = 19
-END VDP_PACKAGE;
+    Q <= IMEM( CONV_INTEGER(IADDRESS) );
+
+END RTL;

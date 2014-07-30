@@ -80,8 +80,8 @@ entity eseps2 is
     PpiPortC : in  std_logic_vector(7 downto 0);
     pKeyX    : out std_logic_vector(7 downto 0);
 
-	CmtScro  : inout std_logic
-	);
+    CmtScro  : inout std_logic
+    );
 end eseps2;
 
 architecture RTL of eseps2 is
@@ -165,9 +165,9 @@ begin
       Ps2Paus := '0';
 
       Paus    <= '0';
-      Reso    <= '0';				-- Sync to ff_Reso
-	  Scro    <= '0';				-- Sync to ff_Scro
-      oFkeys  := (others=>'0');		-- Sync to vFkeys
+      Reso    <= '0';               -- Sync to ff_Reso
+      Scro    <= '0';               -- Sync to ff_Scro
+      oFkeys  := (others=>'0');     -- Sync to vFkeys
 
       MtxSeq := MtxIdle;
 
@@ -321,9 +321,9 @@ begin
                 Paus <= not Paus;  -- CPU pause
                 Ps2Skp := "110";   -- Skip the next 6 sequences.
 
-				Ps2Dat := X"12";   -- Shift Freeze: Pause Bug Fixed
-				Ps2xE0 := '0';
-				Ps2xE1 := '0';
+                Ps2Dat := X"12";   -- Shift Freeze: Pause Bug Fixed
+                Ps2xE0 := '0';
+                Ps2xE1 := '0';
               end if;
             elsif( Ps2Dat = X"7C" and Ps2xE0 = '1' and Ps2xE1 = '0' )then -- printscreen make
               if Ps2brk = '0' then
@@ -357,12 +357,12 @@ begin
               Ps2Chg := '1';
             elsif( Ps2Dat = X"07" and Ps2xE0 = '0' and Ps2xE1 = '0' )then -- F12 make
               if Ps2brk = '0' then
-                oFkeys(0) := not oFkeys(0);  	--	old toggle OnScreenDisplay enable
+                oFkeys(0) := not oFkeys(0);     --  old toggle OnScreenDisplay enable
               end if;
               Ps2Chg := '1';
             elsif( Ps2Dat = X"7E" and Ps2xE0 = '0' and Ps2xE1 = '0' )then -- scroll-lock make
               if Ps2brk = '0' then
-				Scro <= not Scro;  -- toggle scroll lock (currently used for CMT switch)
+                Scro <= not Scro;  -- toggle scroll lock (currently used for CMT switch)
             --    Scro <= not Scro;  -- toggle scroll lock (currently used for 101/106 keyboard switch)
             --    MtxTmp := "0000";
             --    MtxSeq := MtxReset;

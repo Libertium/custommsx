@@ -328,8 +328,6 @@ architecture RTL of emsx_top is
         pRamDbi         : in    std_logic_vector( 15 downto 0 );
         pRamDbo         : out   std_logic_vector(  7 downto 0 );
 
-        HiSpeed_Mode    : in std_logic;
-
         -- Video Output
         pVideoR         : out   std_logic_vector(  5 downto 0 );
         pVideoG         : out   std_logic_vector(  5 downto 0 );
@@ -342,9 +340,16 @@ architecture RTL of emsx_top is
         pVideoDHClk     : out   std_logic;
         pVideoDLClk     : out   std_logic;
 
+        -- CXA1645(RGB->NTSC encoder) signals
+        pVideoSC        : out std_logic;
+        pVideoSYNC      : out std_logic;
+
         -- Display resolution (0=15kHz, 1=31kHz)
-        DispReso        : in     std_logic
-        );
+        DispReso        : in   std_logic;
+      
+        ntsc_forced     : in  std_logic
+
+    );
     end component;
 
     component vencode
@@ -905,6 +910,8 @@ architecture RTL of emsx_top is
 
 --  signal  ff_lpf_div      : std_logic_vector( 3 downto 0 );   -- sccic
 --  signal  w_lpf2ena       : std_logic;                        -- sccic
+
+    signal ntsc_forced      : std_logic;
 
 --  test PCM 
 --  signal  ff_pcm          : std_logic_vector( 11 downto 0 );
@@ -1778,7 +1785,7 @@ begin
     ----------------------------------------------------------------
     -- Video output
     ----------------------------------------------------------------
-    V9938_n <= '1';                                     -- V9958
+    V9938_n <= '0';                                     -- V9938
 
     process (clk21m)
     begin
@@ -1789,6 +1796,7 @@ begin
                 pDac_VG     <= videoY;
                 pDac_VB     <= videoV;
                 Reso_v      <= '0';                     -- Hsync:15kHz
+                ntsc_forced <= '0';
                 pVideoHS_n  <= VideoHS_n;
                 pVideoVS_n  <= VideoVS_n;
 
@@ -1797,6 +1805,7 @@ begin
                 pDac_VG     <= '0' & VideoG( 5 downto 1 );
                 pDac_VB     <= '0' & VideoB( 5 downto 1 );
                 Reso_v      <= '0';                     -- Hsync:15kHz
+                ntsc_forced <= '0';
                 pVideoHS_n  <= VideoCS_n;
                 pVideoVS_n  <= DACout;                  -- Audio
 
@@ -1805,6 +1814,7 @@ begin
                 pDac_VG     <= '0' & VideoG( 5 downto 1 );
                 pDac_VB     <= '0' & VideoB( 5 downto 1 );
                 Reso_v      <= '1';                     -- Hsync:31kHz
+                ntsc_forced <= '1';
                 pVideoHS_n  <= VideoHS_n;
                 pVideoVS_n  <= VideoVS_n;
 
@@ -1813,6 +1823,7 @@ begin
                 pDac_VG     <= VideoG;
                 pDac_VB     <= VideoB;
                 Reso_v      <= '1';                     -- Hsync:31kHz
+                ntsc_forced <= '1';
                 pVideoHS_n  <= VideoHS_n;
                 pVideoVS_n  <= VideoVS_n;
             end case;
@@ -2336,10 +2347,10 @@ begin
                         KanRom, KanAdr, RamDbi, open);
 
     U20 : vdp
-        port map(clk21m, reset, VdpReq, open, wrt, adr, VdpDbi, dbo, pVdpInt_n,
-                        open, WeVdp_n, VdpAdr, VrmDbi, VrmDbo, VdpMode,
-                        VideoR, VideoG, VideoB, VideoHS_n, VideoVS_n, VideoCS_n,
-                        VideoDHClk, VideoDLClk, Reso_v);
+        port map(clk21m, reset, VdpReq, VdpAck, wrt, adr, VdpDbi, dbo, pVdpInt_n, 
+                        OeVdp_n, WeVdp_n, VdpAdr, VrmDbi, VrmDbo,
+                        VideoR, VideoG, VideoB, VideoHS_n, VideoVS_n, VideoCS_n, 
+                        VideoDHClk, VideoDLClk, open, open, Reso_v, ntsc_forced);
 
     U21 : vencode
         port map(clk21m, reset, VideoR, VideoG, videoB, VideoHS_n, VideoVS_n,

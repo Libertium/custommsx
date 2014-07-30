@@ -145,7 +145,7 @@ begin
             swioRESET_n <=  '1';                        -- End of Reset pulse
             io40_n      <=  "11111111";                 -- Default when system boot (Machine On)
             ---------------------------------------------------------------------------------------
-            DefKmap     <=  '1';                        -- Default Keyboard Layout (0=JP, 1=NON-JP)
+            DefKmap     <=  '0';                        -- Default Keyboard Layout (0=JP, 1=NON-JP)
             ---------------------------------------------------------------------------------------
             if( warmRESET /= '1' )then
                 -- Cold Reset

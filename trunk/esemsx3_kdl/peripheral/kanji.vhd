@@ -29,102 +29,136 @@
 -- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
+-------------------------------------------------------------------------------
+-- 05th, April, 2008 modified by t.hara
+-- リファクタリング。
+--
 
 library ieee;
-use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+    use ieee.std_logic_1164.all;
+    use ieee.std_logic_unsigned.all;
 
 entity kanji is
-  port(
-    clk21m  : in std_logic;
-    reset   : in std_logic;
-    clkena  : in std_logic;
-    req     : in std_logic;
-    ack     : out std_logic;
-    wrt     : in std_logic;
-    adr     : in std_logic_vector(15 downto 0);
-    dbi     : out std_logic_vector(7 downto 0);
-    dbo     : in std_logic_vector(7 downto 0);
+    port(
+        clk21m      : in    std_logic;
+        reset       : in    std_logic;
+        clkena      : in    std_logic;
+        req         : in    std_logic;
+        ack         : out   std_logic;
+        wrt         : in    std_logic;
+        adr         : in    std_logic_vector( 15 downto 0 );
+        dbi         : out   std_logic_vector(  7 downto 0 );
+        dbo         : in    std_logic_vector(  7 downto 0 );
 
-    ramreq  : out std_logic;
-    ramadr  : out std_logic_vector(17 downto 0);
-    ramdbi  : in std_logic_vector(7 downto 0);
-    ramdbo  : out std_logic_vector(7 downto 0)
- );
+        ramreq      : out   std_logic;
+        ramadr      : out   std_logic_vector( 17 downto 0 );
+        ramdbi      : in    std_logic_vector(  7 downto 0 );
+        ramdbo      : out   std_logic_vector(  7 downto 0 )
+    );
 end kanji;
 
 architecture rtl of kanji is
 
-  signal UpdateReq   : std_logic;
-  signal UpdateAck   : std_logic;
-  signal KanjiSel    : std_logic;
-  signal KanjiPtr1   : std_logic_vector(16 downto 0);
-  signal KanjiPtr2   : std_logic_vector(16 downto 0);
+    signal updatereq     : std_logic;
+    signal updateack     : std_logic;
+    signal kanjisel      : std_logic;
+    signal kanjiptr1     : std_logic_vector( 16 downto 0 );
+    signal kanjiptr2     : std_logic_vector( 16 downto 0 );
 
 begin
 
-  ----------------------------------------------------------------
-  -- Kanji ROM port access
-  ----------------------------------------------------------------
-  process(clk21m, reset)
+    ----------------------------------------------------------------
+    -- ram access
+    ----------------------------------------------------------------
+    ramreq  <=  req             when( wrt = '0' and adr(0) = '1' )else
+                '0';
+    ramadr  <=  ('0' & kanjiptr1) when( kanjisel = '0' )else
+                ('1' & kanjiptr2);
+    ramdbo  <=  dbo;
 
-  begin
-
-    if (reset = '1') then
-
-      ack <= '0';
-      KanjiSel <= '0';
-      KanjiPtr1 <= (others => '0');
-      KanjiPtr2 <= (others => '0');
-      UpdateReq <= '0';
-      UpdateAck <= '0';
-
-    elsif (clk21m'event and clk21m = '1') then
-
-      if (wrt = '1') then
-        ack <= req;
-      else
-        ack <= '0';
-      end if;
-
-      if (req = '1' and wrt = '1' and adr(1) = '0') then
-        if (adr(0) = '0') then
-          KanjiPtr1(10 downto 5) <= dbo(5 downto 0);
-          KanjiPtr1(4 downto 0) <= (others => '0');
-        else
-          KanjiPtr1(16 downto 11) <= dbo(5 downto 0);
-          KanjiPtr1(4 downto 0) <= (others => '0');
+    ----------------------------------------------------------------
+    -- kanji rom port access
+    ----------------------------------------------------------------
+    process( reset, clk21m )
+    begin
+        if( reset = '1' )then
+            ack <= '0';
+        elsif( clk21m'event and clk21m = '1' )then
+            if( wrt = '1' )then
+                ack <= req;
+            else
+                ack <= '0';
+            end if;
         end if;
-      elsif (req = '1' and wrt = '1' and adr(1) = '1') then
-        if (adr(0) = '0') then
-          KanjiPtr2(10 downto 5) <= dbo(5 downto 0);
-          KanjiPtr2(4 downto 0) <= (others => '1');
-        else
-          KanjiPtr2(16 downto 11) <= dbo(5 downto 0);
-          KanjiPtr2(4 downto 0) <= (others => '1');
+    end process;
+
+    process( reset, clk21m )
+    begin
+        if( reset = '1' )then
+            kanjisel    <= '0';
+            updatereq   <= '0';
+        elsif( clk21m'event and clk21m = '1' )then
+            if( req = '1' and wrt = '0' and adr(0) = '1' )then
+                kanjisel    <= adr(1);
+                updatereq   <= not updateack;
+            end if;
         end if;
-      elsif (req = '1' and wrt = '0' and adr(0) = '1') then
-        KanjiSel <= adr(1);
-        UpdateReq <= not UpdateAck;
-      elsif (req = '0' and (UpdateReq /= UpdateAck)) then
-        dbi <= ramdbi;
-        if (KanjiSel = '0') then
-          KanjiPtr1(4 downto 0) <= KanjiPtr1(4 downto 0) + 1;
-        else
-          KanjiPtr2(4 downto 0) <= KanjiPtr2(4 downto 0) + 1;
+    end process;
+
+    process( reset, clk21m )
+    begin
+        if( reset = '1' )then
+            updateack <= '0';
+        elsif( clk21m'event and clk21m = '1' )then
+            if( req = '0' and (updatereq /= updateack) )then
+                updateack <= not updateack;
+            end if;
         end if;
-        UpdateAck <= not UpdateAck;
-      end if;
+    end process;
 
-    end if;
+    process( reset, clk21m )
+    begin
+        if( reset = '1' )then
+            kanjiptr1 <= (others => '0');
+        elsif( clk21m'event and clk21m = '1' )then
+            if( req = '1' and wrt = '1' and adr(1) = '0' )then
+                if( adr(0) = '0' )then
+                    kanjiptr1( 10 downto  5 ) <= dbo( 5 downto 0 );
+                else
+                    kanjiptr1( 16 downto 11 ) <= dbo( 5 downto 0 );
+                end if;
+                kanjiptr1(  4 downto  0 ) <= (others => '0');
+            elsif( req = '0' and (updatereq /= updateack) and kanjisel = '0' )then
+                kanjiptr1( 4 downto 0 ) <= kanjiptr1( 4 downto 0 ) + 1;
+            end if;
+        end if;
+    end process;
 
-  end process;
+    process( reset, clk21m )
+    begin
+        if( reset = '1' )then
+            kanjiptr2 <= (others => '0');
+        elsif( clk21m'event and clk21m = '1' )then
+            if( req = '1' and wrt = '1' and adr(1) = '1' )then
+                if( adr(0) = '0' )then
+                    kanjiptr2( 10 downto  5 ) <= dbo( 5 downto 0 );
+                else
+                    kanjiptr2( 16 downto 11 ) <= dbo( 5 downto 0 );
+                end if;
+                kanjiptr2(  4 downto  0 ) <= (others => '1');
+            elsif( req = '0' and (updatereq /= updateack) and kanjisel = '1' )then
+                kanjiptr2( 4 downto 0 ) <= kanjiptr2( 4 downto 0 ) + 1;
+            end if;
+        end if;
+    end process;
 
-  RamReq <= req when wrt = '0' and adr(0) = '1' else '0';
---RamReq <= req;
---RamAdr <= '0' & KanjiPtr1;
-  RamAdr <= '0' & KanjiPtr1 when KanjiSel = '0' else
-            '1' & KanjiPtr2;
-  RamDbo <= dbo;
+    process( clk21m )
+    begin
+        if( clk21m'event and clk21m = '1' )then
+            if( req = '0' and (updatereq /= updateack) )then
+                dbi <= ramdbi;
+            end if;
+        end if;
+    end process;
 
 end rtl;
