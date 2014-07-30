@@ -30,7 +30,7 @@
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --------------------------------------------------------------------------------
--- OCM-PLD Pack v3.2 by KdL (2013.12.15)
+-- OCM-PLD Pack v3.2.1 by KdL (2014.05.29)
 -- Special thx to t.hara, caro, mygodess & all MRC users (http://www.msx.org/)
 --------------------------------------------------------------------------------
 --
@@ -1897,7 +1897,7 @@ begin
     VdpReq  <=  req when( mem = '0' and adr(7 downto 2) = "100110"  )else '0';      -- I/O:98-9Bh   / VDP(V9958)
     PsgReq  <=  req when( mem = '0' and adr(7 downto 2) = "101000"  )else '0';      -- I/O:A0-A3h   / PSG(AY-3-8910)
     PpiReq  <=  req when( mem = '0' and adr(7 downto 2) = "101010"  )else '0';      -- I/O:A8-ABh   / PPI(8255)
-    OpllReq <=  req when( mem = '0' and adr(7 downto 2) = "011111"  )else '0';      -- I/O:7C-7Fh   / OPLL(YM2413)
+    OpllReq <=  req when( mem = '0' and adr(7 downto 1) = "0111110" )else '0';      -- I/O:7C-7Dh   / OPLL(YM2413)
     KanReq  <=  req when( mem = '0' and adr(7 downto 2) = "110110"  )else '0';      -- I/O:D8-DBh   / Kanji
     RomReq  <=  req when( (rom_main or rom_opll or rom_extr or rom_free1 or rom_free2) = '1')else '0';
     MapReq  <=  req when( mem = '0' and adr(7 downto 2) = "111111"  )else           -- I/O:FC-FFh   / Memory-mapper
