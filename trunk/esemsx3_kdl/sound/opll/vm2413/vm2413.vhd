@@ -28,6 +28,7 @@
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
@@ -49,8 +50,8 @@ package VM2413 is
     FNUM : std_logic_vector(8 downto 0);
   end record;
 
-  function CONV_REGS_VECTOR ( regs : REGS_TYPE ) return REGS_VECTOR_TYPE;	-- fixed by KdL ( 2010.04.12 )
-  function CONV_REGS ( vec : REGS_VECTOR_TYPE ) return REGS_TYPE;		-- fixed by KdL ( 2010.04.12 )
+  function CONV_REGS_VECTOR ( regs : REGS_TYPE ) return REGS_VECTOR_TYPE;
+  function CONV_REGS ( vec : REGS_VECTOR_TYPE ) return REGS_TYPE;
 
   subtype VOICE_ID_TYPE is integer range 0 to 37;
   subtype VOICE_VECTOR_TYPE is std_logic_vector(35 downto 0);
@@ -65,8 +66,8 @@ package VM2413 is
     AR, DR, SL, RR : std_logic_vector(3 downto 0);
   end record;
   
-  function CONV_VOICE_VECTOR ( inst : VOICE_TYPE ) return VOICE_VECTOR_TYPE;	-- fixed by KdL ( 2010.04.12 )
-  function CONV_VOICE ( inst_vec : VOICE_VECTOR_TYPE ) return VOICE_TYPE;	-- fixed by KdL ( 2010.04.12 )
+  function CONV_VOICE_VECTOR ( inst : VOICE_TYPE ) return VOICE_VECTOR_TYPE;
+  function CONV_VOICE ( inst_vec : VOICE_VECTOR_TYPE ) return VOICE_TYPE;
 
   -- Voice Parameter Types
   subtype AM_TYPE is std_logic; -- AM switch - '0':off  '1':3.70Hz

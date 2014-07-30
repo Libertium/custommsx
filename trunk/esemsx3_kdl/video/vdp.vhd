@@ -77,13 +77,19 @@
 -------------------------------------------------------------------------------
 -- Revision History
 --
+-- 25th,December,2010 modified by KdL
+--   - OSD Debug Window disabled.
+--
+-- 13th,April,2008 modified by KdL
+--   - Forced VGA mode to 60Hz.
+--
 -- 29th,October,2006 modified by Kunihiko Ohnaka
 --   - Insert the license text.
 --   - Add the document part below.
 --
 -- 3rd,Sep,2006 modified by Kunihiko Ohnaka
 --  - fix several UNKNOWN REALITY problems
---    - Horizontal Sprit problem
+--    - Horizontal Sprites problem
 --    - Overscan problem
 --    - [NOP] zoom demo problem
 --    - 'Star Wars Scroll' demo problem
@@ -230,8 +236,6 @@
 -- JP: Ç¢Ç‹Ç∑ÅB
 --
 
--- modified by KdL
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
@@ -277,17 +281,16 @@ entity vdp is
     -- Display resolution (0=15kHz, 1=31kHz)
     DispReso : in  std_logic;
 
-    -- Debug window signals
-    debugWindowToggle : in std_logic;
-    osdLocateX    : in std_logic_vector( 5 downto 0);
-    osdLocateY    : in std_logic_vector( 4 downto 0);
-    osdCharCodeIn : in std_logic_vector( 7 downto 0);
-    osdCharWrReq  : in std_logic;
-    osdCharWrAck  : out std_logic;
-	
-	-- by KdL
     ntsc_forced : in std_logic
 
+    -- Debug window signals
+--    debugWindowToggle : in std_logic;
+--    osdLocateX    : in std_logic_vector( 5 downto 0);
+--    osdLocateY    : in std_logic_vector( 4 downto 0);
+--    osdCharCodeIn : in std_logic_vector( 7 downto 0);
+--    osdCharWrReq  : in std_logic;
+--    osdCharWrAck  : out std_logic
+	
     );
 end vdp;
 
@@ -617,29 +620,29 @@ architecture rtl of vdp is
   signal debugRegData   : std_logic_vector( 7 downto 0);
   
   -- for debug window
-  signal debugWindowMode : std_logic_vector(2 downto 0);
-  signal debWindow : std_logic;
-  signal iVideoR_debwin : std_logic_vector( 1 downto 0);
-  signal iVideoG_debwin : std_logic_vector( 1 downto 0);
-  signal iVideoB_debwin : std_logic_vector( 1 downto 0);
-  signal dDebugWindowToggle :std_logic;
-  signal osdVideoR : std_logic_vector(3 downto 0);
-  signal osdVideoG : std_logic_vector(3 downto 0);
-  signal osdVideoB : std_logic_vector(3 downto 0);
-
-  signal iOsdCharWrAck : std_logic;
-
-  signal osdLocateXMaster : std_logic_vector( 5 downto 0);
-  signal osdLocateYMaster : std_logic_vector( 4 downto 0);
-  signal osdCharCodeInMaster : std_logic_vector( 7 downto 0);
-  signal osdCharMasterWrReq : std_logic;
-  signal osdCharMasterWrAck : std_logic;
-
-  signal osdLocateXLocal : std_logic_vector( 5 downto 0);
-  signal osdLocateYLocal : std_logic_vector( 4 downto 0);
-  signal osdCharCodeInLocal : std_logic_vector( 7 downto 0);
-  signal osdCharLocalWrReq : std_logic;
-  signal osdCharLocalWrAck : std_logic;
+--  signal debugWindowMode : std_logic_vector(2 downto 0);
+--  signal debWindow : std_logic;
+--  signal iVideoR_debwin : std_logic_vector( 1 downto 0);
+--  signal iVideoG_debwin : std_logic_vector( 1 downto 0);
+--  signal iVideoB_debwin : std_logic_vector( 1 downto 0);
+--  signal dDebugWindowToggle :std_logic;
+--  signal osdVideoR : std_logic_vector(3 downto 0);
+--  signal osdVideoG : std_logic_vector(3 downto 0);
+--  signal osdVideoB : std_logic_vector(3 downto 0);
+--
+--  signal iOsdCharWrAck : std_logic;
+--
+--  signal osdLocateXMaster : std_logic_vector( 5 downto 0);
+--  signal osdLocateYMaster : std_logic_vector( 4 downto 0);
+--  signal osdCharCodeInMaster : std_logic_vector( 7 downto 0);
+--  signal osdCharMasterWrReq : std_logic;
+--  signal osdCharMasterWrAck : std_logic;
+--
+--  signal osdLocateXLocal : std_logic_vector( 5 downto 0);
+--  signal osdLocateYLocal : std_logic_vector( 4 downto 0);
+--  signal osdCharCodeInLocal : std_logic_vector( 7 downto 0);
+--  signal osdCharLocalWrReq : std_logic;
+--  signal osdCharLocalWrAck : std_logic;
   
 begin
 
@@ -651,17 +654,17 @@ begin
   ----------------------------------------------------------------
   -- Display Components
   ----------------------------------------------------------------
-  VdpR9PALMode <= VdpR9PALModeX when ntsc_forced = '0' else '0';	-- VGA 60Hz forced by KdL
---  VdpR9PALMode <= VdpR9PALModeX;	-- by KdL
+  VdpR9PALMode <= VdpR9PALModeX when ntsc_forced = '0' else '0';	-- VGA 60Hz forced
+--  VdpR9PALMode <= VdpR9PALModeX;
   
   iVideoR <= (others => '0') when bwindow = '0' else
-             iVideoR_debwin & iVideoR_vdp(5 downto 2) when debWindow = '1' else
+--             iVideoR_debwin & iVideoR_vdp(5 downto 2) when debWindow = '1' else
              iVideoR_vdp;
   iVideoG <= (others => '0') when bwindow = '0' else
-             iVideoG_debwin & iVideoG_vdp(5 downto 2) when debWindow = '1' else
+--             iVideoG_debwin & iVideoG_vdp(5 downto 2) when debWindow = '1' else
              iVideoG_vdp;
   iVideoB <= (others => '0') when bwindow = '0' else
-             iVideoB_debwin & iVideoB_vdp(5 downto 2) when debWindow = '1' else
+--             iVideoB_debwin & iVideoB_vdp(5 downto 2) when debWindow = '1' else
              iVideoB_vdp;
 
   ntsc1 : ntsc port map( clk21m,
@@ -2453,267 +2456,268 @@ begin
   --
   -----------------------------------------------------------------------------
 
-  process( clk21m, reset )
-    variable debWindowV : std_logic;
-    variable tiling : std_logic;
-  begin
-    if (reset = '1') then
-      debugWindowMode <= (others => '0');
-      iVideoR_debwin <= (others => '0');
-      iVideoG_debwin <= (others => '0');
-      iVideoB_debwin <= (others => '0');
-      debWindow <= '0';
-      tiling := '0';
-    elsif (clk21m'event and clk21m = '1') then
+--  process( clk21m, reset )
+--    variable debWindowV : std_logic;
+--    variable tiling : std_logic;
+--  begin
+--    if (reset = '1') then
+--      debugWindowMode <= (others => '0');
+--      iVideoR_debwin <= (others => '0');
+--      iVideoG_debwin <= (others => '0');
+--      iVideoB_debwin <= (others => '0');
+--      debWindow <= '0';
+--      tiling := '0';
+--    elsif (clk21m'event and clk21m = '1') then
+--
+--      dDebugWindowToggle <= debugWindowToggle;
+--      if( debugWindowToggle /= dDebugWindowToggle ) then
+--        if( debugWindowMode = "101" ) then
+--          debugWindowMode <= (others => '0');
+--        else
+--          debugWindowMode <= debugWindowMode + 1;
+--        end if;
+--      end if;
+--      
+--      debWindowV := '0';
+--
+--      if( (dotState = "00") or (dotState = "01") ) then
+--        tiling := preDotCounter_yp(0);
+--      else
+--        tiling := not preDotCounter_yp(0);
+--      end if;
+--
+--      case debugWindowMode is
+--        when "001" =>
+--          if( vsyncIntReq /= vsyncIntAck ) then
+--            if( (VdpR1VSyncIntEn = '1') or (tiling = '1') ) then
+--              iVideoG_debwin <= "10";
+--            else
+--              iVideoG_debwin <= (others => '0');
+--            end if;
+--            debWindowV := '1';
+--          else
+--            iVideoG_debwin <= (others => '0');
+--          end if;
+--          iVideoR_debwin <= (others => '0');
+--          iVideoB_debwin <= (others => '0');
+--        when "010" =>
+--          if( hsyncIntReq /= hsyncIntAck) then
+--            if( (VdpR0HSyncIntEn = '1') or (tiling = '1') ) then
+--              iVideoR_debwin <= "10";
+--            else
+--              iVideoR_debwin <= (others => '0');
+--            end if;
+--            debWindowV := '1';
+--          else
+--            iVideoR_debwin <= (others => '0');
+--          end if;
+--          iVideoG_debwin <= (others => '0');
+--          iVideoB_debwin <= (others => '0');
+--        when "011" =>
+--          -- sprite debugging
+--          if( window = '1' and vdpR1DispOn = '1' and spriteColorOut = '1' and
+--              VdpModeText1 = '0' and VdpModeText2 = '0') then
+--            iVideoB_debwin <= "11";
+--          elsif( (VdpR8SpOff = '1') and (tiling = '1') ) then
+--            iVideoB_debwin <= "10";
+--          else
+--            iVideoB_debwin <= (others => '0');
+--          end if;
+--          iVideoR_debwin <= (others => '0');
+--          iVideoG_debwin <= (others => '0');
+--        when "100" =>
+--          -- palette fixing
+--          iVideoR_debwin <= paletteAddr_out(3 downto 2);
+--          iVideoG_debwin <= paletteAddr_out(1) & paletteAddr_out(1);
+--          iVideoB_debwin <= paletteAddr_out(0) & paletteAddr_out(0);
+--        when "101" =>
+--          -- On-Screen-Display
+--          iVideoR_debwin <= osdVideoR(3 downto 2);
+--          iVideoG_debwin <= osdVideoG(3 downto 2);
+--          iVideoB_debwin <= osdVideoB(3 downto 2);
+--        when others => null;
+--      end case;
+--
+--
+--      -- window signal
+--      if( debugWindowMode /= 0 ) then
+----        debWindow <= debWindowV;
+--        debWindow <= '1';
+--      else
+--        debWindow <= '0';
+--      end if;
+--    end if;
+--  end process;
+--  
+--  osd0: osd port map(clk21m, reset, h_counter, preDotCounter_yp(7 downto 0),
+--                     osdLocateXMaster, osdLocateYMaster, osdCharCodeInMaster, osdCharMasterWrReq, osdCharMasterWrAck,
+--                     osdVideoR, osdVideoG, osdVideoB);
+--
+--  --
+--  -- osd arbitor
+--  --
+--  osdCharWrAck <= iOsdCharWrAck;
+--  
+--  process( clk21m, reset )
+--    variable state : std_logic_vector(1 downto 0);
+--  begin
+--    if (reset = '1') then
+--      state := "00";
+--      iOsdCharWrAck <= '0';
+--      osdCharLocalWrAck <= '0';
+--      osdCharCodeInMaster <= (others => '0');
+--      osdCharMasterWrReq <= '0';
+--    elsif (clk21m'event and clk21m = '1') then
+--      case state is
+--        when "00" =>
+--          if( osdCharWrReq /= iOsdCharWrAck ) then
+--            osdLocateXMaster <= osdLocateX;
+--            osdLocateYMaster <= osdLocateY;
+--            osdCharCodeInMaster <= osdCharCodeIn;
+--            osdCharMasterWrReq <= not osdCharMasterWrAck;
+--            state := "10";
+--          elsif( osdCharLocalWrReq /= osdCharLocalWrAck ) then
+--            osdLocateXMaster <= osdLocateXLocal;
+--            osdLocateYMaster <= osdLocateYLocal;
+--            osdCharCodeInMaster <= osdCharCodeInLocal;
+--            osdCharMasterWrReq <= not osdCharMasterWrAck;
+--            state := "11";
+--          end if;
+--        when "10" =>
+--          if( osdCharMasterWrReq = osdCharMasterWrAck ) then
+--            iOsdCharWrAck <= osdCharWrReq;
+--            state := "00";
+--          end if;
+--        when "11" =>
+--          if( osdCharMasterWrReq = osdCharMasterWrAck ) then
+--            osdCharLocalWrAck <= osdCharLocalWrReq;
+--            state := "00";
+--          end if;
+--        when others => null;
+--      end case;
+--    end if;
+--  end process;
+--
+--
+--  --
+--  -- Output VDP information to OSD.
+--  --
+--  registerRamAddr_out <= debugRegNumSel;
+--  debugRegData <= registerRamReadData;
+--
+--  process( clk21m, reset )
+--    constant str : string  := "VDP Registers";
+--    constant str2 : string := "   0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F";
+--    constant str3 : string := "0:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00";
+--    constant hexchar : string := "0123456789ABCDEF";
+--    variable state : std_logic_vector(3 downto 0);
+--    variable x  : std_logic_vector(7 downto 0);
+--    variable x2 : std_logic_vector(3 downto 0);
+--  begin
+--    if (reset = '1') then
+--      osdLocateXLocal <= (others => '0');
+--      osdLocateYLocal <= (others => '0');
+--      osdCharCodeInLocal <= (others => '0');
+--      osdCharLocalWrReq <= '0';
+--      debugRegNumSel <= (others => '0');
+--      x := (others => '0');
+--      x2 := (others => '0');
+--      state := (others => '0');
+--    elsif (clk21m'event and clk21m = '1') then
+--      
+--      case state is
+--        -- print str 
+--        when X"0" =>
+--          osdLocateXLocal <= (others => '0');
+--          osdLocateYLocal <= conv_std_logic_vector(2, osdLocateYLocal'length);
+--          x := (others => '0');
+--          state := X"1";
+--        when X"1" =>
+--          osdCharCodeInLocal <= char_to_std_logic_vector(str(conv_integer(x)+1));
+--          osdCharLocalWrReq <= not osdCharLocalWrAck;
+--          state := X"2";
+--        when X"2" =>
+--          -- waiting wr ack
+--          if( osdCharLocalWrReq = osdCharLocalWrAck ) then
+----            if( x = str'length -1) then
+--            if( x = 12) then
+--              state := X"3";
+--            else
+--              x := x+1;
+--              osdLocateXLocal <= osdLocateXLocal + 1;
+--              state := X"1";
+--            end if;
+--          end if;
+--        -- print str2
+--        when X"3" =>
+--          osdLocateXLocal <= (others => '0');
+--          osdLocateYLocal <= conv_std_logic_vector(3, osdLocateYLocal'length);
+--          x  := (others => '0');
+--          state := X"4";
+--        when X"4" =>
+--          osdCharCodeInLocal <= char_to_std_logic_vector(str2(conv_integer(x)+1));
+--          osdCharLocalWrReq <= not osdCharLocalWrAck;
+--          state := X"5";
+--        when X"5" =>
+--          -- waiting wr ack
+--          if( osdCharLocalWrReq = osdCharLocalWrAck ) then
+----            if( x = str2'length -1) then
+--            if( x = 49) then
+--              state := X"8";
+--            else
+--              x := x+1;
+--              osdLocateXLocal <= osdLocateXLocal + 1;
+--              state := X"4";
+--            end if;
+--          end if;
+--        -- print str3
+--        when X"8" =>
+--          osdLocateXLocal <= (others => '0');
+--          osdLocateYLocal <= ("00" & debugRegNumSel(6 downto 4)) + 4;
+--          x := (others => '0');
+--          x2 := conv_std_logic_vector(1, x2'length);
+--          state := X"9";
+--        when X"9" =>
+--          if( x = 0 ) then
+--            osdCharCodeInLocal <= char_to_std_logic_vector(hexchar(conv_integer(debugRegNumSel(7 downto 4))+1));
+--          elsif( x2 = 0) then
+--            osdCharCodeInLocal <= char_to_std_logic_vector(hexchar(conv_integer(debugRegData(7 downto 4))+1));
+--          elsif( x2 = 1) then
+--            osdCharCodeInLocal <= char_to_std_logic_vector(hexchar(conv_integer(debugRegData(3 downto 0))+1));
+--            if( x /= 0 ) then
+--              debugRegNumSel <= debugRegNumSel + 1;
+--            end if;
+--          else
+--            osdCharCodeInLocal <= char_to_std_logic_vector(str3(conv_integer(x)+1));
+--          end if;
+--          osdCharLocalWrReq <= not osdCharLocalWrAck;
+--          state := X"A";
+--          if( x2 = 2) then
+--            x2 := (others => '0');
+--          else
+--            x2 := x2 + 1;
+--          end if;
+--        when X"A" =>
+--          -- waiting wr ack
+--          if( osdCharLocalWrReq = osdCharLocalWrAck ) then
+--              if( debugRegNumSel = 47 ) then
+--                debugRegNumSel <= (others => '0');
+--                state := X"8";
+--              else
+----            if( x = str2'length -1) then
+--                if( x = 49) then
+--                  state := X"8";
+--                else
+--                  x := x+1;
+--                  osdLocateXLocal <= osdLocateXLocal + 1;
+--                  state := X"9";
+--                end if;
+--              end if;
+--          end if;
+--        when others => null;
+--      end case;
+--    end if;
+--  end process;
 
-      dDebugWindowToggle <= debugWindowToggle;
-      if( debugWindowToggle /= dDebugWindowToggle ) then
-        if( debugWindowMode = "101" ) then
-          debugWindowMode <= (others => '0');
-        else
-          debugWindowMode <= debugWindowMode + 1;
-        end if;
-      end if;
-      
-      debWindowV := '0';
-
-      if( (dotState = "00") or (dotState = "01") ) then
-        tiling := preDotCounter_yp(0);
-      else
-        tiling := not preDotCounter_yp(0);
-      end if;
-
-      case debugWindowMode is
-        when "001" =>
-          if( vsyncIntReq /= vsyncIntAck ) then
-            if( (VdpR1VSyncIntEn = '1') or (tiling = '1') ) then
-              iVideoG_debwin <= "10";
-            else
-              iVideoG_debwin <= (others => '0');
-            end if;
-            debWindowV := '1';
-          else
-            iVideoG_debwin <= (others => '0');
-          end if;
-          iVideoR_debwin <= (others => '0');
-          iVideoB_debwin <= (others => '0');
-        when "010" =>
-          if( hsyncIntReq /= hsyncIntAck) then
-            if( (VdpR0HSyncIntEn = '1') or (tiling = '1') ) then
-              iVideoR_debwin <= "10";
-            else
-              iVideoR_debwin <= (others => '0');
-            end if;
-            debWindowV := '1';
-          else
-            iVideoR_debwin <= (others => '0');
-          end if;
-          iVideoG_debwin <= (others => '0');
-          iVideoB_debwin <= (others => '0');
-        when "011" =>
-          -- sprite debugging
-          if( window = '1' and vdpR1DispOn = '1' and spriteColorOut = '1' and
-              VdpModeText1 = '0' and VdpModeText2 = '0') then
-            iVideoB_debwin <= "11";
-          elsif( (VdpR8SpOff = '1') and (tiling = '1') ) then
-            iVideoB_debwin <= "10";
-          else
-            iVideoB_debwin <= (others => '0');
-          end if;
-          iVideoR_debwin <= (others => '0');
-          iVideoG_debwin <= (others => '0');
-        when "100" =>
-          -- palette fixing
-          iVideoR_debwin <= paletteAddr_out(3 downto 2);
-          iVideoG_debwin <= paletteAddr_out(1) & paletteAddr_out(1);
-          iVideoB_debwin <= paletteAddr_out(0) & paletteAddr_out(0);
-        when "101" =>
-          -- On-Screen-Display
-          iVideoR_debwin <= osdVideoR(3 downto 2);
-          iVideoG_debwin <= osdVideoG(3 downto 2);
-          iVideoB_debwin <= osdVideoB(3 downto 2);
-        when others => null;
-      end case;
-
-
-      -- window signal
-      if( debugWindowMode /= 0 ) then
---        debWindow <= debWindowV;
-        debWindow <= '1';
-      else
-        debWindow <= '0';
-      end if;
-    end if;
-  end process;
-  
-  osd0: osd port map(clk21m, reset, h_counter, preDotCounter_yp(7 downto 0),
-                     osdLocateXMaster, osdLocateYMaster, osdCharCodeInMaster, osdCharMasterWrReq, osdCharMasterWrAck,
-                     osdVideoR, osdVideoG, osdVideoB);
-
-  --
-  -- osd arbitor
-  --
-  osdCharWrAck <= iOsdCharWrAck;
-  
-  process( clk21m, reset )
-    variable state : std_logic_vector(1 downto 0);
-  begin
-    if (reset = '1') then
-      state := "00";
-      iOsdCharWrAck <= '0';
-      osdCharLocalWrAck <= '0';
-      osdCharCodeInMaster <= (others => '0');
-      osdCharMasterWrReq <= '0';
-    elsif (clk21m'event and clk21m = '1') then
-      case state is
-        when "00" =>
-          if( osdCharWrReq /= iOsdCharWrAck ) then
-            osdLocateXMaster <= osdLocateX;
-            osdLocateYMaster <= osdLocateY;
-            osdCharCodeInMaster <= osdCharCodeIn;
-            osdCharMasterWrReq <= not osdCharMasterWrAck;
-            state := "10";
-          elsif( osdCharLocalWrReq /= osdCharLocalWrAck ) then
-            osdLocateXMaster <= osdLocateXLocal;
-            osdLocateYMaster <= osdLocateYLocal;
-            osdCharCodeInMaster <= osdCharCodeInLocal;
-            osdCharMasterWrReq <= not osdCharMasterWrAck;
-            state := "11";
-          end if;
-        when "10" =>
-          if( osdCharMasterWrReq = osdCharMasterWrAck ) then
-            iOsdCharWrAck <= osdCharWrReq;
-            state := "00";
-          end if;
-        when "11" =>
-          if( osdCharMasterWrReq = osdCharMasterWrAck ) then
-            osdCharLocalWrAck <= osdCharLocalWrReq;
-            state := "00";
-          end if;
-        when others => null;
-      end case;
-    end if;
-  end process;
-
-
-  --
-  -- Output VDP information to OSD.
-  --
-  registerRamAddr_out <= debugRegNumSel;
-  debugRegData <= registerRamReadData;
-
-  process( clk21m, reset )
-    constant str : string  := "VDP Registers";
-    constant str2 : string := "   0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F";
-    constant str3 : string := "0:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00";
-    constant hexchar : string := "0123456789ABCDEF";
-    variable state : std_logic_vector(3 downto 0);
-    variable x  : std_logic_vector(7 downto 0);
-    variable x2 : std_logic_vector(3 downto 0);
-  begin
-    if (reset = '1') then
-      osdLocateXLocal <= (others => '0');
-      osdLocateYLocal <= (others => '0');
-      osdCharCodeInLocal <= (others => '0');
-      osdCharLocalWrReq <= '0';
-      debugRegNumSel <= (others => '0');
-      x := (others => '0');
-      x2 := (others => '0');
-      state := (others => '0');
-    elsif (clk21m'event and clk21m = '1') then
-      
-      case state is
-        -- print str 
-        when X"0" =>
-          osdLocateXLocal <= (others => '0');
-          osdLocateYLocal <= conv_std_logic_vector(2, osdLocateYLocal'length);
-          x := (others => '0');
-          state := X"1";
-        when X"1" =>
-          osdCharCodeInLocal <= char_to_std_logic_vector(str(conv_integer(x)+1));
-          osdCharLocalWrReq <= not osdCharLocalWrAck;
-          state := X"2";
-        when X"2" =>
-          -- waiting wr ack
-          if( osdCharLocalWrReq = osdCharLocalWrAck ) then
---            if( x = str'length -1) then
-            if( x = 12) then
-              state := X"3";
-            else
-              x := x+1;
-              osdLocateXLocal <= osdLocateXLocal + 1;
-              state := X"1";
-            end if;
-          end if;
-        -- print str2
-        when X"3" =>
-          osdLocateXLocal <= (others => '0');
-          osdLocateYLocal <= conv_std_logic_vector(3, osdLocateYLocal'length);
-          x  := (others => '0');
-          state := X"4";
-        when X"4" =>
-          osdCharCodeInLocal <= char_to_std_logic_vector(str2(conv_integer(x)+1));
-          osdCharLocalWrReq <= not osdCharLocalWrAck;
-          state := X"5";
-        when X"5" =>
-          -- waiting wr ack
-          if( osdCharLocalWrReq = osdCharLocalWrAck ) then
---            if( x = str2'length -1) then
-            if( x = 49) then
-              state := X"8";
-            else
-              x := x+1;
-              osdLocateXLocal <= osdLocateXLocal + 1;
-              state := X"4";
-            end if;
-          end if;
-        -- print str3
-        when X"8" =>
-          osdLocateXLocal <= (others => '0');
-          osdLocateYLocal <= ("00" & debugRegNumSel(6 downto 4)) + 4;
-          x := (others => '0');
-          x2 := conv_std_logic_vector(1, x2'length);
-          state := X"9";
-        when X"9" =>
-          if( x = 0 ) then
-            osdCharCodeInLocal <= char_to_std_logic_vector(hexchar(conv_integer(debugRegNumSel(7 downto 4))+1));
-          elsif( x2 = 0) then
-            osdCharCodeInLocal <= char_to_std_logic_vector(hexchar(conv_integer(debugRegData(7 downto 4))+1));
-          elsif( x2 = 1) then
-            osdCharCodeInLocal <= char_to_std_logic_vector(hexchar(conv_integer(debugRegData(3 downto 0))+1));
-            if( x /= 0 ) then
-              debugRegNumSel <= debugRegNumSel + 1;
-            end if;
-          else
-            osdCharCodeInLocal <= char_to_std_logic_vector(str3(conv_integer(x)+1));
-          end if;
-          osdCharLocalWrReq <= not osdCharLocalWrAck;
-          state := X"A";
-          if( x2 = 2) then
-            x2 := (others => '0');
-          else
-            x2 := x2 + 1;
-          end if;
-        when X"A" =>
-          -- waiting wr ack
-          if( osdCharLocalWrReq = osdCharLocalWrAck ) then
-              if( debugRegNumSel = 47 ) then
-                debugRegNumSel <= (others => '0');
-                state := X"8";
-              else
---            if( x = str2'length -1) then
-                if( x = 49) then
-                  state := X"8";
-                else
-                  x := x+1;
-                  osdLocateXLocal <= osdLocateXLocal + 1;
-                  state := X"9";
-                end if;
-              end if;
-          end if;
-        when others => null;
-      end case;
-    end if;
-  end process;
 end rtl;
 

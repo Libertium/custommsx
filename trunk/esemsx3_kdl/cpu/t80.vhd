@@ -66,6 +66,8 @@
 --
 --	0247 : Fixed bus req/ack cycle
 --
+--  0248 : add undocumented DDCB and FDCB opcodes by TobiFlex 20.04.2010
+--
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -238,6 +240,7 @@ architecture rtl of T80 is
 	signal SetEI			: std_logic;
 	signal IMode			: std_logic_vector(1 downto 0);
 	signal Halt				: std_logic;
+	signal XYbit_undoc		: std_logic;
 
 begin
 
@@ -259,6 +262,7 @@ begin
 			F => F,
 			NMICycle => NMICycle,
 			IntCycle => IntCycle,
+			XY_State => XY_State,
 			MCycles => MCycles_d,
 			TStates => TStates,
 			Prefix => Prefix,
@@ -304,7 +308,8 @@ begin
 			IMode => IMode,
 			Halt => Halt,
 			NoRead => NoRead,
-			Write => Write);
+			Write => Write,
+			XYbit_undoc => XYbit_undoc);
 
 	alu : T80_ALU
 		generic map(
@@ -689,6 +694,9 @@ begin
 					F <= Save_Mux;
 				when others =>
 				end case;
+				if XYbit_undoc='1' then
+					DO <= ALU_Q;
+				end if;
 			end if;
 
 		end if;
@@ -892,6 +900,10 @@ begin
 			when others =>
 				BusB <= "--------";
 			end case;
+			if XYbit_undoc='1' then
+				BusA <= DI_Reg;
+				BusB <= DI_Reg;
+			end if;
 			end if;
 		end if;
 	end process;
