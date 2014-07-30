@@ -1,6 +1,6 @@
 --
---  osdnametable.vhd
---   Pattern name table of On-Screen-Display module.
+--  vdp_linebuf.vhd
+--    Line buffer for VGA upscan converter.
 --
 --  Copyright (C) 2006 Kunihiko Ohnaka
 --  All rights reserved.
@@ -67,43 +67,50 @@
 --   - Insert the license text.
 --   - Add the document part below.
 --
+-- 21th,March,2008 modified by t.hara
+--   JP: リファクタリング, 桁揃えなど些細な修正。
+--
 -------------------------------------------------------------------------------
 -- Document
 --
--- JP: OSDに表示される文字のキャラクタコードを保持するテーブルです。
--- JP: 2Kバイトの領域があり、横64文字×縦32行の文字情報を保持できます。
+-- JP: NTSCタイミングの 15KHzで出力されるビデオ信号をVGAタイミングに
+-- JP: 合わせた31KHzの倍レートで出力するためのラインバッファモジュール
+-- JP: です。
+-- JP: ESE-VDPのメインクロックである21.477MHzで動作させるため、
+-- JP: ドットクロックは一般的な 640x480ドットVGAモードの25.175MHz
+-- JP: とは異なります。そのため、液晶モニタ等で表示させるとドットの形が
+-- JP: いびつな形になる事があります。
+--
 
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
+LIBRARY IEEE;
+	USE IEEE.STD_LOGIC_1164.ALL;
+	USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity osdnametable is
-   port (
-         address  : in  std_logic_vector(10 downto 0);
-         inclock  : in  std_logic;
-         we       : in  std_logic;
-         data     : in  std_logic_vector(7 downto 0);
-         q        : out std_logic_vector(7 downto 0)
-        );
-end osdnametable;
+ENTITY VDP_LINEBUF IS
+	 PORT (
+		ADDRESS		: IN	STD_LOGIC_VECTOR(  9 DOWNTO 0 );
+		INCLOCK		: IN	STD_LOGIC;
+		WE			: IN	STD_LOGIC;
+		DATA		: IN	STD_LOGIC_VECTOR(  5 DOWNTO 0 );
+		Q			: OUT	STD_LOGIC_VECTOR(  5 DOWNTO 0 )
+	);
+END VDP_LINEBUF;
 
-architecture RTL of osdnametable is
-  type Mem is array (2047 downto 0) of std_logic_vector(7 downto 0);
-  signal WaveMem  : Mem;
-  signal iAddress : std_logic_vector(10 downto 0);
+ARCHITECTURE RTL OF VDP_LINEBUF IS
+	TYPE MEM IS ARRAY ( 639 DOWNTO 0 ) OF STD_LOGIC_VECTOR( 3 DOWNTO 0 );
+	SIGNAL IMEM		: MEM;
+	SIGNAL IADDRESS	: STD_LOGIC_VECTOR( 9 DOWNTO 0 );
+BEGIN
 
-  begin
+	PROCESS( INCLOCK )
+	BEGIN
+		IF( INCLOCK'EVENT AND INCLOCK ='1' )THEN
+			IF( WE = '1' )THEN
+				IMEM( CONV_INTEGER(ADDRESS) ) <= DATA( 5 DOWNTO 2 );
+			END IF;
+			IADDRESS <= ADDRESS;
+		END IF;
+	END PROCESS;
 
-  process (inclock)
-  begin
-    if (inclock'event and inclock ='1') then
-      if (we = '1') then
-        WaveMem(conv_integer(address)) <= data;
-      end if;
-      iAddress <= address;
-    end if;
-  end process;
-
-  q <= WaveMem(conv_integer(iAddress));
-
-end RTL;
+	Q <= IMEM( CONV_INTEGER(IADDRESS) ) & "00";
+END RTL;

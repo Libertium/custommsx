@@ -1,6 +1,6 @@
 --
---  pal.vhd
---   PAL sync signal generator.
+--  vdp_spinforam.vhd
+--   Sprite information table memory.
 --
 --  Copyright (C) 2006 Kunihiko Ohnaka
 --  All rights reserved.
@@ -67,114 +67,50 @@
 --   - Insert the license text.
 --   - Add the document part below.
 --
--- 16th,September,2006 created by Kunihiko Ohnaka
---   - Start PAL mode implementation.
---
 -------------------------------------------------------------------------------
 -- Document
 --
--- JP: ESE-VDPコア(vdp.vhd)が生成したビデオ信号を、PALの
--- JP: タイミングに合った同期信号および映像信号に変換します。
--- JP: ESE-VDPコアはPALモード時は PALのタイミングで映像
--- JP: 信号や垂直同期信号を生成するため、本モジュールでは
--- JP: 水平同期信号に等価パルスを挿入する処理だけを行って
--- JP: います。
+-- JP: 次の行で表示するスプライトの情報を保持するテーブルです。
+-- JP: テーブルには以下の情報を保持します。
+--
+-- Sprite informations. (Total 31bits)
+--   X        (9bit)
+--   pattern  (16 bit)
+--   color    (4bit)
+--   cc       (1bit)
+--   ic       (1bit)
 --
 
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
-use work.vdp_package.all;
+LIBRARY IEEE;
+	USE IEEE.STD_LOGIC_1164.ALL;
+	USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity pal is
-  port(
-    -- VDP clock ... 21.477MHz
-    clk21m  : in std_logic;
-    reset   : in std_logic;
+ENTITY VDP_SPINFORAM IS
+	 PORT (
+		 ADDRESS	: IN	STD_LOGIC_VECTOR(  2 DOWNTO 0 );
+		 INCLOCK	: IN	STD_LOGIC;
+		 WE			: IN	STD_LOGIC;
+		 DATA		: IN	STD_LOGIC_VECTOR( 31 DOWNTO 0 );
+		 Q			: OUT	STD_LOGIC_VECTOR( 31 DOWNTO 0 )
+	);
+END VDP_SPINFORAM;
 
-    -- Video Input
-    videoRin : in std_logic_vector( 5 downto 0);
-    videoGin : in std_logic_vector( 5 downto 0);
-    videoBin : in std_logic_vector( 5 downto 0);
-    videoHSin_n : in std_logic;
-    videoVSin_n : in std_logic;
-    hCounterIn : in std_logic_vector(10 downto 0);
-    vCounterIn : in std_logic_vector(10 downto 0);
-    interlaceMode : in std_logic;
-    
-    -- Video Output
-    videoRout : out std_logic_vector( 5 downto 0);
-    videoGout : out std_logic_vector( 5 downto 0);
-    videoBout : out std_logic_vector( 5 downto 0);
-    videoHSout_n : out std_logic;
-    videoVSout_n : out std_logic
-    );
-end pal;
+ARCHITECTURE RTL OF VDP_SPINFORAM IS
+	TYPE MEM IS ARRAY ( 7 DOWNTO 0 ) OF STD_LOGIC_VECTOR( 31 DOWNTO 0 );
+	SIGNAL IMEM		: MEM;
+	SIGNAL IADDRESS	: STD_LOGIC_VECTOR( 2 DOWNTO 0 );
 
-architecture rtl of pal is
--- sync state register
-  type typsstate is (sstate_A, sstate_B, sstate_C, sstate_D);
-  signal sstate : typsstate;
+BEGIN
+	PROCESS( INCLOCK )
+	BEGIN
+		IF( INCLOCK'EVENT AND INCLOCK ='1' )THEN
+			IF (WE = '1') THEN
+				IMEM(CONV_INTEGER(ADDRESS)) <= DATA;
+			END IF;
+			IADDRESS <= ADDRESS;
+		END IF;
+	END PROCESS;
 
-  signal HS_n : std_logic;
-begin
+	Q <= IMEM( CONV_INTEGER(IADDRESS) );
 
-  process( clk21m, reset )
-  begin
-    if (reset = '1') then
-      sstate <= sstate_A;
-    elsif (clk21m'event and clk21m = '1') then
-      if( (vCounterIn = 0) or
-          (vCounterIn = 12) or
-          ((vCounterIn = 626) and interlaceMode = '0') or
-          ((vCounterIn = 625) and interlaceMode = '1') or
-          ((vCounterIn = 626 + 12) and interlaceMode = '0') or
-          ((vCounterIn = 625 + 12) and interlaceMode = '1') )then
-        sstate <= sstate_A;
-      elsif( (vCounterIn = 6) or
-             ((vCounterIn = 626+6) and interlaceMode = '0') or
-             ((vCounterIn = 625+6) and interlaceMode = '1') )then
-        sstate <= sstate_B;
-      elsif( (vCounterIn = 18) or
-             ((vCounterIn = 626+18) and interlaceMode = '0') or
-             ((vCounterIn = 625+18) and interlaceMode = '1') )then
-        sstate <= sstate_C;
-      end if;
-
-      -- generate H sync pulse
-      if( sstate = sstate_A ) then
-        if( (hCounterIn = 1) or (hCounterIn = CLOCKS_PER_LINE/2+1) ) then
-          HS_n <= '0';             -- pulse on
-        elsif( (hCounterIn = 51) or (hCounterIn = CLOCKS_PER_LINE/2+51) ) then
-          HS_n <= '1';             -- pulse off
-        end if;
-      elsif( sstate = sstate_B ) then
-        if( (hCounterIn = CLOCKS_PER_LINE  -100+1) or
-            (hCounterIn = CLOCKS_PER_LINE/2-100+1) ) then
-          HS_n <= '0';             -- pulse on
-        elsif( (hCounterIn =                   1) or
-               (hCounterIn = CLOCKS_PER_LINE/2+1) ) then
-          HS_n <= '1';             -- pulse off
-        end if;
-      elsif( sstate = sstate_C ) then
-        if( hCounterIn = 1 ) then
-          HS_n <= '0';             -- pulse on
-        elsif( hCounterIn = 101 ) then
-          HS_n <= '1';             -- pulse off
-        end if;
-      end if;
-
-    end if;
-  end process;
-
-  videoHSout_n <= HS_n;
-  videoVSout_n <= videoVSin_n;
-
-  videoRout <= videoRin;
-  videoGout <= videoGin;
-  videoBout <= videoBin;
-
-end rtl;
-
-
-    
+END RTL;

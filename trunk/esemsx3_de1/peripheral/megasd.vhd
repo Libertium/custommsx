@@ -77,69 +77,56 @@ architecture rtl of megasd is
   signal ErmBank3    : std_logic_vector(7 downto 0);
 
 begin
-
   ----------------------------------------------------------------
   -- ESE-RAM bank register access
   ----------------------------------------------------------------
   process(clk21m, reset)
-
   begin
-
     if (reset = '1') then
-
       ErmBank0   <= X"00";
       ErmBank1   <= X"00";
       ErmBank2   <= X"00";
       ErmBank3   <= X"00";
-
     elsif (clk21m'event and clk21m = '1') then
-
-      -- Mapped I/O port access on 6000-7FFFh ... Bank register write
+ -- Mapped I/O port access on 6000-7FFFh ... Bank register write
       if (req = '1' and wrt = '1' and adr(15 downto 13) = "011") then
         case adr(12 downto 11) is
-          when "00"   => ErmBank0 <= dbo;
-          when "01"   => ErmBank1 <= dbo;
-          when "10"   => ErmBank2 <= dbo;
-          when others => ErmBank3 <= dbo;
+          when "00"   => ErmBank0 <= dbo;	-- 6000..67ff
+          when "01"   => ErmBank1 <= dbo;	-- 6800..6fff
+          when "10"   => ErmBank2 <= dbo;	-- 7000..77ff
+          when others => ErmBank3 <= dbo;	-- 7800..7fff
         end case;
       end if;
-
       ack <= req;
-
     end if;
-
   end process;
-
-  RamReq <= req when wrt = '0'                                      else
-            req when ErmBank0(7) = '1' and adr(14 downto 13) = "10" else
-            req when ErmBank2(7) = '1' and adr(14 downto 13) = "00" else
-            req when ErmBank3(7) = '1' and adr(14 downto 13) = "01" else '0';
+-- =====================================================
+  RamReq <= req when wrt = '0'                                      else	-- rd
+            req when ErmBank0(7) = '1' and adr(14 downto 13) = "10" else	-- wr 4000..5fff
+            req when ErmBank2(7) = '1' and adr(14 downto 13) = "00" else	-- wr 8000..9fff
+            req when ErmBank3(7) = '1' and adr(14 downto 13) = "01" else	-- wr A000..Bfff
+			'0';
   RamWrt <= wrt;
 
-  RamAdr <= ErmBank0(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "10" else
-            ErmBank1(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "11" else
-            ErmBank2(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "00" else
-            ErmBank3(6 downto 0) & adr(12 downto 0);
+  RamAdr <= ErmBank0(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "10" else	-- 4000..5fff
+            ErmBank1(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "11" else	-- 6000..7fff
+            ErmBank2(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "00" else	-- 8000..9fff
+            ErmBank3(6 downto 0) & adr(12 downto 0);									-- A000..Bfff
 
   RamDbo <= dbo;
   dbi    <= RamDbi;
-
   ----------------------------------------------------------------
   -- SD/MMC card access
   ----------------------------------------------------------------
   process(clk21m, reset)
-
     variable MmcEnx : std_logic;
     variable EpcEna : std_logic;
     variable MmcMod : std_logic_vector(1 downto 0);
     variable MmcSeq : std_logic_vector(4 downto 0);
     variable MmcTmp : std_logic_vector(7 downto 0);
     variable MmcDbo : std_logic_vector(7 downto 0);
-
   begin
-
     if (reset = '1') then
-
       MmcEnx := '0';
       EpcEna := '0';
       MmcMod := (others => '0');
@@ -154,21 +141,19 @@ begin
       epc_ck <= '1';
       epc_cs <= '1';
       epc_di <= 'Z';
-
     elsif (clk21m'event and clk21m = '1') then
-
-      if (ErmBank0(7 downto 6) = "01") then
+      if (ErmBank0(7 downto 6) = "01") then		-- 40h (4000..5fff)
         MmcEnx := '1';
       else
         MmcEnx := '0';
       end if;
 
-      if (ErmBank0(7 downto 4) = "0110") then
-        EpcEna := '1';
+      if (ErmBank0(7 downto 4) = "0110") then	-- 60h (4000..5fff)
+        EpcEna := '1';		-- EPC
       else
-        EpcEna := '0';
+        EpcEna := '0';		-- MMC
       end if;
-
+-- WR MMC & EPC 
       if (MmcSeq(0) = '0') then
         case MmcSeq(4 downto 1) is
           when "1010" => mmc_di <= MmcDbo(7); epc_di <= MmcDbo(7);
@@ -184,7 +169,7 @@ begin
           when others => mmc_di <= 'Z';       epc_di <= '1';      
         end case;
       end if;
-
+-- RD MMC
       if (MmcSeq(0) = '0' and EpcEna = '0') then
         case MmcSeq(4 downto 1) is
           when "1001" => MmcTmp(7) := mmc_do;
@@ -195,9 +180,10 @@ begin
           when "0100" => MmcTmp(2) := mmc_do;
           when "0011" => MmcTmp(1) := mmc_do;
           when "0010" => MmcTmp(0) := mmc_do;
-          when "0001" => mmcdbi <= MmcTmp;
+          when "0001" => mmcdbi <= MmcTmp;		-- RD data MMC
           when others => null;
         end case;
+-- RD EPC
       elsif (MmcSeq(0) = '0' and EpcEna = '1') then
         case MmcSeq(4 downto 1) is
           when "1001" => MmcTmp(7) := epc_do;
@@ -208,16 +194,19 @@ begin
           when "0100" => MmcTmp(2) := epc_do;
           when "0011" => MmcTmp(1) := epc_do;
           when "0010" => MmcTmp(0) := epc_do;
-          when "0001" => mmcdbi <= MmcTmp;
+          when "0001" => mmcdbi <= MmcTmp;		-- RD data EPC
           when others => null;
         end case;
       end if;
 
+-- CLK
       if (MmcSeq(4 downto 1) < "1011" and MmcSeq(4 downto 1) > "0010") then
         if (EpcEna = '0') then
+-- MMC
           mmc_ck <= MmcSeq(0);
           epc_ck <= '1';
         else
+-- EPC
           mmc_ck <= '1';
           epc_ck <= MmcSeq(0);
         end if;
@@ -226,43 +215,42 @@ begin
         epc_ck <= '1';
       end if;
 
-      -- Memory mapped I/O port access on 4000-57FFh ... SD/MMC data register
+-- Memory mapped I/O port access on 4000-57FFh ... SD/MMC data register
       if (req = '1' and adr(15 downto 13) = "010" and adr(12 downto 11) /= "11" and 
-          MmcEnx = '1' and MmcSeq = "00000" and MmcMod(0) = '0') then
+					MmcEnx = '1' and MmcSeq = "00000" and MmcMod(0) = '0') then
         if (wrt = '1') then
           MmcDbo := dbo;
         else
           MmcDbo := (others => '1');
         end if;
         if (EpcEna = '0') then
-          mmc_cs <= adr(12);
+          mmc_cs <= adr(12);		-- /CS MMC (4000h..47ff)
           epc_cs <= '1';
         else
           mmc_cs <= '1';
-          epc_cs <= adr(12);
+          epc_cs <= adr(12);		-- /CS EPC (4000h..47ff)
         end if;
         MmcSeq := "10101";
       elsif (MmcSeq /= "00000") then
         MmcSeq := MmcSeq - 1;
       end if;
 
-      -- Memory mapped I/O port access on 5800-5FFFh ... SD/MMC data register
-      if (req = '1' and adr(15 downto 13) = "010" and adr(12 downto 11)  = "11" and MmcEnx = '1' and wrt = '1') then
-        MmcMod := dbo(1 downto 0);
+-- Memory mapped I/O port access on 5800-5FFFh ... SD/MMC data register
+      if (req = '1' and adr(15 downto 13) = "010" and adr(12 downto 11)  = "11" and 
+					MmcEnx = '1' and wrt = '1') then
+        MmcMod := dbo(1 downto 0);	-- 
       end if;
-
+-- generate /WAIT for Z80
       if (MmcSeq = "00000") then
         mmcact <= '0';
       else
         mmcact <= '1';
       end if;
-
+--
     end if;
-
-  end process;
-
+end process;
+--
   mmcena <= '1' when ErmBank0(7 downto 6) = "01" else '0';
   epc_oe <= '1' when reset = '1' else '0';  -- epc_oe = 0:enable, 1:disable
-
 
 end rtl;

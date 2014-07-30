@@ -1,8 +1,8 @@
 --
---  linebuf.vhd
---    Line buffer for VGA upscan converter.
+--  vdp_doublebuf.vhd
+--    Double Buffered Line Memory.
 --
---  Copyright (C) 2006 Kunihiko Ohnaka
+--  Copyright (C) 2000-2006 Kunihiko Ohnaka
 --  All rights reserved.
 --                                     http://www.ohnaka.jp/ese-vdp/
 --
@@ -61,58 +61,121 @@
 --   JP: 日本語のコメント行は JP:を頭に付ける事にする
 --
 -------------------------------------------------------------------------------
--- Revision History
---
--- 29th,October,2006 modified by Kunihiko Ohnaka
---   - Insert the license text.
---   - Add the document part below.
---
--------------------------------------------------------------------------------
 -- Document
 --
--- JP: NTSCタイミングの 15KHzで出力されるビデオ信号をVGAタイミングに
--- JP: 合わせた31KHzの倍レートで出力するためのラインバッファモジュール
--- JP: です。
--- JP: ESE-VDPのメインクロックである21.477MHzで動作させるため、
--- JP: ドットクロックは一般的な 640x480ドットVGAモードの25.175MHz
--- JP: とは異なります。そのため、液晶モニタ等で表示させるとドットの形が
--- JP: いびつな形になる事があります。
+-- JP: ダブルバッファリング機能付きラインバッファモジュール。
+-- JP: vga.vhdによるアップスキャンコンバートに使用します。
 --
+-- JP: xPositionWに X座標を入れ，weを 1にすると書き込みバッファに
+-- JP: 書き込まれる．また，xPositionRに X座標を入れると，読み込み
+-- JP: バッファから読み出した色コードが qから出力される。
+-- JP: evenOdd信号によって，読み込みバッファと書き込みバッファが
+-- JP: 切り替わる。
 
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
+LIBRARY IEEE;
+	USE IEEE.STD_LOGIC_1164.ALL;
+	USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity linebuf is
-   port (
-         address  : in  std_logic_vector(9 downto 0);
-         inclock  : in  std_logic;
-         we       : in  std_logic;
-         data     : in  std_logic_vector(5 downto 0);
-         q        : out std_logic_vector(5 downto 0)
-        );
-end linebuf;
+ENTITY VDP_DOUBLEBUF IS
+	PORT (
+		CLK			: IN	STD_LOGIC;
+		XPOSITIONW	: IN	STD_LOGIC_VECTOR(  9 DOWNTO 0 );
+		XPOSITIONR	: IN	STD_LOGIC_VECTOR(  9 DOWNTO 0 );
+		EVENODD		: IN	STD_LOGIC;
+		WE			: IN	STD_LOGIC;
+		DATARIN		: IN	STD_LOGIC_VECTOR(  5 DOWNTO 0 );
+		DATAGIN		: IN	STD_LOGIC_VECTOR(  5 DOWNTO 0 );
+		DATABIN		: IN	STD_LOGIC_VECTOR(  5 DOWNTO 0 );
+		DATAROUT	: OUT	STD_LOGIC_VECTOR(  5 DOWNTO 0 );
+		DATAGOUT	: OUT	STD_LOGIC_VECTOR(  5 DOWNTO 0 );
+		DATABOUT	: OUT	STD_LOGIC_VECTOR(  5 DOWNTO 0 )
+	);
+END VDP_DOUBLEBUF;
 
-architecture RTL of linebuf is
---  type Mem is array (639 downto 0) of std_logic_vector(5 downto 0);
-  type Mem is array (639 downto 0) of std_logic_vector(3 downto 0);
-  signal iMem  : Mem;
-  signal iAddress : std_logic_vector(9 downto 0);
+ARCHITECTURE RTL OF VDP_DOUBLEBUF IS
+	COMPONENT VDP_LINEBUF
+		 PORT (
+			ADDRESS		: IN	STD_LOGIC_VECTOR(  9 DOWNTO 0 );
+			INCLOCK		: IN	STD_LOGIC;
+			WE			: IN	STD_LOGIC;
+			DATA		: IN	STD_LOGIC_VECTOR(  5 DOWNTO 0 );
+			Q			: OUT	STD_LOGIC_VECTOR(  5 DOWNTO 0 )
+		);
+	END COMPONENT;
 
-  begin
+	SIGNAL WE_E		: STD_LOGIC;
+	SIGNAL WE_O		: STD_LOGIC;
+	SIGNAL ADDR_E	: STD_LOGIC_VECTOR(9 DOWNTO 0);
+	SIGNAL ADDR_O	: STD_LOGIC_VECTOR(9 DOWNTO 0);
+	SIGNAL OUTR_E	: STD_LOGIC_VECTOR(5 DOWNTO 0);
+	SIGNAL OUTG_E	: STD_LOGIC_VECTOR(5 DOWNTO 0);
+	SIGNAL OUTB_E	: STD_LOGIC_VECTOR(5 DOWNTO 0);
+	SIGNAL OUTR_O	: STD_LOGIC_VECTOR(5 DOWNTO 0);
+	SIGNAL OUTG_O	: STD_LOGIC_VECTOR(5 DOWNTO 0);
+	SIGNAL OUTB_O	: STD_LOGIC_VECTOR(5 DOWNTO 0);
+BEGIN
+	-- EVEN LINE
+	U_BUF_RE: VDP_LINEBUF
+	PORT MAP(
+		ADDRESS		=> ADDR_E,
+		INCLOCK		=> CLK,
+		WE			=> WE_E,
+		DATA		=> DATARIN,
+		Q			=> OUTR_E
+	);
 
-  process (inclock)
-  begin
-    if (inclock'event and inclock ='1') then
-      if (we = '1') then
---        iMem(conv_integer(address)) <= data(5 downto 0);
-        iMem(conv_integer(address)) <= data(5 downto 2);
-      end if;
-      iAddress <= address;
-    end if;
-  end process;
+	U_BUF_GE: VDP_LINEBUF
+	PORT MAP(
+		ADDRESS		=> ADDR_E,
+		INCLOCK		=> CLK,
+		WE			=> WE_E,
+		DATA		=> DATAGIN,
+		Q			=> OUTG_E
+	);
 
---  q <= iMem(conv_integer(iAddress));
-  q <= iMem(conv_integer(iAddress)) & "00";
+	U_BUF_BE: VDP_LINEBUF
+	PORT MAP(
+		ADDRESS		=> ADDR_E,
+		INCLOCK		=> CLK,
+		WE			=> WE_E,
+		DATA		=> DATABIN,
+		Q			=> OUTB_E
+	);
+	-- ODD LINE
+	U_BUF_RO: VDP_LINEBUF
+	PORT MAP(
+		ADDRESS		=> ADDR_O,
+		INCLOCK		=> CLK,
+		WE			=> WE_O,
+		DATA		=> DATARIN,
+		Q			=> OUTR_O
+	);
 
-end RTL;
+	U_BUF_GO: VDP_LINEBUF
+	PORT MAP(
+		ADDRESS		=> ADDR_O,
+		INCLOCK		=> CLK,
+		WE			=> WE_O,
+		DATA		=> DATAGIN,
+		Q			=> OUTG_O
+	);
+
+	U_BUF_BO: VDP_LINEBUF
+	PORT MAP(
+		ADDRESS		=> ADDR_O,
+		INCLOCK		=> CLK,
+		WE			=> WE_O,
+		DATA		=> DATABIN,
+		Q			=> OUTB_O
+	);
+
+	WE_E		<= WE WHEN( EVENODD = '0' )ELSE '0';
+	WE_O		<= WE WHEN( EVENODD = '1' )ELSE '0';
+	
+	ADDR_E		<= XPOSITIONW WHEN( EVENODD = '0' )ELSE XPOSITIONR;
+	ADDR_O		<= XPOSITIONW WHEN( EVENODD = '1' )ELSE XPOSITIONR;
+
+	DATAROUT	<= OUTR_E WHEN( EVENODD = '1' )ELSE OUTR_O;
+	DATAGOUT	<= OUTG_E WHEN( EVENODD = '1' )ELSE OUTG_O;
+	DATABOUT	<= OUTB_E WHEN( EVENODD = '1' )ELSE OUTB_O;
+END RTL;

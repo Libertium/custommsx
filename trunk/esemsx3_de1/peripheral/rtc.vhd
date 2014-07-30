@@ -1,9 +1,9 @@
 -- 
 -- rtc.vhd
---   Real time clock (RP-5C01)
---   Revision 1.00
+--   REAL TIME CLOCK (MSX2 CLOCK-IC)
+--   Version 1.00
 -- 
--- Copyright (c) 2006 Kazuhiro Tsujikawa (ESE Artists' factory)
+-- Copyright (c) 2008 Takayuki Hara
 -- All rights reserved.
 -- 
 -- Redistribution and use of this source code or any derivative works, are 
@@ -30,255 +30,526 @@
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+LIBRARY IEEE;
+	USE IEEE.STD_LOGIC_1164.ALL;
+	USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity rtc is
-  port(
-    clk21m  : in std_logic;
-    reset   : in std_logic;
-    clkena  : in std_logic;
-    req     : in std_logic;
-    ack     : out std_logic;
-    wrt     : in std_logic;
-    adr     : in std_logic_vector(15 downto 0);
-    dbi     : out std_logic_vector(7 downto 0);
-    dbo     : in std_logic_vector(7 downto 0)
+ENTITY RTC IS
+	PORT(
+		CLK21M		: IN	STD_LOGIC;
+		RESET		: IN	STD_LOGIC;
+		CLKENA		: IN	STD_LOGIC;			-- 10HZ
+		REQ			: IN	STD_LOGIC;
+		ACK			: OUT	STD_LOGIC;
+		WRT			: IN	STD_LOGIC;
+		ADR			: IN	STD_LOGIC_VECTOR( 15 DOWNTO 0 );
+		DBI			: OUT	STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+		DBO			: IN	STD_LOGIC_VECTOR(  7 DOWNTO 0 )
  );
-end rtc;
+END RTC;
 
-architecture rtl of rtc is
+ARCHITECTURE RTL OF RTC IS
 
-  component ram is
-    port (
-      adr   : in  std_logic_vector(7 downto 0);
-      clk   : in  std_logic;
-      we    : in  std_logic;
-      dbo   : in  std_logic_vector(7 downto 0);
-      dbi   : out std_logic_vector(7 downto 0)
-    );
-  end component;
+	-- BANK MEMORY
+	COMPONENT RAM IS
+		PORT (
+			ADR		: IN	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+			CLK		: IN	STD_LOGIC;
+			WE		: IN	STD_LOGIC;
+			DBO		: IN	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+			DBI		: OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 )
+		);
+	END COMPONENT;
 
-  -- RTC signals
-  signal ireq        : std_logic;
-  signal MemWe       : std_logic;
-  signal MemAdr      : std_logic_vector(7 downto 0);
-  signal oMemDat     : std_logic_vector(7 downto 0);
-  signal PreScaler   : std_logic_vector(23 downto 0);
-  signal RtcRegPtr   : std_logic_vector(3 downto 0);
-  signal RegMode     : std_logic_vector(3 downto 0);
-  signal RegTest     : std_logic_vector(3 downto 0);
-  signal RegRest     : std_logic_vector(3 downto 0);
+	-- FF
+	SIGNAL FF_REQ		: STD_LOGIC;
+	SIGNAL FF_1SEC_CNT	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );
 
-  signal RegSec      : std_logic_vector(7 downto 0);
-  signal RegMin      : std_logic_vector(7 downto 0);
-  signal RegHou      : std_logic_vector(7 downto 0);
-  signal RegWee      : std_logic_vector(7 downto 0);
-  signal RegDay      : std_logic_vector(7 downto 0);
-  signal RegMon      : std_logic_vector(7 downto 0);
-  signal RegYea      : std_logic_vector(7 downto 0);
-  signal RegMinA     : std_logic_vector(7 downto 0);
-  signal RegHouA     : std_logic_vector(7 downto 0);
-  signal RegWeeA     : std_logic_vector(7 downto 0);
-  signal RegDayA     : std_logic_vector(7 downto 0);
-  signal Reg1224     : std_logic_vector(7 downto 0);
-  signal RegLeap     : std_logic_vector(7 downto 0);
+	-- REGISTER FF
+	SIGNAL REG_PTR		: STD_LOGIC_VECTOR(  3 DOWNTO 0 );
+	SIGNAL REG_MODE		: STD_LOGIC_VECTOR(  3 DOWNTO 0 );		--	TE, AE(NOT SUPPORTED), M1, M0
+	SIGNAL REG_SEC_L	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );		--	HL = X"00" ... X"59"
+	SIGNAL REG_SEC_H	: STD_LOGIC_VECTOR(  6 DOWNTO 4 );
+	SIGNAL REG_MIN_L	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );		--	HL = X"00" ... X"59"
+	SIGNAL REG_MIN_H	: STD_LOGIC_VECTOR(  6 DOWNTO 4 );
+	SIGNAL REG_HOU_L	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );		--	HL = X"00" ... X"23" 
+	SIGNAL REG_HOU_H	: STD_LOGIC_VECTOR(  5 DOWNTO 4 );		--	HL = X"00" ... X"23" 
+	SIGNAL REG_WEE		: STD_LOGIC_VECTOR(  2 DOWNTO 0 );		--	     X"0"  ... X"6"
+	SIGNAL REG_DAY_L	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );		--	HL = X"00" ... X"31"
+	SIGNAL REG_DAY_H	: STD_LOGIC_VECTOR(  5 DOWNTO 4 );		--
+	SIGNAL REG_MON_L	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );		--	HL = X"01" ... X"12"
+	SIGNAL REG_MON_H	: STD_LOGIC;
+	SIGNAL REG_YEA_L	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );		--	HL = X"00" ... X"99"
+	SIGNAL REG_YEA_H	: STD_LOGIC_VECTOR(  7 DOWNTO 4 );
+	SIGNAL REG_1224		: STD_LOGIC;							--	'0' = 12HOUR MODE, '1' = 24HOUR MODE
+	SIGNAL REG_LEAP		: STD_LOGIC_VECTOR(  1 DOWNTO 0 );		--	"00" LEAP YEAR, "01" ... "11" OTHER YEAR 
 
-begin
+	-- WIRE
+	SIGNAL W_ADR_DEC	: STD_LOGIC_VECTOR( 15 DOWNTO 0 );
+	SIGNAL W_BANK_DEC	: STD_LOGIC_VECTOR(  2 DOWNTO 0 );
+	SIGNAL W_WRT		: STD_LOGIC;
+	SIGNAL W_MEM_WE		: STD_LOGIC;
+	SIGNAL W_MEM_ADDR	: STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+	SIGNAL W_MEM_Q		: STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+	SIGNAL W_1SEC		: STD_LOGIC;
+	SIGNAL W_10SEC		: STD_LOGIC;
+	SIGNAL W_60SEC		: STD_LOGIC;
+	SIGNAL W_10MIN		: STD_LOGIC;
+	SIGNAL W_60MIN		: STD_LOGIC;
+	SIGNAL W_10HOUR		: STD_LOGIC;
+	SIGNAL W_1224HOUR	: STD_LOGIC;
+	SIGNAL W_10DAY		: STD_LOGIC;
+	SIGNAL W_NEXT_MON	: STD_LOGIC;
+	SIGNAL W_10MON		: STD_LOGIC;
+	SIGNAL W_1YEAR		: STD_LOGIC;
+	SIGNAL W_10YEAR		: STD_LOGIC;
+	SIGNAL W_100YEAR	: STD_LOGIC;
+	SIGNAL W_ENABLE		: STD_LOGIC;
+BEGIN
 
-  ----------------------------------------------------------------
-  -- RTC register read
-  ----------------------------------------------------------------
-  dbi <= "1111" & RegMode when RtcRegPtr = "1101" and adr(0) = '1' else
-         "1111" & RegTest when RtcRegPtr = "1110" and adr(0) = '1' else
-         "1111" & RegRest when RtcRegPtr = "1111" and adr(0) = '1' else
+	----------------------------------------------------------------
+	-- ADDRESS DECODER
+	----------------------------------------------------------------
+	WITH REG_PTR SELECT W_ADR_DEC <=
+		"0000000000000001" WHEN "0000",
+		"0000000000000010" WHEN "0001",
+		"0000000000000100" WHEN "0010",
+		"0000000000001000" WHEN "0011",
+		"0000000000010000" WHEN "0100",
+		"0000000000100000" WHEN "0101",
+		"0000000001000000" WHEN "0110",
+		"0000000010000000" WHEN "0111",
+		"0000000100000000" WHEN "1000",
+		"0000001000000000" WHEN "1001",
+		"0000010000000000" WHEN "1010",
+		"0000100000000000" WHEN "1011",
+		"0001000000000000" WHEN "1100",
+		"0010000000000000" WHEN "1101",
+		"0100000000000000" WHEN "1110",
+		"1000000000000000" WHEN "1111",
+		"XXXXXXXXXXXXXXXX" WHEN OTHERS;
 
-         "1111" & RegSec(3 downto 0) when RegMode(1 downto 0) & RtcRegPtr = "000000" and adr(0) = '1' else
-         "1111" & RegSec(7 downto 4) when RegMode(1 downto 0) & RtcRegPtr = "000001" and adr(0) = '1' else
-         "1111" & RegMin(3 downto 0) when RegMode(1 downto 0) & RtcRegPtr = "000010" and adr(0) = '1' else
-         "1111" & RegMin(7 downto 4) when RegMode(1 downto 0) & RtcRegPtr = "000011" and adr(0) = '1' else
-         "1111" & RegHou(3 downto 0) when RegMode(1 downto 0) & RtcRegPtr = "000100" and adr(0) = '1' else
-         "1111" & RegHou(7 downto 4) when RegMode(1 downto 0) & RtcRegPtr = "000101" and adr(0) = '1' else
-         "1111" & RegWee(3 downto 0) when RegMode(1 downto 0) & RtcRegPtr = "000110" and adr(0) = '1' else
-         "1111" & RegDay(3 downto 0) when RegMode(1 downto 0) & RtcRegPtr = "000111" and adr(0) = '1' else
-         "1111" & RegDay(7 downto 4) when RegMode(1 downto 0) & RtcRegPtr = "001000" and adr(0) = '1' else
-         "1111" & RegMon(3 downto 0) when RegMode(1 downto 0) & RtcRegPtr = "001001" and adr(0) = '1' else
-         "1111" & RegMon(7 downto 4) when RegMode(1 downto 0) & RtcRegPtr = "001010" and adr(0) = '1' else
-         "1111" & RegYea(3 downto 0) when RegMode(1 downto 0) & RtcRegPtr = "001011" and adr(0) = '1' else
-         "1111" & RegYea(7 downto 4) when RegMode(1 downto 0) & RtcRegPtr = "001100" and adr(0) = '1' else
-         "1111" & RegLeap(3 downto 0) when RegMode(1 downto 0) & RtcRegPtr = "011011" and adr(0) = '1' else
+	WITH REG_MODE( 1 DOWNTO 0 ) SELECT W_BANK_DEC <=
+		"001" WHEN "00",
+		"010" WHEN "01",
+		"100" WHEN "10",
+		"100" WHEN "11",
+		"XXX" WHEN OTHERS;
 
-         oMemDat          when                        adr(0) = '1' else
-         (others => '1');
+	W_WRT <= REQ AND WRT;
 
-  ----------------------------------------------------------------
-  -- RTC register write
-  ----------------------------------------------------------------
-  process(clk21m, reset)
+	----------------------------------------------------------------
+	-- RTC REGISTER READ
+	----------------------------------------------------------------
+	DBI <=	"1111"    & REG_MODE            WHEN(                         W_ADR_DEC(13) = '1' AND ADR(0) = '1' )ELSE
+			"1111"    & REG_SEC_L           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 0) = '1' AND ADR(0) = '1' )ELSE
+			"11110"   & REG_SEC_H           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 1) = '1' AND ADR(0) = '1' )ELSE
+			"1111"    & REG_MIN_L           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 2) = '1' AND ADR(0) = '1' )ELSE
+			"11110"   & REG_MIN_H           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 3) = '1' AND ADR(0) = '1' )ELSE
+			"1111"    & REG_HOU_L           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 4) = '1' AND ADR(0) = '1' )ELSE
+			"111100"  & REG_HOU_H           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 5) = '1' AND ADR(0) = '1' )ELSE
+			"11110"   & REG_WEE             WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 6) = '1' AND ADR(0) = '1' )ELSE
+			"1111"    & REG_DAY_L           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 7) = '1' AND ADR(0) = '1' )ELSE
+			"111100"  & REG_DAY_H           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 8) = '1' AND ADR(0) = '1' )ELSE
+			"1111"    & REG_MON_L           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC( 9) = '1' AND ADR(0) = '1' )ELSE
+			"1111000" & REG_MON_H           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC(10) = '1' AND ADR(0) = '1' )ELSE
+			"1111"    & REG_YEA_L           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC(11) = '1' AND ADR(0) = '1' )ELSE
+			"1111"    & REG_YEA_H           WHEN( W_BANK_DEC(0) = '1' AND W_ADR_DEC(12) = '1' AND ADR(0) = '1' )ELSE
+			"111100"  & REG_LEAP            WHEN( W_BANK_DEC(1) = '1' AND W_ADR_DEC(11) = '1' AND ADR(0) = '1' )ELSE
+			"1111"    & W_MEM_Q(3 DOWNTO 0) WHEN( W_BANK_DEC(2) = '1'                         AND ADR(0) = '1' )ELSE
+			(OTHERS => '1');
 
-  begin
+	----------------------------------------------------------------
+	-- REQUEST AND ACK
+	----------------------------------------------------------------
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			FF_REQ <= '0';
+		ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			FF_REQ <= REQ;
+		END IF;
+	END PROCESS;
 
-    if (reset = '1') then
+	ACK <= FF_REQ;
 
-      ireq      <= '0';
-      RtcRegPtr <= (others => '0');
-      RegMode   <= (others => '0');
-      RegTest   <= (others => '0');
-      RegRest   <= (others => '0');
+	----------------------------------------------------------------
+	-- MODE REGISTER [TE BIT]
+	----------------------------------------------------------------
+	W_ENABLE <= CLKENA AND REG_MODE(3);
 
-      RegSec(7)           <= '0';
-      RegMin(7)           <= '0';
-      RegHou(7 downto 6)  <= (others => '0');
-      RegWee(3)           <= '0';
-      RegDay(7 downto 6)  <= (others => '0');
-      RegMon(7 downto 5)  <= (others => '0');
-      RegLeap(7 downto 2) <= (others => '0');
+	----------------------------------------------------------------
+	-- 1SEC TIMER
+	----------------------------------------------------------------
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			FF_1SEC_CNT <= "1001";
+		ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(1) = '1' AND W_ADR_DEC(15) = '1' )THEN
+				-- RESET REGISTER [CR BIT]
+				IF( DBO(1) = '1' )THEN
+					FF_1SEC_CNT <= "1001";
+				END IF;
+			ELSIF( W_1SEC = '1' )THEN
+				FF_1SEC_CNT <= "1001";
+			ELSIF( W_ENABLE = '1' )THEN
+				FF_1SEC_CNT <= FF_1SEC_CNT - 1;
+			END IF;
+		END IF;
+	END PROCESS;
 
-    elsif (clk21m'event and clk21m = '1') then
+	W_1SEC	<=	W_ENABLE WHEN( FF_1SEC_CNT = "0000" )ELSE
+				'0';
 
-      ireq <= req;
+	----------------------------------------------------------------
+	-- 10SEC TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 0) = '1' )THEN
+				REG_SEC_L <= DBO(3 DOWNTO 0);
+			ELSIF( W_1SEC = '1' )THEN
+				IF( W_10SEC = '1' )THEN
+					REG_SEC_L <= "0000";
+				ELSE
+					REG_SEC_L <= REG_SEC_L + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-      if (req = '1' and wrt = '1' and adr(0) = '0') then
-        -- register pointer
-        RtcRegPtr <= dbo(3 downto 0);
-      elsif (req = '1' and wrt = '1' and adr(0) = '1') then
-        -- Rtc registers
-        if (RegMode(1 downto 0) = "00") then
-          case RtcRegPtr is
-            when "0000" => RegSec(3 downto 0) <= dbo(3 downto 0);
-            when "0001" => RegSec(6 downto 4) <= dbo(2 downto 0);
-            when "0010" => RegMin(3 downto 0) <= dbo(3 downto 0);
-            when "0011" => RegMin(6 downto 4) <= dbo(2 downto 0);
-            when "0100" => RegHou(3 downto 0) <= dbo(3 downto 0);
-            when "0101" => RegHou(5 downto 4) <= dbo(1 downto 0);
-            when "0110" => RegWee(2 downto 0) <= dbo(2 downto 0);
-            when "0111" => RegDay(3 downto 0) <= dbo(3 downto 0);
-            when "1000" => RegDay(5 downto 4) <= dbo(1 downto 0);
-            when "1001" => RegMon(3 downto 0) <= dbo(3 downto 0);
-            when "1010" => RegMon(4         ) <= dbo(0         );
-            when "1011" => RegYea(3 downto 0) <= dbo(3 downto 0);
-            when "1100" => RegYea(7 downto 4) <= dbo(3 downto 0);
-            when others => null;
-          end case;
-        end if;
+	W_10SEC	<=	'1' WHEN( REG_SEC_L = "1001" )ELSE
+				'0';
 
-        if (RegMode(1 downto 0) = "01") then
-          case RtcRegPtr is
-            when "0010" => RegMinA(3 downto 0) <= dbo(3 downto 0);
-            when "0011" => RegMinA(6 downto 4) <= dbo(2 downto 0);
-            when "0100" => RegHouA(3 downto 0) <= dbo(3 downto 0);
-            when "0101" => RegHouA(5 downto 4) <= dbo(1 downto 0);
-            when "0110" => RegWeeA(2 downto 0) <= dbo(2 downto 0);
-            when "0111" => RegDayA(3 downto 0) <= dbo(3 downto 0);
-            when "1000" => RegDayA(5 downto 4) <= dbo(1 downto 0);
-            when "1010" => Reg1224(0         ) <= dbo(0         );
-            when "1011" => RegLeap(1 downto 0) <= dbo(1 downto 0);
-            when others => null;
-          end case;
-        end if;
+	----------------------------------------------------------------
+	-- 60SEC TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 1) = '1' )THEN
+				REG_SEC_H <= DBO(2 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC) = '1' )THEN
+				IF( W_60SEC = '1' )THEN
+					REG_SEC_H <= "000";
+				ELSE
+					REG_SEC_H <= REG_SEC_H + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-        case RtcRegPtr is
-          when "1101" => RegMode <= dbo(3 downto 0);
-          when "1110" => RegTest <= dbo(3 downto 0);
-          when "1111" => RegRest <= dbo(3 downto 0);
-          when others => null;
-        end case;
+	W_60SEC	<=	'1' WHEN( REG_SEC_H = "101" )ELSE
+				'0';
 
-      elsif (clkena = '1') then
+	----------------------------------------------------------------
+	-- 10MIN TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 2) = '1' )THEN
+				REG_MIN_L <= DBO(3 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC) = '1' )THEN
+				IF( W_10MIN = '1' )THEN
+					REG_MIN_L <= "0000";
+				ELSE
+					REG_MIN_L <= REG_MIN_L + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-        if (PreScaler /= X"000000") then
-          PreScaler <= PreScaler - 1;
-        else
-          PreScaler <= X"369E99"; --(3.579545MHz)
-          if (RegSec(3 downto 0) /= "1001") then
-            RegSec(3 downto 0) <= RegSec(3 downto 0) + 1;
-          else
-            RegSec(3 downto 0) <= (others => '0');
-            if (RegSec(6 downto 4) /= "101") then
-              RegSec(6 downto 4) <= RegSec(6 downto 4) + 1;
-            else
-              RegSec(6 downto 4) <= (others => '0');
-              if (RegMin(3 downto 0) /= "1001") then
-                RegMin(3 downto 0) <= RegMin(3 downto 0) + 1;
-              else
-                RegMin(3 downto 0) <= (others => '0');
-                if (RegMin(6 downto 4) /= "101") then
-                  RegMin(6 downto 4) <= RegMin(6 downto 4) + 1;
-                else
-                  RegMin(6 downto 4) <= (others => '0');
-                  if (RegHou(3 downto 0) = "1001") then
-                    RegHou(3 downto 0) <= "0000";
-                    RegHou(5 downto 4) <= RegHou(5 downto 4) + 1;
-                  elsif ((Reg1224(0) & RegHou(4 downto 0) /= "010001") and
-                         (Reg1224(0) & RegHou(5 downto 0) /= "1100011")) then
-                    RegHou(3 downto 0) <= RegHou(3 downto 0) + 1;
-                  else
-                    RegHou(4 downto 0) <= (others => '0');
-                    RegHou(5) <= not RegHou(5);
+	W_10MIN	<=	'1' WHEN( REG_MIN_L = "1001" )ELSE
+				'0';
 
-                    if (RegWee(2 downto 0) /= "110") then
-                      RegWee(2 downto 0) <= RegWee(2 downto 0) + 1;
-                    else
-                      RegWee(2 downto 0) <= (others => '0');
-                    end if;
+	----------------------------------------------------------------
+	-- 60MIN TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 3) = '1' )THEN
+				REG_MIN_H <= DBO(2 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN) = '1' )THEN
+				IF( W_60MIN = '1' )THEN
+					REG_MIN_H <= "000";
+				ELSE
+					REG_MIN_H <= REG_MIN_H + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-                    if ((RegMon & RegDay & RegLeap = X"022801") or
-                        (RegMon & RegDay & RegLeap = X"022802") or
-                        (RegMon & RegDay & RegLeap = X"022803") or
-                        (RegMon & RegDay & RegLeap = X"022900") or
-                        (RegMon & RegDay = X"0430") or
-                        (RegMon & RegDay = X"0630") or
-                        (RegMon & RegDay = X"0930") or
-                        (RegMon & RegDay = X"1130") or
-                        (         RegDay = X"31")) then
-                      RegDay(5 downto 0) <= "000001";
+	W_60MIN	<=	'1' WHEN( REG_MIN_H = "101" )ELSE
+				'0';
 
-                      if (RegMon(3 downto 0) = "1001") then
-                        RegMon(4 downto 0) <= "10000";
-                      elsif (RegMon(4 downto 0) /= "10010" ) then
-                        RegMon(3 downto 0) <= RegMon(3 downto 0) + 1;
-                      else
-                        RegMon(4 downto 0) <= "00001";
-                        RegLeap(1 downto 0) <= RegLeap(1 downto 0) + 1;
-                        if (RegYea(3 downto 0) /= "1001") then
-                          RegYea(3 downto 0) <= RegYea(3 downto 0) + 1;
-                        else
-                          RegYea(3 downto 0) <= "0000";
-                          if (RegYea(7 downto 4) /= "1001") then
-                            RegYea(7 downto 4) <= RegYea(7 downto 4) + 1;
-                          else
-                            RegYea(7 downto 4) <= "0000";
-                          end if;
-                        end if;
-                      end if;
+	----------------------------------------------------------------
+	-- 10HOUR TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 4) = '1' )THEN
+				REG_HOU_L <= DBO(3 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN) = '1' )THEN
+				IF( (W_10HOUR OR W_1224HOUR) = '1' )THEN
+					REG_HOU_L <= "0000";
+				ELSE
+					REG_HOU_L <= REG_HOU_L + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-                    elsif (RegDay(3 downto 0) /= "1001") then
-                      RegDay(3 downto 0) <= RegDay(3 downto 0) + 1;
-                    else
-                      RegDay(3 downto 0) <= (others => '0');
-                      RegDay(5 downto 4) <= RegDay(5 downto 4) + 1;
-                    end if;
-                  end if;
-                end if;
-              end if;
-            end if;
-          end if;
-        end if;
-      end if;
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 5) = '1' )THEN
+				REG_HOU_H <= DBO(1 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN) = '1' )THEN
+				IF( W_10HOUR = '1' )THEN
+					REG_HOU_H <= REG_HOU_H + 1;
+				ELSIF( W_1224HOUR = '1' )THEN
+					REG_HOU_H(5) <= NOT REG_HOU_H(5);
+					REG_HOU_H(4) <= '0';
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-    end if;
+	W_10HOUR	<=	'1' WHEN( REG_HOU_L = "1001" )ELSE								--  09 --> 10
+					'0';
 
-  end process;
+	W_1224HOUR	<=	'1' WHEN(	(REG_1224 = '0' AND REG_HOU_H(4) =  '1' AND REG_HOU_L = "0001") OR		--  11 --> 00
+								(REG_1224 = '1' AND REG_HOU_H    = "10" AND REG_HOU_L = "0011") )ELSE	--  23 --> 00
+					'0';
 
-  ----------------------------------------------------------------
-  -- Connect components
-  ----------------------------------------------------------------
+	----------------------------------------------------------------
+	-- WEEK DAY TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 6) = '1' )THEN
+				REG_WEE <= DBO(2 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN AND W_1224HOUR) = '1' )THEN
+				IF( REG_WEE = "110" )THEN
+					REG_WEE <= (OTHERS => '0');
+				ELSE
+					REG_WEE <= REG_WEE + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-  -- I/O port access on B5h ... RTC register access
-  MemAdr <= "00" & RegMode(1 downto 0) & RtcRegPtr;
-  MemWe  <= wrt when req = '1' and ireq = '0' and adr(0) = '1' else '0';
-  ack    <= ireq;
-  Mem : ram port map(MemAdr, clk21m, MemWe, dbo, oMemDat);
+	----------------------------------------------------------------
+	-- 10DAY TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 7) = '1' )THEN
+				REG_DAY_L <= DBO(3 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN AND W_1224HOUR) = '1' )THEN
+				IF( W_10DAY = '1' )THEN
+					REG_DAY_L <= "0000";
+				ELSIF( W_NEXT_MON = '1' )THEN
+					REG_DAY_L <= "0001";
+				ELSE
+					REG_DAY_L <= REG_DAY_L + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
 
-end rtl;
+	W_10DAY		<=	'1' WHEN( REG_DAY_L = "1001" )ELSE
+					'0';
+
+	----------------------------------------------------------------
+	-- 1MONTH TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 8) = '1' )THEN
+				REG_DAY_H <= DBO(1 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN AND W_1224HOUR) = '1' )THEN
+				IF( W_NEXT_MON = '1' )THEN
+					REG_DAY_H <= "00";
+				ELSIF( W_10DAY = '1' )THEN
+					REG_DAY_H <= REG_DAY_H + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+
+	W_NEXT_MON	<=	'1'	WHEN(	(                                           REG_DAY_H = "11" AND REG_DAY_L = "0001" ) OR						--	XX/31
+								(REG_MON_H = '0' AND REG_MON_L = "0010" AND REG_DAY_H = "10" AND REG_DAY_L = "1001" AND REG_LEAP  = "00" ) OR	--	02/29 (LEAP YEAR)
+								(REG_MON_H = '0' AND REG_MON_L = "0010" AND REG_DAY_H = "10" AND REG_DAY_L = "1000" AND REG_LEAP /= "00" ) OR	--	02/28
+								(REG_MON_H = '0' AND REG_MON_L = "0100" AND REG_DAY_H = "11" AND REG_DAY_L = "0000" ) OR						--	04/30
+								(REG_MON_H = '0' AND REG_MON_L = "0110" AND REG_DAY_H = "11" AND REG_DAY_L = "0000" ) OR						--	06/30
+								(REG_MON_H = '0' AND REG_MON_L = "1001" AND REG_DAY_H = "11" AND REG_DAY_L = "0000" ) OR						--	09/30
+								(REG_MON_H = '1' AND REG_MON_L = "0001" AND REG_DAY_H = "11" AND REG_DAY_L = "0000" ) )ELSE						--	11/30
+					'0';
+
+	----------------------------------------------------------------
+	-- 10MONTH TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC( 9) = '1' )THEN
+				REG_MON_L <= DBO(3 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN AND W_1224HOUR AND W_NEXT_MON) = '1' )THEN
+				IF( W_10MON = '1' )THEN
+					REG_MON_L <= "0000";
+				ELSIF( W_1YEAR = '1' )THEN
+					REG_MON_L <= "0001";
+				ELSE
+					REG_MON_L <= REG_MON_L + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+
+	W_10MON	<=	'1'	WHEN( REG_MON_L = "1001" )ELSE
+				'0';
+
+	----------------------------------------------------------------
+	-- 1YEAR TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC(10) = '1' )THEN
+				REG_MON_H <= DBO(0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN AND W_1224HOUR AND W_NEXT_MON) = '1' )THEN
+				IF( W_10MON = '1' )THEN
+					REG_MON_H <= '1';
+				ELSIF( W_1YEAR = '1' )THEN
+					REG_MON_H <= '0';
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+
+	W_1YEAR	<=	'1'	WHEN( REG_MON_H = '1' AND REG_MON_L = "0010" )ELSE		--	X"12"
+				'0';
+
+	----------------------------------------------------------------
+	-- 10YEAR TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC(11) = '1' )THEN
+				REG_YEA_L <= DBO(3 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN AND W_1224HOUR AND W_NEXT_MON AND W_1YEAR) = '1' )THEN
+				IF( W_10YEAR = '1' )THEN
+					REG_YEA_L <= "0000";
+				ELSE
+					REG_YEA_L <= REG_YEA_L + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+
+	W_10YEAR	<=	'1'	WHEN( REG_YEA_L = "1001" )ELSE
+					'0';
+
+	----------------------------------------------------------------
+	-- 100YEAR TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(0) = '1' AND W_ADR_DEC(12) = '1' )THEN
+				REG_YEA_H <= DBO(3 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN AND W_1224HOUR AND W_NEXT_MON AND W_1YEAR AND W_10YEAR) = '1' )THEN
+				IF( W_100YEAR = '1' )THEN
+					REG_YEA_H <= "0000";
+				ELSE
+					REG_YEA_H <= REG_YEA_H + 1;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+
+	W_100YEAR	<=	'1'	WHEN( REG_YEA_H = "1001" )ELSE
+					'0';
+
+	----------------------------------------------------------------
+	-- LEAP YEAR TIMER
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(1) = '1' AND W_ADR_DEC(11) = '1' )THEN
+				REG_LEAP <= DBO(1 DOWNTO 0);
+			ELSIF( (W_1SEC AND W_10SEC AND W_60SEC AND W_10MIN AND W_60MIN AND W_1224HOUR AND W_NEXT_MON AND W_1YEAR) = '1' )THEN
+				REG_LEAP <= REG_LEAP + 1;
+			END IF;
+		END IF;
+	END PROCESS;
+
+	----------------------------------------------------------------
+	-- 12HOUR MODE/24 HOUR MODE
+	----------------------------------------------------------------
+	PROCESS( CLK21M )
+	BEGIN
+		IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_BANK_DEC(1) = '1' AND W_ADR_DEC(10) = '1' )THEN
+				REG_1224 <= DBO(0);
+			END IF;
+		END IF;
+	END PROCESS;
+
+	----------------------------------------------------------------
+	-- RTC REGISTER POINTER
+	----------------------------------------------------------------
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			REG_PTR	<= (OTHERS => '0');
+		ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '0' )THEN
+				-- REGISTER POINTER
+				REG_PTR <= DBO(3 DOWNTO 0);
+			END IF;
+		END IF;
+	END PROCESS;
+
+	----------------------------------------------------------------
+	-- RTC TEST REGISTER
+	----------------------------------------------------------------
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			REG_MODE <= "1000";
+		ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( W_WRT = '1' AND ADR(0) = '1' AND W_ADR_DEC(13) = '1' )THEN
+				REG_MODE <= DBO(3 DOWNTO 0);
+			END IF;
+		END IF;
+	END PROCESS;
+
+	----------------------------------------------------------------
+	-- BACKUP MEMORY EMULATION
+	----------------------------------------------------------------
+	W_MEM_ADDR	<= "00" & REG_MODE(1 DOWNTO 0) & REG_PTR;
+	W_MEM_WE	<=	'1' WHEN( W_WRT = '1' AND ADR(0) = '1' )ELSE
+					'0';
+
+	U_MEM: RAM
+	PORT MAP (
+		ADR		=> W_MEM_ADDR,
+		CLK		=> CLK21M,
+		WE		=> W_MEM_WE,
+		DBO		=> DBO,
+		DBI		=> W_MEM_Q		
+	);
+
+END RTL;

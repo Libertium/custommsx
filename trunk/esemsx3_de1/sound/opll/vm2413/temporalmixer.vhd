@@ -31,6 +31,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use ieee.std_logic_arith.all;
 use WORK.VM2413.ALL;
 
 entity TemporalMixer is
@@ -65,7 +66,7 @@ begin
     
       mo <= (others =>'0');
       ro <= (others =>'0');
-      maddr <= 0;
+      maddr <= (others => '0');
       mmute <= '1';
       rmute <= '1';
     
@@ -79,48 +80,50 @@ begin
         if rhythm = '0' then 
     
           case slot is 
-            when 0 =>  maddr <= 1; mmute <='0'; -- CH0
-            when 1 =>  maddr <= 3; mmute <='0'; -- CH1
-            when 2 =>  maddr <= 5; mmute <='0'; -- CH2
-            when 3 =>  mmute <= '1';
-            when 4 =>  mmute <= '1';
-            when 5 =>  mmute <= '1'; 
-            when 6 =>  maddr <= 7; mmute<='0'; -- CH3
-            when 7 =>  maddr <= 9; mmute<='0'; -- CH4
-            when 8 =>  maddr <= 11; mmute<='0'; -- CH5
-            when 9 =>  mmute <= '1'; 
-            when 10 => mmute <= '1';
-            when 11 => mmute <= '1';
-            when 12 => maddr <= 13; mmute<='0'; -- CH6
-            when 13 => maddr <= 15; mmute<='0'; -- CH7 
-            when 14 => maddr <= 17; mmute<='0'; -- CH8
-            when 15 => mmute <= '1';
-            when 16 => mmute <= '1';
-            when 17 => mmute <= '1';
+            when "00000" => maddr <= "00001"; mmute <='0'; -- CH0
+            when "00001" => maddr <= "00011"; mmute <='0'; -- CH1
+            when "00010" => maddr <= "00101"; mmute <='0'; -- CH2
+            when "00011" => mmute <= '1';
+            when "00100" => mmute <= '1';
+            when "00101" => mmute <= '1'; 
+            when "00110" => maddr <= "00111"; mmute<='0'; -- CH3
+            when "00111" => maddr <= "01001"; mmute<='0'; -- CH4
+            when "01000" => maddr <= "01011"; mmute<='0'; -- CH5
+            when "01001" => mmute <= '1'; 
+            when "01010" => mmute <= '1';
+            when "01011" => mmute <= '1';
+            when "01100" => maddr <= "01101"; mmute<='0'; -- CH6
+            when "01101" => maddr <= "01111"; mmute<='0'; -- CH7 
+            when "01110" => maddr <= "10001"; mmute<='0'; -- CH8
+            when "01111" => mmute <= '1';
+            when "10000" => mmute <= '1';
+            when "10001" => mmute <= '1';
+            when others  =>
           end case;
           rmute <= '1';
           
         else
         
           case slot is 
-            when  0 => maddr <= 1; mmute <='0';             rmute <='1'; -- CH0
-            when  1 => maddr <= 3; mmute <='0';             rmute <='1'; -- CH1
-            when  2 => maddr <= 5; mmute <='0';             rmute <='1'; -- CH2
-            when  3 =>             mmute <='1'; maddr <= 15; rmute <='0'; -- SD
-            when  4 =>             mmute <='1'; maddr <= 17; rmute <='0'; -- CYM
-            when  5 =>             mmute <='1';             rmute <='1'; 
-            when  6 => maddr <= 7; mmute <='0';             rmute <='1'; -- CH3
-            when  7 => maddr <= 9; mmute <='0';             rmute <='1'; -- CH4
-            when  8 => maddr <= 11;mmute <='0';             rmute <='1'; -- CH5
-            when  9 =>             mmute <='1'; maddr <= 14; rmute <='0'; -- HH
-            when 10 =>             mmute <='1'; maddr <= 16; rmute <='0'; -- TOM
-            when 11 =>             mmute <='1'; maddr <= 13; rmute <='0'; -- BD
-            when 12 =>             mmute <='1'; maddr <= 15; rmute <='0'; -- SD
-            when 13 =>             mmute <='1'; maddr <= 17; rmute <='0'; -- CYM
-            when 14 =>             mmute <='1'; maddr <= 14; rmute <='0'; -- HH
-            when 15 =>             mmute <='1'; maddr <= 16; rmute <='0'; -- TOM
-            when 16 =>             mmute <='1'; maddr <= 13; rmute <='0'; -- BD
-            when 17 =>             mmute <='1';              rmute <='1';
+            when "00000" => maddr <= "00001"; mmute <='0'; rmute <='1'; -- CH0
+            when "00001" => maddr <= "00011"; mmute <='0'; rmute <='1'; -- CH1
+            when "00010" => maddr <= "00101"; mmute <='0'; rmute <='1'; -- CH2
+            when "00011" => maddr <= "01111"; mmute <='1'; rmute <='0'; -- SD
+            when "00100" => maddr <= "10001"; mmute <='1'; rmute <='0'; -- CYM
+            when "00101" =>                   mmute <='1'; rmute <='1'; 
+            when "00110" => maddr <= "00111"; mmute <='0'; rmute <='1'; -- CH3
+            when "00111" => maddr <= "01001"; mmute <='0'; rmute <='1'; -- CH4
+            when "01000" => maddr <= "01011"; mmute <='0'; rmute <='1'; -- CH5
+            when "01001" => maddr <= "01110"; mmute <='1'; rmute <='0'; -- HH
+            when "01010" => maddr <= "10000"; mmute <='1'; rmute <='0'; -- TOM
+            when "01011" => maddr <= "01101"; mmute <='1'; rmute <='0'; -- BD
+            when "01100" => maddr <= "01111"; mmute <='1'; rmute <='0'; -- SD
+            when "01101" => maddr <= "10001"; mmute <='1'; rmute <='0'; -- CYM
+            when "01110" => maddr <= "01110"; mmute <='1'; rmute <='0'; -- HH
+            when "01111" => maddr <= "10000"; mmute <='1'; rmute <='0'; -- TOM
+            when "10000" => maddr <= "01101"; mmute <='1'; rmute <='0'; -- BD
+            when "10001" =>                   mmute <='1'; rmute <='1';
+            when others  =>
           end case;
           
         end if;

@@ -28,52 +28,48 @@
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use WORK.VM2413.ALL;
+
+--
+--  modified by t.hara
+--
+
+library ieee;
+    use ieee.std_logic_1164.all;
+    use ieee.std_logic_unsigned.all;
 
 entity SlotCounter is 
-  generic (
-      DELAY : integer range 0 to MAXSLOT*4-1
-  );
-  port (
-    clk    : in std_logic;
-    reset  : in std_logic;
-    clkena : in std_logic;
-  
-    slot   : out SLOT_TYPE;
-    stage  : out STAGE_TYPE
-  );
+    generic (
+        delay   : integer
+    );
+    port (
+        clk     : in    std_logic;
+        reset   : in    std_logic;
+        clkena  : in    std_logic;
+
+        slot    : out   std_logic_vector( 4 downto 0 );
+        stage   : out   std_logic_vector( 1 downto 0 )
+    );
 end SlotCounter;
 
-architecture RTL of SlotCounter is
-
+architecture rtl of SlotCounter is
+    signal ff_count     : std_logic_vector( 6 downto 0 );
 begin
 
-  process(clk, reset)
-  
-    variable count : integer range 0 to MAXSLOT*4-1;
+    process( reset, clk )
+    begin
+        if( reset = '1' )then
+            ff_count <= "1000111" - delay;
+        elsif( clk'event and clk='1' )then
+            if( clkena ='1' )then
+                if( ff_count = "1000111" )then      -- 71
+                    ff_count <= (others => '0');
+                else
+                    ff_count <= ff_count + 1;
+                end if;
+            end if;
+        end if;
+    end process;
 
-  begin
-
-    if reset = '1' then
-
-      count := MAXSLOT*4-1-DELAY;
-
-    elsif clk'event and clk='1' then if clkena ='1' then
-
-      if count = MAXSLOT*4-1 then
-        count := 0;
-      else
-        count := count + 1;
-      end if;
-      
-      slot  <= count/4;
-      stage <= count mod 4;
-
-    end if; end if;
-  
-  end process;    
-  
-end RTL;
+    stage   <= ff_count( 1 downto 0 );      --  0`3 ‚ÅzŠÂ 
+    slot    <= ff_count( 6 downto 2 );      --  0`17 ‚ÅzŠÂ 
+end rtl;
