@@ -28,6 +28,11 @@
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --
+
+--
+--	modified by t.hara
+--
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
@@ -49,7 +54,7 @@ entity PhaseGenerator is port (
   key    : in std_logic;
 
   noise  : out std_logic;  
-  pgout  : out PGOUT_TYPE
+  pgout  : out std_logic_vector( 17 downto 0 )
   );
 end PhaseGenerator;
 
@@ -86,21 +91,14 @@ architecture RTL of PhaseGenerator is
   -- Counter for pitch modulation;  
   signal pmcount : std_logic_vector(12 downto 0);
   
-  function CONV_PGOUT ( pv : PHASE_TYPE ) return PGOUT_TYPE is
-  begin
-    return pv(PHASE_TYPE'high downto PHASE_TYPE'high - PGOUT_TYPE'high);
-  end;
-
 begin
 
-  process(clk, reset)
-
-    variable lastkey : std_logic_vector(MAXSLOT-1 downto 0); 
-    variable dphase : PHASE_TYPE;   
-    variable noise14 : std_logic;
-    variable noise17 : std_logic;
-    variable pgout_buf : PGOUT_TYPE;
-    
+	process(clk, reset)
+		variable lastkey : std_logic_vector(18-1 downto 0); 
+		variable dphase : PHASE_TYPE;   
+		variable noise14 : std_logic;
+		variable noise17 : std_logic;
+		variable pgout_buf : std_logic_vector( 17 downto 0 );	--	êÆêîïî 9bit, è¨êîïî 9bit 
   begin
 
     if reset = '1' then
@@ -145,21 +143,21 @@ begin
         end if;
         
         -- Update Phase
-        if lastkey(slot) = '0' and key = '1' and (rhythm = '0' or (slot /= 14 and slot /= 17)) then
+        if lastkey(conv_integer(slot)) = '0' and key = '1' and (rhythm = '0' or (slot /= "01110" and slot /= "10001")) then
           memin <= (others=>'0');
         else
           memin <= memout + dphase;
         end if;
-        lastkey(slot) := key;
+        lastkey(conv_integer(slot)) := key;
         
         -- Update noise
-        if slot = 14 then
+        if slot = "01110" then
           noise14 := noise14_tbl(CONV_INTEGER(memout(15 downto 10)));
-        elsif slot = 17 then
+        elsif slot = "10001" then
           noise17 := noise17_tbl(CONV_INTEGER(memout(13 downto 11)));
         end if;
         
-        pgout_buf := CONV_PGOUT(memout);
+        pgout_buf := memout;
         pgout <= pgout_buf;
         memwr <= '1';
 

@@ -47,14 +47,14 @@ end EnvelopeMemory;
  
 architecture RTL of EnvelopeMemory is
 
-  type EGDATA_ARRAY is array (0 to MAXSLOT-1) of EGDATA_VECTOR_TYPE;
+  type EGDATA_ARRAY is array (0 to 18-1) of EGDATA_VECTOR_TYPE;
   signal egdata_set : EGDATA_ARRAY;
   
 begin
 
   process (clk, reset) 
    
-    variable init_slot : integer range 0 to SLOT_TYPE'high+1;  
+    variable init_slot : integer range 0 to 18;  
     
   begin
   
@@ -64,13 +64,13 @@ begin
    
    elsif clk'event and clk = '1' then
    
-     if init_slot /= SLOT_TYPE'high + 1 then     
+     if init_slot /= 18 then     
        egdata_set(init_slot) <= (others=>'1');
        init_slot := init_slot + 1;     
      elsif wr = '1' then     
-       egdata_set(waddr) <= CONV_EGDATA_VECTOR(wdata);       
+       egdata_set(conv_integer(waddr)) <= CONV_EGDATA_VECTOR(wdata);       
      end if;       
-     rdata <= CONV_EGDATA(egdata_set(raddr));
+     rdata <= CONV_EGDATA(egdata_set(conv_integer(raddr)));
      
    end if;
    

@@ -34,12 +34,9 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 package VM2413 is
 
-  constant MAXCH   : integer := 9;
-  constant MAXSLOT : integer := MAXCH * 2;
-
-  subtype CH_TYPE is integer range 0 to MAXCH-1;
-  subtype SLOT_TYPE is integer range 0 to MAXSLOT-1;
-  subtype STAGE_TYPE is integer range 0 to 3;
+  subtype CH_TYPE is integer range 0 to 9-1;
+  subtype SLOT_TYPE		is std_logic_vector( 4 downto 0 );
+  subtype STAGE_TYPE	is std_logic_vector( 1 downto 0 );
   
   subtype REGS_VECTOR_TYPE is std_logic_vector(23 downto 0);
   
@@ -52,8 +49,8 @@ package VM2413 is
     FNUM : std_logic_vector(8 downto 0);
   end record;
 
-  function CONV_REGS_VECTOR ( inst : REGS_TYPE ) return REGS_VECTOR_TYPE;
-  function CONV_REGS ( inst_vec : REGS_VECTOR_TYPE ) return REGS_TYPE; 
+  function CONV_REGS_VECTOR ( regs : REGS_TYPE ) return REGS_VECTOR_TYPE;	-- fixed by KdL ( 2010.04.12 )
+  function CONV_REGS ( vec : REGS_VECTOR_TYPE ) return REGS_TYPE;		-- fixed by KdL ( 2010.04.12 )
 
   subtype VOICE_ID_TYPE is integer range 0 to 37;
   subtype VOICE_VECTOR_TYPE is std_logic_vector(35 downto 0);
@@ -68,8 +65,8 @@ package VM2413 is
     AR, DR, SL, RR : std_logic_vector(3 downto 0);
   end record;
   
-  function CONV_VOICE_VECTOR ( voice : VOICE_TYPE ) return VOICE_VECTOR_TYPE;
-  function CONV_VOICE ( vector : VOICE_VECTOR_TYPE ) return VOICE_TYPE; 
+  function CONV_VOICE_VECTOR ( inst : VOICE_TYPE ) return VOICE_VECTOR_TYPE;	-- fixed by KdL ( 2010.04.12 )
+  function CONV_VOICE ( inst_vec : VOICE_VECTOR_TYPE ) return VOICE_TYPE;	-- fixed by KdL ( 2010.04.12 )
 
   -- Voice Parameter Types
   subtype AM_TYPE is std_logic; -- AM switch - '0':off  '1':3.70Hz
@@ -148,151 +145,6 @@ package VM2413 is
     MO      : out std_logic_vector(9 downto 0);
     RO      : out std_logic_vector(9 downto 0)
   );    
-  end component;
-
-  component Controller port (
-    clk    : in std_logic;
-    reset  : in std_logic;
-    clkena : in std_logic;
-    
-    slot   : in SLOT_TYPE;
-    stage  : in STAGE_TYPE;
-  
-    wr     : in std_logic;
-    addr   : in std_logic_vector(7 downto 0);
-    data   : in std_logic_vector(7 downto 0);
-    
-    am     : out AM_TYPE;
-    pm     : out PM_TYPE;
-    wf     : out WF_TYPE;
-    ml     : out ML_TYPE;
-    tl     : out DB_TYPE;
-    fb     : out FB_TYPE;
-    ar     : out AR_TYPE;
-    dr     : out DR_TYPE;
-    sl     : out SL_TYPE;
-    rr     : out RR_TYPE;
-    blk    : out BLK_TYPE;
-    fnum   : out FNUM_TYPE;
-    rks    : out RKS_TYPE;    
-    key    : out std_logic;
-    rhythm : out std_logic
-  );
-  end component;
-
-  -- Slot and stage counter
-  component SlotCounter 
-    generic (
-      DELAY : integer range 0 to MAXSLOT*4-1
-    );
-    port(
-      clk    : in std_logic;
-      reset  : in std_logic;
-      clkena : in std_logic;
-      slot   : out SLOT_TYPE;
-      stage  : out STAGE_TYPE
-    );
-  end component;
-
-  component EnvelopeGenerator 
-    port (  
-      clk    : in std_logic;
-      reset  : in std_logic;
-      clkena : in std_logic;
-    
-      slot   : in SLOT_TYPE;
-      stage  : in STAGE_TYPE;
-      rhythm : in std_logic;
-
-      am     : in AM_TYPE;
-      tl     : in DB_TYPE;
-      ar     : in AR_TYPE;
-      dr     : in DR_TYPE;
-      sl     : in SL_TYPE;
-      rr     : in RR_TYPE;
-      rks    : in RKS_TYPE;
-      key    : in std_logic;
-
-      egout  : out DB_TYPE    
-    );
-  end component;
-  
-  component PhaseGenerator port (
-    clk      : in std_logic;
-    reset    : in std_logic;
-    clkena   : in std_logic;
-  
-    slot     : in SLOT_TYPE;
-    stage    : in STAGE_TYPE;
-    rhythm : in std_logic;
-  
-    pm     : in PM_TYPE;
-    ml     : in ML_TYPE;
-    blk    : in BLK_TYPE;
-    fnum   : in FNUM_TYPE;
-    key    : in std_logic;
-
-    noise  : out std_logic;  
-    pgout  : out PGOUT_TYPE
-  );
-  end component;
-  
-  component Operator port (
-    clk    : in std_logic;
-    reset  : in std_logic;
-    clkena : in std_logic;
-    slot   : in SLOT_TYPE;    
-    stage  : in STAGE_TYPE;
-    rhythm : in std_logic;
-        
-    WF     : in WF_TYPE;
-    FB     : in FB_TYPE;
-       
-    noise  : in std_logic;
-    pgout  : in PGOUT_TYPE;
-    egout  : in DB_TYPE;
-    
-    faddr  : out CH_TYPE;
-    fdata  : in SIGNED_LI_TYPE;
-    
-    opout  : out SIGNED_DB_TYPE
-  );        
-  end component;
-  
-  component OutputGenerator port (
-    clk     : in std_logic;
-    reset   : in std_logic;
-    clkena  : in std_logic;
-    slot    : in SLOT_TYPE;
-    stage   : in STAGE_TYPE;        
-    rhythm  : in std_logic;
-    
-    opout   : in SIGNED_DB_TYPE; 
-    
-    faddr  : in CH_TYPE;
-    fdata  : out SIGNED_LI_TYPE;
-
-    maddr  : in SLOT_TYPE;
-    mdata  : out SIGNED_LI_TYPE
-  );
-  end component;
-  
-  component TemporalMixer port (
-    clk    : in std_logic;
-    reset  : in std_logic;
-    clkena : in std_logic;
-    
-    slot   : in SLOT_TYPE;
-    stage  : in STAGE_TYPE;
-
-    rhythm : in std_logic;
-    
-    maddr : out SLOT_TYPE;
-    mdata : in SIGNED_LI_TYPE;
-    
-    mo : out std_logic_vector(9 downto 0);
-    ro : out std_logic_vector(9 downto 0)
-  );        
   end component;
  
 end VM2413;

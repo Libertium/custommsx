@@ -71,19 +71,19 @@ architecture rtl of rtc is
   signal RegTest     : std_logic_vector(3 downto 0);
   signal RegRest     : std_logic_vector(3 downto 0);
 
-  signal RegSec      : std_logic_vector(7 downto 0);		--	šLATCH 
-  signal RegMin      : std_logic_vector(7 downto 0);		--	šLATCH 
-  signal RegHou      : std_logic_vector(7 downto 0);		--	šLATCH 
-  signal RegWee      : std_logic_vector(7 downto 0);		--	šLATCH 
-  signal RegDay      : std_logic_vector(7 downto 0);		--	šLATCH 
-  signal RegMon      : std_logic_vector(7 downto 0);		--	šLATCH 
+  signal RegSec      : std_logic_vector(7 downto 0);
+  signal RegMin      : std_logic_vector(7 downto 0);
+  signal RegHou      : std_logic_vector(7 downto 0);
+  signal RegWee      : std_logic_vector(7 downto 0);
+  signal RegDay      : std_logic_vector(7 downto 0);
+  signal RegMon      : std_logic_vector(7 downto 0);
   signal RegYea      : std_logic_vector(7 downto 0);
---  signal RegMinA     : std_logic_vector(7 downto 0);
---  signal RegHouA     : std_logic_vector(7 downto 0);
---  signal RegWeeA     : std_logic_vector(7 downto 0);
---  signal RegDayA     : std_logic_vector(7 downto 0);
+  signal RegMinA     : std_logic_vector(7 downto 0);
+  signal RegHouA     : std_logic_vector(7 downto 0);
+  signal RegWeeA     : std_logic_vector(7 downto 0);
+  signal RegDayA     : std_logic_vector(7 downto 0);
   signal Reg1224     : std_logic_vector(7 downto 0);
-  signal RegLeap     : std_logic_vector(7 downto 0);		--	šLATCH 
+  signal RegLeap     : std_logic_vector(7 downto 0);
 
 begin
 
@@ -165,13 +165,13 @@ begin
 
         if (RegMode(1 downto 0) = "01") then
           case RtcRegPtr is
---            when "0010" => RegMinA(3 downto 0) <= dbo(3 downto 0);
---            when "0011" => RegMinA(6 downto 4) <= dbo(2 downto 0);
---            when "0100" => RegHouA(3 downto 0) <= dbo(3 downto 0);
---            when "0101" => RegHouA(5 downto 4) <= dbo(1 downto 0);
---            when "0110" => RegWeeA(2 downto 0) <= dbo(2 downto 0);
---            when "0111" => RegDayA(3 downto 0) <= dbo(3 downto 0);
---            when "1000" => RegDayA(5 downto 4) <= dbo(1 downto 0);
+            when "0010" => RegMinA(3 downto 0) <= dbo(3 downto 0);
+            when "0011" => RegMinA(6 downto 4) <= dbo(2 downto 0);
+            when "0100" => RegHouA(3 downto 0) <= dbo(3 downto 0);
+            when "0101" => RegHouA(5 downto 4) <= dbo(1 downto 0);
+            when "0110" => RegWeeA(2 downto 0) <= dbo(2 downto 0);
+            when "0111" => RegDayA(3 downto 0) <= dbo(3 downto 0);
+            when "1000" => RegDayA(5 downto 4) <= dbo(1 downto 0);
             when "1010" => Reg1224(0         ) <= dbo(0         );
             when "1011" => RegLeap(1 downto 0) <= dbo(1 downto 0);
             when others => null;
