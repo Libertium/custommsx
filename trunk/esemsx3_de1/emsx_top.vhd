@@ -433,7 +433,6 @@ architecture rtl of emsx_top is
   );
  end component;
 
-
   component eseopll
     port(
       clk21m  : in std_logic;
@@ -733,25 +732,20 @@ end component;
 
   -- RTC signals
   signal RtcReq      : std_logic;
---  signal RtcAck      : std_logic;
   signal RtcDbi      : std_logic_vector(7 downto 0);
 
   -- Kanji ROM signals
   signal KanReq      : std_logic;
---  signal KanAck      : std_logic;
   signal KanDbi      : std_logic_vector(7 downto 0);
   signal KanRom      : std_logic;
---  signal KanDbo      : std_logic_vector(7 downto 0);
   signal KanAdr      : std_logic_vector(17 downto 0);
 
   -- VDP signals
   signal VdpReq      : std_logic;
---  signal VdpAck      : std_logic;
   signal VdpDbi      : std_logic_vector(7 downto 0);
   signal VideoSC     : std_logic;
   signal VideoDLClk  : std_logic;
   signal VideoDHClk  : std_logic;
---  signal OeVdp_n     : std_logic;
   signal WeVdp_n     : std_logic;
   signal VdpAdr      : std_logic_vector(16 downto 0);
   signal VrmDbo      : std_logic_vector(7 downto 0);
@@ -771,7 +765,6 @@ end component;
 
   -- PSG signals
   signal PsgReq      : std_logic;
---  signal PsgAck      : std_logic;
   signal PsgDbi      : std_logic_vector(7 downto 0);
   signal PsgAmp      : std_logic_vector(7 downto 0);
 
@@ -782,9 +775,7 @@ end component;
   signal Scc1Ram     : std_logic;
   signal Scc1Wrt     : std_logic;
   signal Scc1Adr     : std_logic_vector(19 downto 0);
---  signal Scc1Dbo     : std_logic_vector(7 downto 0);
   signal Scc1AmpL    : std_logic_vector(14 downto 0);
---  signal Scc1AmpR    : std_logic_vector(14 downto 0);
 
   signal Scc2Req     : std_logic;
   signal Scc2Ack     : std_logic;
@@ -792,9 +783,7 @@ end component;
   signal Scc2Ram     : std_logic;
   signal Scc2Wrt     : std_logic;
   signal Scc2Adr     : std_logic_vector(19 downto 0);
---  signal Scc2Dbo     : std_logic_vector(7 downto 0);
   signal Scc2AmpL    : std_logic_vector(14 downto 0);
---  signal Scc2AmpR    : std_logic_vector(14 downto 0);
 
   signal Scc1Type    : std_logic_vector(1 downto 0);
 
@@ -811,9 +800,6 @@ end component;
   signal Sound_level : std_logic_vector(8 downto 0);
   signal Sound_A     : std_logic_vector(15 downto 0);
 
---  signal PsgVol      : std_logic_vector(2 downto 0);
---  signal SccVol      : std_logic_vector(2 downto 0);
---  signal OpllVol     : std_logic_vector(2 downto 0);
   signal MstrVol     : std_logic_vector(2 downto 0);
 
   signal pSltSndL    : std_logic_vector(5 downto 0);
@@ -1204,21 +1190,21 @@ begin
         dlydbi <= RomDbi;
       elsif (mem = '1' and iSltErm = '1' and MmcEna = '1') then
         dlydbi <= MmcDbi;
-      elsif (mem = '0' and adr(6 downto 2)  = "00010") then
+--      elsif (mem = '0' and adr(7 downto 2)  = "100010") then
+--        dlydbi <= VdpDbi;
+      elsif (mem = '0' and adr(7 downto 2)  = "100110") then
         dlydbi <= VdpDbi;
-      elsif (mem = '0' and adr(6 downto 2)  = "00110") then
-        dlydbi <= VdpDbi;
-      elsif (mem = '0' and adr(6 downto 2)  = "01000") then
+      elsif (mem = '0' and adr(7 downto 2)  = "101000") then
         dlydbi <= PsgDbi;
-      elsif (mem = '0' and adr(6 downto 2)  = "01010") then
+      elsif (mem = '0' and adr(7 downto 2)  = "101010") then
         dlydbi <= PpiDbi;
-      elsif (mem = '0' and adr(6 downto 2)  = "11111") then
+      elsif (mem = '0' and adr(7 downto 2)  = "111111") then
         dlydbi <= MapDbi;
-      elsif (mem = '0' and adr(6 downto 1)  = "011010") then
+      elsif (mem = '0' and adr(7 downto 1)  = "1011010") then
         dlydbi <= RtcDbi;
-      elsif (mem = '0' and adr(6 downto 2)  = "10110") then
+      elsif (mem = '0' and adr(7 downto 2)  = "110110") then     -- I/O:D8-DBh / Kanji
         dlydbi <= KanDbi;
-      elsif (mem = '0' and adr(6 downto 1)  = "110011") then
+      elsif (mem = '0' and adr(7 downto 1)  = "1110011") then
 		dlydbi <= systim_dbi;
       elsif (mem = '0' and adr(7 downto 0)  = "11110100") then	-- port F4
 		dlydbi <= portF4_bit7 & "1111111";
@@ -1273,14 +1259,12 @@ req <= '1' when (((iSltMerq_n = '0') or (iSltIorq_n = '0')) and
 mem <= iSltIorq_n; -- 1=memory area, 0=i/o area
 dbo <= iSltDat;    -- CPU data (CPU > device)
 adr <= iSltAdr;    -- CPU address (CPU > device)
-
 -- access acknowledge, Components > CPU
 ack     <= RamAck  when                 RamReq = '1' else     -- ErmAck, MapAck, KanAck;
            Scc1Ack when mem = '1' and iSltScc1 = '1' else     -- Scc1Ack
            Scc2Ack when mem = '1' and iSltScc2 = '1' else     -- Scc2Ack
            OpllAck when                OpllReq = '1' else     -- OpllAck
            req;                                               -- PsgAck, PpiAck, MapAck, VdpAck, RtcAck
-
 dbi     <= Scc1Dbi when (jSltScc1 = '1') else
            MRAMDbi when (jMEGA_RAM = '1') else
            Scc2Dbi when (jSltScc2 = '1') else
@@ -1459,7 +1443,7 @@ ISLTERM		<=	MEM	WHEN( (W_PRISLT_DEC(3) AND W_EXPSLT3_DEC(2) AND (W_PAGE_DEC(1) O
 ISLTBOT		<=	MEM	WHEN( (W_PRISLT_DEC(3) AND W_EXPSLT3_DEC(3) AND (W_PAGE_DEC(0) OR W_PAGE_DEC(3))) = '1' )ELSE
 				'0';
 -- I/O
-ROM_KANJ	<=	(NOT MEM)	WHEN( ADR(7 DOWNTO 2) = "110110" )ELSE
+ROM_KANJ	<=	(NOT MEM) WHEN( ADR(7 DOWNTO 2) = "110110" )ELSE
 				'0';
 
 -- RamX / RamY access request
@@ -1570,7 +1554,7 @@ end process;
 	begin
 		if( clk21m'event and clk21m = '1' )then
 			if( lock_n = '0' )then
-				MstrVol <= "010";
+				MstrVol <= "000";			-- Maximum
 			elsif( Fkeys(5) /= vFkeys(5) )then -- PgUp Master Volume Up
 				if( MstrVol /= "000" )then
 					MstrVol <= MstrVol - '1';
@@ -1677,6 +1661,7 @@ end process;
   -- Slot 3-1 : ExtROM          618000-61BFFF(  16KB)
   -- Slot 3-2 : MegaSD          600000-60FFFF(  64KB)
   --            EseRAM          600000-63FFFF(BIOS:256KB)
+  -- Slot 1   : Mega RAM        680000-6FFFFF( 512KB)
   -- Slot 3-3 : IPL-ROM         (blockRAM:512Bytes)
 
   -- VRAM     : VRAM            700000-71FFFF( 128KB)
@@ -1693,7 +1678,7 @@ end process;
                               Scc2Adr(19 downto 0) when iSltScc2  = '1' else -- 500000-5FFFFF (1024KB)
                    "1"      & MRAMAdr(18 downto 0) when iMEGA_RAM = '1' else -- 680000-6FFFFF (512 KB) MEGA RAM
                    "0"      & ErmAdr(18 downto 0)  when iSltErm   = '1' else -- 600000-67FFFF (512KB) ESE-RAM
-                   "001"    & KanAdr(16 downto 0)  when rom_kanj  = '1' else -- 620000-63FFFF (128KB)
+                   "001"    & KanAdr(16 downto 0)  when rom_kanj  = '1' else -- 620000-63FFFF (128KB) KANJI ROM
                    "0100"   & adr(15 downto 0 )    when rom_free1 = '1' else -- 640000-64FFFF (64 KB)
                    "0101"   & adr(15 downto 0 )    when rom_free2 = '1' else -- 650000-65FFFF (64 KB)
                    "00010"  & adr(14 downto 0)     when rom_main  = '1' else -- 610000-617FFF (32 KB)

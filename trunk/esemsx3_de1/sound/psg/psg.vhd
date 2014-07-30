@@ -57,7 +57,7 @@ entity psg is
 		cmtin		: in	std_logic;
 		keymode 	: in	std_logic;
 
-		wave		: out	std_logic_vector(  7 downto 0 )
+		wave		: out	std_logic_vector(  9 downto 0 )
  );
 end psg;
 
@@ -74,7 +74,7 @@ architecture rtl of psg is
 			adr			: in	std_logic_vector( 15 downto 0 );
 			dbi			: out	std_logic_vector(  7 downto 0 );
 			dbo			: in	std_logic_vector(  7 downto 0 );
-			wave		: out	std_logic_vector(  7 downto 0 );
+			wave		: out	std_logic_vector(  9 downto 0 );
 			reg_index	: in	std_logic_vector(  3 downto 0 )
 		);
 	end component;
@@ -135,9 +135,9 @@ begin
 		if( reset = '1' )then
 			ff_reg_a	<= (others => '0');
 		elsif( clk21m'event and clk21m = '1' )then
-			ff_reg_a(7)				<= cmtin;		-- Cassete voice input : always '0' on MSX turboR
-			ff_reg_a(6)				<= keymode;		-- KeyBoard mode : 1=JIS
-			ff_reg_a(5 downto 0)	<= w_joy_sel;
+			ff_reg_a(7)			<= cmtin;		-- Cassete voice input : always '0' on MSX turboR
+			ff_reg_a(6)			<= keymode;		-- KeyBoard mode : 1=JIS
+			ff_reg_a(5 downto 0)<= w_joy_sel;
 		end if;
 	end process;
 
