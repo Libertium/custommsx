@@ -46,14 +46,14 @@ end PhaseMemory;
 
 architecture RTL of PhaseMemory is
 
-  type PHASE_ARRAY_TYPE is array (0 to MAXSLOT-1) of PHASE_TYPE;
+  type PHASE_ARRAY_TYPE is array (0 to 18-1) of PHASE_TYPE;
   signal phase_array : PHASE_ARRAY_TYPE;
 
 begin
 
   process (clk, reset)
 
-    variable init_slot : integer range 0 to MAXSLOT;
+    variable init_slot : integer range 0 to 18;
 
   begin
   
@@ -63,18 +63,18 @@ begin
       
    elsif clk'event and clk = '1' then
 
-     if init_slot /= MAXSLOT then
+     if init_slot /= 18 then
      
        phase_array(init_slot) <= (others=>'0');
        init_slot := init_slot + 1;
        
      elsif memwr = '1' then
      
-         phase_array(slot) <= memin;
+         phase_array(conv_integer(slot)) <= memin;
          
      end if;
      
-     memout <= phase_array(slot);
+     memout <= phase_array(conv_integer(slot));
      
     end if;
         

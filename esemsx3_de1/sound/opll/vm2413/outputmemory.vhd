@@ -47,14 +47,14 @@ end OutputMemory;
 
 architecture RTL of OutputMemory is
 
-  type SIGNED_LI_ARRAY_TYPE is array (0 to MAXSLOT) of SIGNED_LI_VECTOR_TYPE;
+  type SIGNED_LI_ARRAY_TYPE is array (0 to 18) of SIGNED_LI_VECTOR_TYPE;
   signal data_array : SIGNED_LI_ARRAY_TYPE;
   
 begin
 
   process(clk, reset)
   
-    variable init_ch : integer range 0 to MAXSLOT;
+    variable init_ch : integer range 0 to 18;
     
   begin
   
@@ -64,19 +64,19 @@ begin
                
     elsif clk'event and clk='1' then
     
-      if init_ch /= MAXSLOT then
+      if init_ch /= 18 then
             
         data_array(init_ch) <= (others=>'0');
         init_ch := init_ch + 1;
               
       elsif wr='1' then
             
-        data_array(addr) <= CONV_SIGNED_LI_VECTOR(wdata);
+        data_array(conv_integer(addr)) <= CONV_SIGNED_LI_VECTOR(wdata);
                 
       end if;
       
-      rdata <= CONV_SIGNED_LI(data_array(addr));
-      rdata2 <= CONV_SIGNED_LI(data_array(addr2));
+      rdata <= CONV_SIGNED_LI(data_array(conv_integer(addr)));
+      rdata2 <= CONV_SIGNED_LI(data_array(conv_integer(addr2)));
       
     end if;
     

@@ -385,7 +385,7 @@ begin
             if (Ps2Dat = X"FA" and Ps2Led = "111101101") then
               Ps2Seq := Ps2Txd;         -- Tx data state
               pPs2Dat <= '0';
-
+--   d2 - Caps Lock; d1 - Num Lock; d0 - Scroll Lock
               --Ps2Led := (Caps xor Kana xor Paus xor '1') & "00000" & (not Caps) & (not Kana) & Paus;
               Ps2Led := (Caps xor Kana xor Paus xor '1') & "00000" & (not Caps) & Paus & (not Kana);
               timout := X"FFFF";        -- countdown timeout (18.3ms = 279ns x 65536clk, exceed 1ms)
@@ -395,30 +395,21 @@ begin
               pPs2Dat <= '0';
               Ps2Led := "111101101";    -- Command EDh
               timout := X"FFFF";        -- countdown timeout (18.3ms = 279ns x 65536clk, exceed 1ms)
-
             end if;
           end if;
-
         else
           timout := timout - 1;         -- countdown timeout
-
         end if;
-
         Ps2Clk(1) := Ps2Clk(0);
-        Ps2Clk(0) := pPs2Clk;                    
-
-             
+        Ps2Clk(0) := pPs2Clk;                                
       end if;
-
     end if;
-
     Fkeys <= oFkeys;
-
   end process;
-
+--
   pPs2Clk <= 'Z';
-
+--
   U1 : ram port map(KeyRow, clk21m, KeyWe, iKeyCol, oKeyCol);
   U2 : keymap port map( MtxIdx, clk21m, MtxPtr );
-
+--
 end RTL;

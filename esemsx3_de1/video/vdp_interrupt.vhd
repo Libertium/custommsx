@@ -1,6 +1,6 @@
 --
---  doublebuf.vhd
---    Double Buffered Line Memory.
+--  vdp_interrupt.vhd
+--   Interrupt controller of ESE-VDP.
 --
 --  Copyright (C) 2000-2006 Kunihiko Ohnaka
 --  All rights reserved.
@@ -55,73 +55,76 @@
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 --  POSSIBILITY OF SUCH DAMAGE.
 --
--------------------------------------------------------------------------------
--- Memo
---   Japanese comment lines are starts with "JP:".
---   JP: 日本語のコメント行は JP:を頭に付ける事にする
---
--------------------------------------------------------------------------------
--- Document
---
--- JP: ダブルバッファリング機能付きラインバッファモジュール。
--- JP: vga.vhdによるアップスキャンコンバートに使用します。
---
--- JP: xPositionWに X座標を入れ，weを 1にすると書き込みバッファに
--- JP: 書き込まれる．また，xPositionRに X座標を入れると，読み込み
--- JP: バッファから読み出した色コードが qから出力される。
--- JP: evenOdd信号によって，読み込みバッファと書き込みバッファが
--- JP: 切り替わる。
 
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
-use work.vdp_package.all;
+LIBRARY IEEE;
+	USE IEEE.STD_LOGIC_1164.ALL;
+	USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+	USE IEEE.STD_LOGIC_ARITH.ALL;
 
-entity doublebuf is
-   port (
-         clk        : in  std_logic;
-         xPositionW : in  std_logic_vector(9 downto 0);
-         xPositionR : in  std_logic_vector(9 downto 0);
-         evenOdd    : in  std_logic;
-         we         : in  std_logic;
-         dataRin    : in  std_logic_vector(5 downto 0);
-         dataGin    : in  std_logic_vector(5 downto 0);
-         dataBin    : in  std_logic_vector(5 downto 0);
-         dataRout   : out  std_logic_vector(5 downto 0);
-         dataGout   : out  std_logic_vector(5 downto 0);
-         dataBout   : out  std_logic_vector(5 downto 0)
-        );
-end doublebuf;
+ENTITY VDP_INTERRUPT IS
+	PORT(
+		RESET					: IN	STD_LOGIC;
+		CLK21M					: IN	STD_LOGIC;
 
-architecture RTL of doublebuf is
-  signal we_e : std_logic;
-  signal we_o : std_logic;
-  signal addr_e : std_logic_vector(9 downto 0);
-  signal addr_o : std_logic_vector(9 downto 0);
-  signal outR_e : std_logic_vector(5 downto 0);
-  signal outG_e : std_logic_vector(5 downto 0);
-  signal outB_e : std_logic_vector(5 downto 0);
-  signal outR_o : std_logic_vector(5 downto 0);
-  signal outG_o : std_logic_vector(5 downto 0);
-  signal outB_o : std_logic_vector(5 downto 0);
-begin
+		H_CNT					: IN	STD_LOGIC_VECTOR( 10 DOWNTO 0 );
+		Y_CNT					: IN	STD_LOGIC_VECTOR(  7 DOWNTO 0 );
+		ACTIVE_LINE				: IN	STD_LOGIC;
+		V_BLANKING_START		: IN	STD_LOGIC;
+		CLR_VSYNC_INT			: IN	STD_LOGIC;
+		CLR_HSYNC_INT			: IN	STD_LOGIC;
+		REQ_VSYNC_INT_N			: OUT	STD_LOGIC;
+		REQ_HSYNC_INT_N			: OUT	STD_LOGIC;
+		REG_R19_HSYNC_INT_LINE	: IN	STD_LOGIC_VECTOR(  7 DOWNTO 0 )
+	);
+END VDP_INTERRUPT;
 
-  bufRe : linebuf port map(addr_e, clk, we_e, dataRin, outR_e);
-  bufGe : linebuf port map(addr_e, clk, we_e, dataGin, outG_e);
-  bufBe : linebuf port map(addr_e, clk, we_e, dataBin, outB_e);
+ARCHITECTURE RTL OF VDP_INTERRUPT IS
 
-  bufRo : linebuf port map(addr_o, clk, we_o, dataRin, outR_o);
-  bufGo : linebuf port map(addr_o, clk, we_o, dataGin, outG_o);
-  bufBo : linebuf port map(addr_o, clk, we_o, dataBin, outB_o);
+	SIGNAL FF_VSYNC_INT_N			: STD_LOGIC;
+	SIGNAL FF_HSYNC_INT_N			: STD_LOGIC;
+	SIGNAL W_VSYNC_INTR_TIMING		: STD_LOGIC;
+BEGIN
 
-  we_e <= we when evenOdd = '0' else '0';
-  we_o <= we when evenOdd = '1' else '0';
-  
-  addr_e <= xPositionW when evenOdd = '0' else xPositionR;
-  addr_o <= xPositionW when evenOdd = '1' else xPositionR;
+	REQ_VSYNC_INT_N <= FF_VSYNC_INT_N;
+	REQ_HSYNC_INT_N <= FF_HSYNC_INT_N;
 
-  dataRout <= outR_e when evenOdd = '1' else outR_o;
-  dataGout <= outG_e when evenOdd = '1' else outG_o;
-  dataBout <= outB_e when evenOdd = '1' else outB_o;
+	-----------------------------------------------------------------------------
+	-- VSYNC INTERRUPT REQUEST
+	-----------------------------------------------------------------------------
+	W_VSYNC_INTR_TIMING <=	'1' WHEN( H_CNT = 235 )ELSE
+							'0';
 
-end RTL;
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+			FF_VSYNC_INT_N <= '1';
+		ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			IF( CLR_VSYNC_INT = '1' )THEN
+				-- V-BLANKING INTERRUPT CLEAR
+				FF_VSYNC_INT_N <= '1';
+			ELSIF( W_VSYNC_INTR_TIMING = '1' AND V_BLANKING_START = '1' )THEN
+				-- V-BLANKING INTERRUPT REQUEST
+				FF_VSYNC_INT_N <= '0';
+			END IF;
+		END IF;
+	END PROCESS;
+
+	--------------------------------------------------------------------------
+	--	W_HSYNC INTERRUPT REQUEST
+	--------------------------------------------------------------------------
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF (RESET = '1') THEN
+			FF_HSYNC_INT_N <= '1';
+		ELSIF (CLK21M'EVENT AND CLK21M = '1') THEN
+			IF( CLR_HSYNC_INT = '1' OR (W_VSYNC_INTR_TIMING = '1' AND V_BLANKING_START = '1') )THEN
+				-- H-BLANKING INTERRUPT CLEAR
+				FF_HSYNC_INT_N <= '1';
+			ELSIF( H_CNT = 1235 AND ACTIVE_LINE = '1' AND Y_CNT = REG_R19_HSYNC_INT_LINE )THEN
+				-- H-BLANKING INTERRUPT REQUEST
+				FF_HSYNC_INT_N <= '0';
+			END IF;
+		END IF;
+	END PROCESS;
+
+END RTL;
