@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -102,7 +102,6 @@ ENTITY VDP_VGA IS
         -- VDP CLOCK ... 21.477MHZ
         CLK21M          : IN    STD_LOGIC;
         RESET           : IN    STD_LOGIC;
-
         -- VIDEO INPUT
         VIDEORIN        : IN    STD_LOGIC_VECTOR( 5 DOWNTO 0);
         VIDEOGIN        : IN    STD_LOGIC_VECTOR( 5 DOWNTO 0);
@@ -110,8 +109,9 @@ ENTITY VDP_VGA IS
         VIDEOVSIN_N     : IN    STD_LOGIC;
         HCOUNTERIN      : IN    STD_LOGIC_VECTOR(10 DOWNTO 0);
         VCOUNTERIN      : IN    STD_LOGIC_VECTOR(10 DOWNTO 0);
+        -- MODE
+        PALMODE         : IN    STD_LOGIC;  -- caro
         INTERLACEMODE   : IN    STD_LOGIC;
-        
         -- VIDEO OUTPUT
         VIDEOROUT       : OUT   STD_LOGIC_VECTOR( 5 DOWNTO 0);
         VIDEOGOUT       : OUT   STD_LOGIC_VECTOR( 5 DOWNTO 0);
@@ -176,11 +176,11 @@ BEGIN
         DATABOUT    => DATABOUT
     );
 
-    XPOSITIONW <= HCOUNTERIN(10 DOWNTO 1) - (CLOCKS_PER_LINE/2 - DISP_WIDTH - 10);
-    EVENODD <= VCOUNTERIN(1);
-    WE_BUF <= '1';
+    XPOSITIONW  <=  HCOUNTERIN(10 DOWNTO 1) - (CLOCKS_PER_LINE/2 - DISP_WIDTH - 10);
+    EVENODD     <=  VCOUNTERIN(1);
+    WE_BUF      <=  '1';
 
-    -- GENERATE H-SYNC SIGNAL.
+    -- GENERATE H-SYNC SIGNAL
     PROCESS( RESET, CLK21M )
     BEGIN
         IF( RESET = '1' )THEN
@@ -194,30 +194,46 @@ BEGIN
         END IF;
     END PROCESS;
 
-    -- GENERATE V-SYNC SIGNAL.
-        -- THE VIDEOVSIN_N SIGNAL IS NOT USED.
+    -- GENERATE V-SYNC SIGNAL
+    -- THE VIDEOVSIN_N SIGNAL IS NOT USED
     PROCESS( RESET, CLK21M )
     BEGIN
         IF( RESET = '1' )THEN
             VIDEOVSOUT_N <= '1';
         ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
-            IF( INTERLACEMODE = '0' ) THEN
-                IF( (VCOUNTERIN = 3*2) OR (VCOUNTERIN = 524+3*2) )THEN
-                    VIDEOVSOUT_N <= '0';
-                ELSIF( (VCOUNTERIN = 6*2) OR (VCOUNTERIN = 524+6*2) ) THEN
-                    VIDEOVSOUT_N <= '1';
+            IF ( PALMODE = '0' ) THEN -- caro
+                IF( INTERLACEMODE = '0' ) THEN
+                    IF( (VCOUNTERIN = 3*2) OR (VCOUNTERIN = 524+3*2) )THEN
+                        VIDEOVSOUT_N <= '0';
+                    ELSIF( (VCOUNTERIN = 6*2) OR (VCOUNTERIN = 524+6*2) ) THEN
+                        VIDEOVSOUT_N <= '1';
+                    END IF;
+                ELSE
+                    IF( (VCOUNTERIN = 3*2) OR (VCOUNTERIN = 525+3*2) )THEN
+                        VIDEOVSOUT_N <= '0';
+                    ELSIF( (VCOUNTERIN = 6*2) OR (VCOUNTERIN = 525+6*2) ) THEN
+                        VIDEOVSOUT_N <= '1';
+                    END IF;
                 END IF;
             ELSE
-                IF( (VCOUNTERIN = 3*2) OR (VCOUNTERIN = 525+3*2) )THEN
-                    VIDEOVSOUT_N <= '0';
-                ELSIF( (VCOUNTERIN = 6*2) OR (VCOUNTERIN = 525+6*2) ) THEN
-                    VIDEOVSOUT_N <= '1';
+                IF( INTERLACEMODE = '0' ) THEN
+                    IF( (VCOUNTERIN = 3*2) OR (VCOUNTERIN = 626+3*2) )THEN
+                        VIDEOVSOUT_N <= '0';
+                    ELSIF( (VCOUNTERIN = 6*2) OR (VCOUNTERIN = 626+6*2) ) THEN
+                        VIDEOVSOUT_N <= '1';
+                    END IF;
+                ELSE
+                    IF( (VCOUNTERIN = 3*2) OR (VCOUNTERIN = 625+3*2) )THEN
+                        VIDEOVSOUT_N <= '0';
+                    ELSIF( (VCOUNTERIN = 6*2) OR (VCOUNTERIN = 625+6*2) ) THEN
+                        VIDEOVSOUT_N <= '1';
+                    END IF;
                 END IF;
             END IF;
         END IF;
     END PROCESS;
 
-    -- GENERATE DATA READ TIMING.
+    -- GENERATE DATA READ TIMING
     PROCESS( RESET, CLK21M )
     BEGIN
         IF( RESET = '1' )THEN
@@ -232,7 +248,7 @@ BEGIN
         END IF;
     END PROCESS;
 
-    -- GENERATE VIDEO OUTPUT TIMING.
+    -- GENERATE VIDEO OUTPUT TIMING
     PROCESS( RESET, CLK21M )
     BEGIN
         IF( RESET = '1' )THEN
@@ -241,12 +257,12 @@ BEGIN
             IF( (HCOUNTERIN = DISP_START_X) OR
                     ((HCOUNTERIN = DISP_START_X + (CLOCKS_PER_LINE/2)) AND INTERLACEMODE = '0') ) THEN
                 VIDEOOUTX <= '1';
-            ELSIF( (HCOUNTERIN = DISP_START_X+DISP_WIDTH) OR
-                         (HCOUNTERIN = DISP_START_X+DISP_WIDTH + (CLOCKS_PER_LINE/2)) ) THEN
+            ELSIF( (HCOUNTERIN = DISP_START_X + DISP_WIDTH) OR
+                       (HCOUNTERIN = DISP_START_X + DISP_WIDTH + (CLOCKS_PER_LINE/2)) ) THEN
                 VIDEOOUTX <= '0';
             END IF;
         END IF;
     END PROCESS;
 
-    VIDEOHSOUT_N    <= FF_HSYNC_N;
+    VIDEOHSOUT_N <= FF_HSYNC_N;
 END RTL;

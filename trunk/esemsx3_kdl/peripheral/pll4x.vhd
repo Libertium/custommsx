@@ -1,7 +1,7 @@
 -- megafunction wizard: %ALTPLL%
 -- GENERATION: STANDARD
 -- VERSION: WM1.0
--- MODULE: altpll 
+-- MODULE: altpll
 
 -- ============================================================
 -- File Name: PLL4X.vhd
@@ -48,7 +48,7 @@ ENTITY PLL4X IS
         inclk0      : IN STD_LOGIC  := '0';
         c0      : OUT STD_LOGIC ;
         c1      : OUT STD_LOGIC ;
-        e0      : OUT STD_LOGIC 
+        e0      : OUT STD_LOGIC
     );
 END PLL4X;
 

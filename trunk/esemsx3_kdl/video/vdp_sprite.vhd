@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -70,7 +70,7 @@
 -- 26th,August,2006 modified by Kunihiko Ohnaka
 --   - latch the base addresses every eight dot cycle
 --     (DRAM RAS/CAS access emulation)
--- 
+--
 -- 20th,August,2006 modified by Kunihiko Ohnaka
 --   - Change the drawing algorithm.
 --   - Add sprite collision checking function.
@@ -172,7 +172,7 @@
 -- JP:   きれいなサイクルにしています。
 -- JP:   どうしても実機と同じタイミングにしたいという方は
 -- JP:   チャレンジしてみてください。
--- JP:  
+-- JP:
 
 LIBRARY IEEE;
     USE IEEE.STD_LOGIC_1164.ALL;
@@ -253,7 +253,7 @@ ARCHITECTURE RTL OF VDP_SPRITE IS
 
     SIGNAL FF_VDPS0RESETACK         : STD_LOGIC;
     SIGNAL FF_VDPS5RESETACK         : STD_LOGIC;
-    
+
     -- FOR SPINFORAM
     SIGNAL SPINFORAMADDR            : STD_LOGIC_VECTOR(  2 DOWNTO 0);
     SIGNAL SPINFORAMWE              : STD_LOGIC;
@@ -270,7 +270,7 @@ ARCHITECTURE RTL OF VDP_SPRITE IS
     SIGNAL SPINFORAMCOLOR_OUT       : STD_LOGIC_VECTOR(  3 DOWNTO 0);
     SIGNAL SPINFORAMCC_OUT          : STD_LOGIC;
     SIGNAL SPINFORAMIC_OUT          : STD_LOGIC;
-    
+
     TYPE TYPESPSTATE IS ( SPSTATE_IDLE, SPSTATE_YTEST_DRAW, SPSTATE_PREPARE );
     SIGNAL SPSTATE                  : TYPESPSTATE;
 
@@ -281,7 +281,7 @@ ARCHITECTURE RTL OF VDP_SPRITE IS
     SIGNAL IRAMADR                  : STD_LOGIC_VECTOR( 16 DOWNTO 0 );
     SIGNAL FF_Y_TEST_VRAM_ADDR      : STD_LOGIC_VECTOR( 16 DOWNTO 0 );
     SIGNAL IRAMADRPREPARE           : STD_LOGIC_VECTOR( 16 DOWNTO 0 );
-    
+
     SIGNAL SPATTRTBLBASEADDR        : STD_LOGIC_VECTOR( REG_R11R5_SP_ATR_ADDR'LENGTH -1 DOWNTO 0);
     SIGNAL SPPTNGENETBLBASEADDR     : STD_LOGIC_VECTOR( REG_R6_SP_GEN_ADDR'LENGTH -1 DOWNTO 0);
     SIGNAL SPATTRIB_ADDR            : STD_LOGIC_VECTOR( 16 DOWNTO 2 );
@@ -313,7 +313,7 @@ ARCHITECTURE RTL OF VDP_SPRITE IS
     SIGNAL SPDRAWX                  : STD_LOGIC_VECTOR(  8 DOWNTO 0 );  -- -32 - 287 (=256+31)
     SIGNAL SPDRAWPATTERN            : STD_LOGIC_VECTOR( 15 DOWNTO 0 );
     SIGNAL SPDRAWCOLOR              : STD_LOGIC_VECTOR(  3 DOWNTO 0 );
-    
+
     -- JP: スプライト描画ラインバッファの制御信号
     SIGNAL SPLINEBUFADDR_E          : STD_LOGIC_VECTOR(  7 DOWNTO 0 );
     SIGNAL SPLINEBUFADDR_O          : STD_LOGIC_VECTOR(  7 DOWNTO 0 );
@@ -323,7 +323,7 @@ ARCHITECTURE RTL OF VDP_SPRITE IS
     SIGNAL SPLINEBUFDATA_IN_O       : STD_LOGIC_VECTOR(  7 DOWNTO 0 );
     SIGNAL SPLINEBUFDATA_OUT_E      : STD_LOGIC_VECTOR(  7 DOWNTO 0 );
     SIGNAL SPLINEBUFDATA_OUT_O      : STD_LOGIC_VECTOR(  7 DOWNTO 0 );
-    
+
     SIGNAL SPLINEBUFDISPWE          : STD_LOGIC;
     SIGNAL SPLINEBUFDRAWWE          : STD_LOGIC;
     SIGNAL SPLINEBUFDISPX           : STD_LOGIC_VECTOR(  7 DOWNTO 0 );
@@ -350,7 +350,7 @@ BEGIN
     PVDPS0SPOVERMAPPEDNUM   <= FF_SP_OVERMAP_NUM;
 
     ---------------------------------------------------------------------------
-    -- スプライトを表示するか否かを示す信号 
+    -- スプライトを表示するか否かを示す信号
     ---------------------------------------------------------------------------
     PROCESS( RESET, CLK21M )
     BEGIN
@@ -365,7 +365,7 @@ BEGIN
 
     ----------------------------------------------------------------
     -- SPRITE INFORMATION ARRAY
-    -- 実際に表示するスプライトの情報を集めて記録しておくRAM 
+    -- 実際に表示するスプライトの情報を集めて記録しておくRAM
     ----------------------------------------------------------------
     ISPINFORAM: VDP_SPINFORAM
     PORT MAP(
@@ -376,7 +376,7 @@ BEGIN
         Q           => SPINFORAMDATA_OUT
     );
 
-    SPINFORAMDATA_IN    <=  '0' & 
+    SPINFORAMDATA_IN    <=  '0' &
                             SPINFORAMX_IN & SPINFORAMPATTERN_IN &
                             SPINFORAMCOLOR_IN & SPINFORAMCC_IN & SPINFORAMIC_IN;
     SPINFORAMX_OUT      <=  SPINFORAMDATA_OUT( 30 DOWNTO 22 );
@@ -384,7 +384,7 @@ BEGIN
     SPINFORAMCOLOR_OUT  <=  SPINFORAMDATA_OUT(  5 DOWNTO  2 );
     SPINFORAMCC_OUT     <=  SPINFORAMDATA_OUT( 1 );
     SPINFORAMIC_OUT     <=  SPINFORAMDATA_OUT( 0 );
-    
+
     SPINFORAMADDR <=    SPPREPARELOCALPLANENUM WHEN( SPSTATE = SPSTATE_PREPARE )ELSE
                         SPPREDRAWLOCALPLANENUM;
 
@@ -402,7 +402,7 @@ BEGIN
         CLK     => CLK21M               ,
         WE      => SPLINEBUFWE_E        ,
         DBO     => SPLINEBUFDATA_IN_E   ,
-        DBI     => SPLINEBUFDATA_OUT_E  
+        DBI     => SPLINEBUFDATA_OUT_E
     );
 
     SPLINEBUFADDR_O         <= SPLINEBUFDRAWX       WHEN( DOTCOUNTERYP(0) = '0' )ELSE SPLINEBUFDISPX;
@@ -416,7 +416,7 @@ BEGIN
         CLK     => CLK21M               ,
         WE      => SPLINEBUFWE_O        ,
         DBO     => SPLINEBUFDATA_IN_O   ,
-        DBI     => SPLINEBUFDATA_OUT_O  
+        DBI     => SPLINEBUFDATA_OUT_O
     );
 
     -----------------------------------------------------------------------------
@@ -459,7 +459,7 @@ BEGIN
     END PROCESS;
 
     -----------------------------------------------------------------------------
-    -- 現ラインのライン番号 
+    -- 現ラインのライン番号
     -----------------------------------------------------------------------------
     PROCESS( CLK21M )
     BEGIN
@@ -519,22 +519,22 @@ BEGIN
     END PROCESS;
 
     ---------------------------------------------------------------------------
-    -- [Y_TEST]Yテスト用の信号 
+    -- [Y_TEST]Yテスト用の信号
     ---------------------------------------------------------------------------
     W_SPLISTUPY     <= FF_CUR_Y(7 DOWNTO 0) - PRAMDAT;
 
-    -- [Y_TEST]着目スプライトを現ラインに表示するかどうかの信号 
-    W_TARGET_SP_EN  <=  '1'     WHEN(   ((W_SPLISTUPY(7 DOWNTO 3) = "00000") AND (REG_R1_SP_SIZE = '0' ) AND (REG_R1_SP_ZOOM='0')) OR 
-                                        ((W_SPLISTUPY(7 DOWNTO 4) = "0000" ) AND (REG_R1_SP_SIZE = '1' ) AND (REG_R1_SP_ZOOM='0')) OR 
-                                        ((W_SPLISTUPY(7 DOWNTO 4) = "0000" ) AND (REG_R1_SP_SIZE = '0' ) AND (REG_R1_SP_ZOOM='1')) OR 
+    -- [Y_TEST]着目スプライトを現ラインに表示するかどうかの信号
+    W_TARGET_SP_EN  <=  '1'     WHEN(   ((W_SPLISTUPY(7 DOWNTO 3) = "00000") AND (REG_R1_SP_SIZE = '0' ) AND (REG_R1_SP_ZOOM='0')) OR
+                                        ((W_SPLISTUPY(7 DOWNTO 4) = "0000" ) AND (REG_R1_SP_SIZE = '1' ) AND (REG_R1_SP_ZOOM='0')) OR
+                                        ((W_SPLISTUPY(7 DOWNTO 4) = "0000" ) AND (REG_R1_SP_SIZE = '0' ) AND (REG_R1_SP_ZOOM='1')) OR
                                         ((W_SPLISTUPY(7 DOWNTO 5) = "000"  ) AND (REG_R1_SP_SIZE = '1' ) AND (REG_R1_SP_ZOOM='1')) )ELSE
                         '0';
 
-    -- [Y_TEST]これ以降のスプライトは表示禁止かどうかの信号 
+    -- [Y_TEST]これ以降のスプライトは表示禁止かどうかの信号
     W_SP_OFF        <=  '1' WHEN( PRAMDAT = ("1101" & SPMODE2 & "000") )ELSE
                         '0';
 
-    -- [Y_TEST]４つ（８つ）のスプライトが並んでいるかどうかの信号 
+    -- [Y_TEST]４つ（８つ）のスプライトが並んでいるかどうかの信号
     W_SP_OVERMAP    <=  '1' WHEN( (FF_Y_TEST_LISTUP_ADDR(2) = '1' AND SPMODE2 = '0') OR FF_Y_TEST_LISTUP_ADDR(3) = '1' )ELSE
                         '0';
 
@@ -542,7 +542,7 @@ BEGIN
     W_ACTIVE        <=  BWINDOW_Y;
 
     ---------------------------------------------------------------------------
-    -- [Y_TEST]Yテストステートでないことを示す信号 
+    -- [Y_TEST]Yテストステートでないことを示す信号
     ---------------------------------------------------------------------------
     PROCESS( RESET, CLK21M )
     BEGIN
@@ -594,7 +594,7 @@ BEGIN
                     -- INITIALIZE
                     FF_Y_TEST_LISTUP_ADDR <= (OTHERS => '0');
                 ELSIF( EIGHTDOTSTATE = "110" )THEN
-                    -- NEXT SPRITE [リストアップメモリが満杯になるまでインクリメント] 
+                    -- NEXT SPRITE [リストアップメモリが満杯になるまでインクリメント]
                     IF( FF_Y_TEST_EN = '1' AND W_TARGET_SP_EN = '1' AND W_SP_OVERMAP = '0' AND W_SP_OFF = '0' )THEN
                         FF_Y_TEST_LISTUP_ADDR <= FF_Y_TEST_LISTUP_ADDR + 1;
                     END IF;
@@ -623,7 +623,7 @@ BEGIN
     END PROCESS;
 
     ---------------------------------------------------------------------------
-    -- [Y_TEST]４つ目（８つ目）のスプライトが並んだかどうかの信号 
+    -- [Y_TEST]４つ目（８つ目）のスプライトが並んだかどうかの信号
     ---------------------------------------------------------------------------
     PROCESS( RESET, CLK21M )
     BEGIN
@@ -646,7 +646,7 @@ BEGIN
     END PROCESS;
 
     ---------------------------------------------------------------------------
-    -- [Y_TEST]処理をあきらめたスプライト信号 
+    -- [Y_TEST]処理をあきらめたスプライト信号
     ---------------------------------------------------------------------------
     PROCESS( RESET, CLK21M )
     BEGIN
@@ -670,7 +670,7 @@ BEGIN
     END PROCESS;
 
     ---------------------------------------------------------------------------
-    -- Yテスト用の VRAM読み出しアドレス 
+    -- Yテスト用の VRAM読み出しアドレス
     ---------------------------------------------------------------------------
     PROCESS( RESET, CLK21M )
     BEGIN
@@ -794,7 +794,7 @@ BEGIN
                                 IF( PRAMDAT(7) = '1' ) THEN
                                     SPINFORAMX_IN <= SPINFORAMX_IN - 32;
                                 END IF;
-                                
+
                                 -- IF ALL OF THE SPRITES LIST-UPED ARE READED,
                                 -- THE SPRITES LEFT SHOULD NOT BE DRAWN.
                                 IF( SPPREPARELOCALPLANENUM >= FF_Y_TEST_LISTUP_ADDR )THEN
@@ -851,14 +851,14 @@ BEGIN
         VARIABLE VDPS5S6SPCOLLISIONYV               : STD_LOGIC_VECTOR(8 DOWNTO 0);
     BEGIN
         IF( RESET ='1' ) THEN
-            SPLINEBUFDRAWWE             <= '0';                 -- JP: ラインバッファへの書き込みイネーブラ 
+            SPLINEBUFDRAWWE             <= '0';                 -- JP: ラインバッファへの書き込みイネーブラ
             SPPREDRAWEND                <= '0';
             SPDRAWPATTERN               <= (OTHERS => '0');
             SPLINEBUFDRAWCOLOR          <= (OTHERS => '0');
             SPLINEBUFDRAWX              <= (OTHERS => '0');
             SPDRAWCOLOR                 <= (OTHERS => '0');
 
-            VDPS0SPCOLLISIONINCIDENCEV  := '0';                 -- JP: スプライトが衝突したかどうかを示すフラグ 
+            VDPS0SPCOLLISIONINCIDENCEV  := '0';                 -- JP: スプライトが衝突したかどうかを示すフラグ
             VDPS3S4SPCOLLISIONXV        := (OTHERS => '0');
             VDPS5S6SPCOLLISIONYV        := (OTHERS => '0');
             SPCC0FOUNDV                 := '0';
@@ -868,10 +868,10 @@ BEGIN
             IF( SPSTATE = SPSTATE_YTEST_DRAW ) THEN
                 CASE DOTSTATE IS
                     WHEN "10" =>
-                        -- JP: 処理単位の始まり 
+                        -- JP: 処理単位の始まり
                         SPLINEBUFDRAWWE <= '0';
                     WHEN "00" =>
-                        -- JP: 
+                        -- JP:
                         IF( DOTCOUNTERX(4 DOWNTO 0) = 1 ) THEN
                             SPDRAWPATTERN   <= SPINFORAMPATTERN_OUT;
                             SPDRAWXV        := SPINFORAMX_OUT;
@@ -1003,11 +1003,11 @@ BEGIN
         END IF;
     END PROCESS;
 
-    -- JP: ウィンドウで表示をカットする 
+    -- JP: ウィンドウで表示をカットする
     PROCESS( RESET, CLK21M )
     BEGIN
         IF( RESET = '1' ) THEN
-            SPCOLOROUT  <= '0';                     -- JP:  0=透明, 1=スプライトドット 
+            SPCOLOROUT  <= '0';                     -- JP:  0=透明, 1=スプライトドット
             SPCOLORCODE <= (OTHERS => '0');         -- JP:  SPCOLOROUT=1 の時のスプライトドット色番号
         ELSIF (CLK21M'EVENT AND CLK21M = '1') THEN
             IF( DOTSTATE = "01" )THEN

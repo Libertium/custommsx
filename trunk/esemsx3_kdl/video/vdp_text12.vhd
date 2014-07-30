@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -57,7 +57,7 @@
 --
 -------------------------------------------------------------------------------
 -- Contributors
---  
+--
 --   Alex Wulms
 --     - Improvement of the TEXT2 mode such as 'blink function'.
 --
@@ -111,7 +111,7 @@ ENTITY VDP_TEXT12 IS
         REG_R7_FRAME_COL            : IN    STD_LOGIC_VECTOR(  7 DOWNTO 0 );
         REG_R12_BLINK_MODE          : IN    STD_LOGIC_VECTOR(  7 DOWNTO 0 );
         REG_R13_BLINK_PERIOD        : IN    STD_LOGIC_VECTOR(  7 DOWNTO 0 );
-        
+
         REG_R2_PT_NAM_ADDR          : IN    STD_LOGIC_VECTOR(  6 DOWNTO 0 );
         REG_R4_PT_GEN_ADDR          : IN    STD_LOGIC_VECTOR(  5 DOWNTO 0 );
         REG_R10R3_COL_ADDR          : IN    STD_LOGIC_VECTOR( 10 DOWNTO 0 );
@@ -163,7 +163,7 @@ BEGIN
     --
 
     ----------------------------------------------------------------
-    -- 
+    --
     ----------------------------------------------------------------
     TXCHARCOUNTER       <=  TXCHARCOUNTERSTARTOFLINE + TXCHARCOUNTERX;
 
@@ -241,7 +241,7 @@ BEGIN
     END PROCESS;
 
     ---------------------------------------------------------------------------
-    -- 
+    --
     ---------------------------------------------------------------------------
     PROCESS( RESET, CLK21M )
     BEGIN
@@ -337,7 +337,7 @@ BEGIN
     END PROCESS;
 
     ----------------------------------------------------------------
-    -- 
+    --
     ----------------------------------------------------------------
     PROCESS( RESET, CLK21M )
     BEGIN

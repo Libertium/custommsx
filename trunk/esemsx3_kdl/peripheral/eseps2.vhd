@@ -1,52 +1,53 @@
--- 
+--
 -- eseps2.vhd
 --   PS/2 keyboard interface for ESE-MSX
 --   Revision 1.00
--- 
+--
 -- Copyright (c) 2006 Kazuhiro Tsujikawa (ESE Artists' factory)
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --------------------------------------------------------------------------------
 -- Update note by KdL
 --------------------------------------------------------------------------------
--- Oct 25 2010 - Fixed CMT led using switched I/O ports.
--- Jun 04 2010 - Fixed a problem where pause key is pressed with shift.
--- Mar 15 2008 - Added CMT switch.
---
+-- Oct 25 2010 - Updated the led of CMT to make it work with the I/O ports.
+-- Jun 04 2010 - Fixed a bug where the shift key is not broken after a pause.
+-- Mar 15 2008 - Added the CMT switch.
+-- Aug 05 2013 - Typing any key during an hard reset the keyboard could continue
+--               that command after the reboot: press again the key to break it.
 --------------------------------------------------------------------------------
 -- Update note
 --------------------------------------------------------------------------------
--- Oct 05 2006 - Removed 101/106 toggle switch. 
--- Sep 23 2006 - Fixed a problem where some key events are lost after 101/106 
+-- Oct 05 2006 - Removed 101/106 toggle switch.
+-- Sep 23 2006 - Fixed a problem where some key events are lost after 101/106
 --               keyboard type switching.
--- Sep 22 2006 - Added external default keyboard layout input
+-- Sep 22 2006 - Added external default keyboard layout input.
 -- May 21 2005 - Modified to support Quartus2we5.
--- Jan 24 2004 - Fixed a locking key problem if 101/106 keyboard type is 
+-- Jan 24 2004 - Fixed a locking key problem if 101/106 keyboard type is
 --               switched during pressing keys.
---             - Fixed a problem where a comma key is pressed after a 
+--             - Fixed a problem where a comma key is pressed after a
 --               pause key.
 -- Jan 23 2004 - Added a 101 keyboard table.
 --------------------------------------------------------------------------------
@@ -69,7 +70,7 @@ entity eseps2 is
     Paus     : inout std_logic;
     Scro     : inout std_logic;
     Reso     : inout std_logic;
-    
+
     -- | b7  | b6   | b5   | b4   | b3  | b2  | b1  | b0  |
     -- | SHI | --   | PgUp | PgDn | F9  | F10 | F11 | F12 |
     Fkeys    : out std_logic_vector(7 downto 0);
@@ -131,10 +132,10 @@ begin
     variable Ps2Caps : std_logic;
     variable Ps2Kana : std_logic;
     variable Ps2Paus : std_logic;
---    variable Ps2Scro : std_logic; -- used for 101/106 key table switching
-    variable Ps2Scro : std_logic; -- used for CMT switching
-    variable Ps2Shif : std_logic; -- real shift status 
-    variable Ps2Vshi : std_logic; -- virtual shift status
+--  variable Ps2Scro : std_logic;       -- used for 101/106 key table switching
+    variable Ps2Scro : std_logic;       -- used for CMT switching
+    variable Ps2Shif : std_logic;       -- real shift status
+    variable Ps2Vshi : std_logic;       -- virtual shift status
     variable oFkeys  : std_logic_vector(7 downto 0);
 
     variable KeyId   : std_logic_vector(8 downto 0);
@@ -147,32 +148,32 @@ begin
 
     if( reset = '1' )then
 
-      Ps2Seq := Ps2Idle;
-      Ps2Chg := '0';
-      Ps2brk := '0';
-      Ps2xE0 := '0';
-      Ps2xE1 := '0';
-      Ps2Cnt := (others => '0');
-      Ps2Clk := (others => '1');
-      Ps2Dat := (others => '1');
-      timout := (others => '1');
-      Ps2Led := (others => '1');
-      Ps2Vshi:= '0';
-      Ps2Skp := "000";
+      Ps2Seq  := Ps2Idle;
+      Ps2Chg  := '0';
+      Ps2brk  := '0';
+      Ps2xE0  := '0';
+      Ps2xE1  := '0';
+      Ps2Cnt  := (others => '0');
+      Ps2Clk  := (others => '1');
+      Ps2Dat  := (others => '1');
+      timout  := (others => '1');
+      Ps2Led  := (others => '1');
+      Ps2Vshi := '0';
+      Ps2Skp  := "000";
 
       Ps2Caps := '1';
       Ps2Kana := '1';
       Ps2Paus := '0';
 
       Paus    <= '0';
-      Reso    <= '0';               -- Sync to ff_Reso
-      Scro    <= '0';               -- Sync to ff_Scro
-      oFkeys  := (others=>'0');     -- Sync to vFkeys
+      Reso    <= '0';                   -- Sync to ff_Reso
+      Scro    <= '0';                   -- Sync to ff_Scro
+      oFkeys  := (others => '0');       -- Sync to vFkeys
 
-      MtxSeq := MtxIdle;
+      MtxSeq  := MtxIdle;
 
       pPs2Dat <= 'Z';
-      pKeyX <= (others => '1');
+      pKeyX   <= (others => '1');
 
       KeyWe   <= '0';
       KeyRow  <= (others => '0');
@@ -184,9 +185,9 @@ begin
         -- "Scan table > MSX key-matrix" conversion
         case MtxSeq is
           when MtxIdle =>
-                   
-            if Ps2Chg = '1' then 
- 
+
+            if Ps2Chg = '1' then
+
               KeyId := Ps2xE0 & Ps2Dat;
               if Kmap = '1' then
                 MtxSeq := MtxSettle;
@@ -196,9 +197,9 @@ begin
                 MtxIdx <= "10" & KeyId;
               end if;
               pKeyX <= (others => '1');
-        
+
             else
-        
+
               for i in 7 downto 1 loop
                 if oKeyCol(i) = '1' then
                   pKeyX(i) <= '0';
@@ -221,24 +222,24 @@ begin
               end if;
               KeyRow <= "0000" & PpiPortC(3 downto 0);
             end if;
-          
+
           when MtxSettle =>
             MtxSeq := MtxClean;
             KeyWe  <= '0';
             KeyRow <= "0000" & MtxPtr(3 downto 0);
-     
-          when MtxClean =>                          
+
+          when MtxClean =>
             MtxSeq := MtxRead;
             KeyWe <= '1';
             iKeyCol <= oKeyCol;
             iKeyCol(conv_integer(MtxPtr(6 downto 4))) <= '0';
             MtxIdx <= "0" & Ps2Shif & KeyId;
-          
+
           when MtxRead =>
             MtxSeq := MtxWrite;
             KeyWe <= '0';
             KeyRow <= "0000" & MtxPtr(3 downto 0);
-            if( Ps2Brk = '0' )then 
+            if( Ps2Brk = '0' )then
               Ps2Vshi := MtxPtr(7);
             else
               Ps2Vshi := Ps2Shif;
@@ -306,7 +307,7 @@ begin
             end if;
             Ps2Dat := pPs2Dat & Ps2Dat(7 downto 1);
             Ps2Cnt := Ps2Cnt + 1;
-            
+
           elsif( Ps2Seq = Ps2Stop )then
             Ps2Seq := Ps2Idle;
             if( Ps2Dat = X"AA" )then    -- BAT code (basic assurance test)
@@ -314,20 +315,20 @@ begin
               Ps2Kana := not Kana;
               Ps2Paus := not Paus;
               Ps2Scro := not CmtScro;
-            elsif Ps2Skp /= "000" then  -- Skip some sequences.
+            elsif Ps2Skp /= "000" then  -- Skip some sequences
               Ps2Skp := Ps2Skp - 1;
             elsif( Ps2Dat = X"14" and Ps2xE0 = '0' and Ps2xE1 = '1' )then -- pause/break make
               if Ps2brk = '0' then
-                Paus <= not Paus;  -- CPU pause
-                Ps2Skp := "110";   -- Skip the next 6 sequences.
+                Paus <= not Paus;       -- CPU pause
+                Ps2Skp := "110";        -- Skip the next 6 sequences
 
-                Ps2Dat := X"12";   -- Shift Freeze: Pause Bug Fixed
+                Ps2Dat := X"12";        -- shift + pause bug fixed
                 Ps2xE0 := '0';
                 Ps2xE1 := '0';
               end if;
             elsif( Ps2Dat = X"7C" and Ps2xE0 = '1' and Ps2xE1 = '0' )then -- printscreen make
               if Ps2brk = '0' then
-                Reso <= not Reso;  -- toggle display mode
+                Reso <= not Reso;       -- toggle display mode
               end if;
               Ps2Chg := '1';
             elsif( Ps2Dat = X"7D" and Ps2xE0 = '1' and Ps2xE1 = '0' )then -- PgUp make
@@ -378,7 +379,7 @@ begin
               Ps2xE0 := '1';
             elsif( Ps2Dat = X"E1" )then -- extnd code E1 (ignore)
               Ps2xE1 := '1';
-            elsif( Ps2Dat = X"FA" )then  -- Ack of "EDh" command
+            elsif( Ps2Dat = X"FA" )then -- Ack of "EDh" command
               Ps2Seq := Ps2Idle;
             else
               Ps2Chg := '1';
@@ -420,9 +421,9 @@ begin
         end if;
 
         Ps2Clk(1) := Ps2Clk(0);
-        Ps2Clk(0) := pPs2Clk;                    
+        Ps2Clk(0) := pPs2Clk;
 
-             
+
       end if;
 
     end if;
@@ -433,7 +434,7 @@ begin
 
   pPs2Clk <= 'Z';
 
-  U1 : ram port map(KeyRow, clk21m, KeyWe, iKeyCol, oKeyCol);
+  U1 : ram    port map( KeyRow, clk21m, KeyWe, iKeyCol, oKeyCol );
   U2 : keymap port map( MtxIdx, clk21m, MtxPtr );
 
 end RTL;

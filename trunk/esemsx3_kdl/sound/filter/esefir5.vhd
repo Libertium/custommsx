@@ -1,46 +1,46 @@
--- 
+--
 -- esefir5.vhd
 --   5 Tap FIR low-pass filter (cutoff=20000Hz)
 --   Revision 1.00
--- 
+--
 -- Copyright (c) 2006 Mitsutaka Okazaki (ESE Artists' factory)
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--- 
+--
 --------------------------------------------------------------------------------
 -- Description
 --------------------------------------------------------------------------------
 --   This component is an implementation of 5 tap FIR low-pass
---   simulation circut for ESE-MSX system II. 
---   21MHz rate is assumed for an input clock. 3.58MHz is 
---   assumed for streaming sample rate of 'wavin' and 'wavout'. 
+--   simulation circut for ESE-MSX system II.
+--   21MHz rate is assumed for an input clock. 3.58MHz is
+--   assumed for streaming sample rate of 'wavin' and 'wavout'.
 --------------------------------------------------------------------------------
 
 --  修正 t.hara
---  TAP-RAM の読み出し用アドレスと、描き込み用アドレスが共通の FF になっているが 
---  この気持ちがずれていて、フィルタ係数の掛かり方がおかしかったのを修正 
+--  TAP-RAM の読み出し用アドレスと、描き込み用アドレスが共通の FF になっているが
+--  この気持ちがずれていて、フィルタ係数の掛かり方がおかしかったのを修正
 
 library ieee;
     use ieee.std_logic_1164.all;
@@ -51,11 +51,11 @@ entity esefir5 is
     generic (
         msbi    : integer
     );
-    port ( 
+    port (
         clk     : in    std_logic;
         reset   : in    std_logic;
         wavin   : in    std_logic_vector ( msbi downto 0 );
-        wavout  : out   std_logic_vector ( msbi downto 0 )  
+        wavout  : out   std_logic_vector ( msbi downto 0 )
     );
 end esefir5;
 
@@ -93,7 +93,7 @@ begin
     wavout  <=  ff_wavout;
 
     ---------------------------------------------------------------------------
-    --  内部ステート 
+    --  内部ステート
     ---------------------------------------------------------------------------
     process( reset, clk )
     begin
@@ -122,7 +122,7 @@ begin
     end process;
 
     ---------------------------------------------------------------------------
-    --  積分器 
+    --  積分器
     ---------------------------------------------------------------------------
     w_mul <= tapout * h( conv_integer( ff_state ) );
 
@@ -153,13 +153,13 @@ begin
     end process;
 
     ---------------------------------------------------------------------------
-    --  タップメモリ書き込み制御 
+    --  タップメモリ書き込み制御
     ---------------------------------------------------------------------------
     w_we <= '1' when( ff_state = "101" )else
             '0';
-    
+
     ---------------------------------------------------------------------------
-    --  タップメモリインスタンス 
+    --  タップメモリインスタンス
     ---------------------------------------------------------------------------
     u0 : tapram generic map (
         msbi    => msbi
@@ -169,6 +169,6 @@ begin
         tapidx  => ff_tapidx,
         wr      => w_we     ,
         tapin   => wavin    ,
-        tapout  => tapout   
+        tapout  => tapout
     );
 end rtl;

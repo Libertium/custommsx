@@ -1,30 +1,30 @@
--- 
--- LinearTable.vhd 
+--
+-- LinearTable.vhd
 --
 -- Copyright (c) 2006 Mitsutaka Okazaki (brezza@pokipoki.org)
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --
@@ -51,7 +51,7 @@ architecture rtl of linear_table_mul is
 begin
 
     w_mul   <= ('0' & i0) * i1;
-    o       <= w_mul( 15 downto 6 );        --  MSBカット, 小数部下位 6bitカット 
+    o       <= w_mul( 15 downto 6 );        --  MSBカット, 小数部下位 6bitカット
 end rtl;
 
 -- ----------------------------------------------------------------------------
@@ -61,10 +61,10 @@ library ieee;
     use work.vm2413.all;
 
 entity LinearTable is
-    port ( 
+    port (
         clk     : in    std_logic;
         reset   : in    std_logic;
-        addr    : in    std_logic_vector( 13 downto 0 );    --  整数部 8bit, 小数部 6bit 
+        addr    : in    std_logic_vector( 13 downto 0 );    --  整数部 8bit, 小数部 6bit
         data    : out   signed_li_type
     );
 end LinearTable;
@@ -122,7 +122,7 @@ architecture rtl of lineartable is
 
     signal w_addr1      : std_logic_vector( 12 downto 6 );
     signal w_data       : std_logic_vector(  8 downto 0 );
-    signal w_sub        : std_logic_vector(  9 downto 0 );  --  符号付き 
+    signal w_sub        : std_logic_vector(  9 downto 0 );  --  符号付き
     signal w_mul        : std_logic_vector(  9 downto 0 );
     signal w_inter      : std_logic_vector(  9 downto 0 );
 begin
@@ -132,7 +132,7 @@ begin
     process( clk )
     begin
         if( clk'event and clk = '1' )then
-            --  アドレス指定された次のサイクルで対応する値が出てくる（1cycle delay） 
+            --  アドレス指定された次のサイクルで対応する値が出てくる（1cycle delay）
             ff_data0 <= log2lin_data( conv_integer( addr(12 downto 6) ) );
             ff_data1 <= log2lin_data( conv_integer( w_addr1           ) );
         end if;
@@ -146,8 +146,8 @@ begin
         end if;
     end process;
 
-    --  補間    (※符号をまたがる場所では 0 になるから ff_sign は気にしない） 
-    --  o = i0 * (1 - k) + i1 * w = i0 - w * i0 + w * i1 = i0 + w * (i1 - i0) 
+    --  補間    (※符号をまたがる場所では 0 になるから ff_sign は気にしない）
+    --  o = i0 * (1 - k) + i1 * w = i0 - w * i0 + w * i1 = i0 + w * (i1 - i0)
     w_sub   <=  ('0' & ff_data1) - ('0' & ff_data0);
 
     u_linear_table_mul: linear_table_mul

@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -132,7 +132,7 @@ begin
   -- JP: 残りの4ドットの時間でVRAM R/Wや VDPコマンドを実行している。
   -- JP: 似非VDPでも同様に、8ドットの最初の4ドット中に描画用のデータを読み、
   -- JP: 残りの4ドットの期間でVRAM R/Wや VDPコマンドを実行する。
-  -- 
+  --
   -- JP: よって、以下のようなタイミングで画面の描画を行う事。
   --
   -- [データリード系]
@@ -155,25 +155,25 @@ begin
   -- eightDotState    7=><====0=====><====1=====><====2=====><====3=====>
   -- dotState         "10"00"01"11"10"00"01"11"10"00"01"11"10"00"01"11"10"
   -- (GRAPHIC4)
-  -- FIFO OUT               <D0>                    <D1>        
+  -- FIFO OUT               <D0>                    <D1>
   -- Palette Addr              <D0>        <D0>        <D1>        <D1>
   -- Palette Data                 <D0>        <D0>        <D1>        <D1>
   -- Display Output                  <D0========><D0========><D1=========><D1==
   -- (GRAPHIC5)
-  -- FIFO OUT               <D0>                    <D1>        
+  -- FIFO OUT               <D0>                    <D1>
   -- Palette Addr              <D0>  <D0>  <D0>  <D0>  <D1>  <D1>  <D1>  <D1>
   -- Palette Data                 <D0>  <D0>  <D0>  <D0>  <D1>  <D1>  <D1>  <D1>
   -- Display Output                  <D0==><D0==><D0==><D0==><D1==><D1==><D1==><D1==>
   -- (GRAPHIC6)
-  -- FIFO OUT               <D0>        <P0>        <D1>        <P1>   
+  -- FIFO OUT               <D0>        <P0>        <D1>        <P1>
   -- Palette Addr              <D0>  <D0>  <P0>  <P0>  <D1>  <D1>  <P1>  <P1>
   -- Palette Data                 <D0>  <D0>  <P0>  <P0>  <D1>  <D1>  <P1>  <P1>
   -- Display Output                  <D0==><D0==><P0==><P0==><D1==><D1==><P1==><P1==>
   -- (GRAPHIC7)
-  -- FIFO OUT               <D0>        <P0>        <D1>        <P1>   
+  -- FIFO OUT               <D0>        <P0>        <D1>        <P1>
   -- Direct Color              <D0===>     <P0===>     <D1===>     <P1===>
   -- Display Output                  <D0========><P0========><D1=========><P1==
-  -- 
+  --
 
   ----------------------------------------------------------------
   -- FIFO and control signals
@@ -187,7 +187,7 @@ begin
   fifoMem : ram port map(fifoAddr, clk21m, fifoWe, fifoData_in, fifoData_out);
 
   ----------------------------------------------------------------
-  -- 
+  --
   ----------------------------------------------------------------
 
   -- VRAM address mappings.
@@ -195,7 +195,7 @@ begin
                          ("11" & dotCounterY(7 downto 0) & localDotCounterX(7 downto 1));
   logicalVramAddrG67 <=  (latchedPtnNameTblBaseAddr(5 downto 0) & "11111111111") and
                          ("1" & dotCounterY(7 downto 0) & localDotCounterX(7 downto 0));
-  
+
   process( clk21m, reset )
   begin
     if(reset = '1' ) then
@@ -207,7 +207,7 @@ begin
       localDotCounterX <= (others => '0');
     elsif (clk21m'event and clk21m = '1') then
 
-      
+
       case dotState is
         when "00" =>
           if( eightDotState = "000" ) then

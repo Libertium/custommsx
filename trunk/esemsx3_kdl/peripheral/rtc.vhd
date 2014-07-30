@@ -1,32 +1,32 @@
--- 
+--
 -- rtc.vhd
 --   REAL TIME CLOCK (MSX2 CLOCK-IC)
 --   Version 1.00
--- 
+--
 -- Copyright (c) 2008 Takayuki Hara
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 
@@ -38,7 +38,7 @@ entity rtc is
     port(
         clk21m      : in    std_logic;
         reset       : in    std_logic;
-        clkena      : in    std_logic;          -- 10hz
+        clkena      : in    std_logic;          -- 10Hz
         req         : in    std_logic;
         ack         : out   std_logic;
         wrt         : in    std_logic;
@@ -72,8 +72,8 @@ architecture rtl of rtc is
     signal reg_sec_h    : std_logic_vector(  6 downto 4 );
     signal reg_min_l    : std_logic_vector(  3 downto 0 );      --  hl = x"00" ... x"59"
     signal reg_min_h    : std_logic_vector(  6 downto 4 );
-    signal reg_hou_l    : std_logic_vector(  3 downto 0 );      --  hl = x"00" ... x"23" 
-    signal reg_hou_h    : std_logic_vector(  5 downto 4 );      --  hl = x"00" ... x"23" 
+    signal reg_hou_l    : std_logic_vector(  3 downto 0 );      --  hl = x"00" ... x"23"
+    signal reg_hou_h    : std_logic_vector(  5 downto 4 );      --  hl = x"00" ... x"23"
     signal reg_wee      : std_logic_vector(  2 downto 0 );      --       x"0"  ... x"6"
     signal reg_day_l    : std_logic_vector(  3 downto 0 );      --  hl = x"00" ... x"31"
     signal reg_day_h    : std_logic_vector(  5 downto 4 );      --
@@ -82,7 +82,7 @@ architecture rtl of rtc is
     signal reg_yea_l    : std_logic_vector(  3 downto 0 );      --  hl = x"00" ... x"99"
     signal reg_yea_h    : std_logic_vector(  7 downto 4 );
     signal reg_1224     : std_logic;                            --  '0' = 12hour mode, '1' = 24hour mode
-    signal reg_leap     : std_logic_vector(  1 downto 0 );      --  "00" leap year, "01" ... "11" other year 
+    signal reg_leap     : std_logic_vector(  1 downto 0 );      --  "00" leap year, "01" ... "11" other year
 
     -- wire
     signal w_adr_dec    : std_logic_vector( 15 downto 0 );
@@ -549,7 +549,7 @@ begin
         clk     => clk21m       ,
         we      => w_mem_we     ,
         dbo     => dbo          ,
-        dbi     => w_mem_q      
+        dbi     => w_mem_q
     );
 
 end rtl;

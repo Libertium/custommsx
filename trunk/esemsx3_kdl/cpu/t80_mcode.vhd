@@ -1,7 +1,7 @@
 --
 -- Z80 compatible microprocessor core
 --
--- Version : 0242a
+-- Version : 0249
 --
 -- Copyright (c) 2001-2002 Daniel Wallner (jesus@opencores.org)
 --
@@ -64,6 +64,9 @@
 --             Fixed INI, IND, INIR, INDR, OUTI, OUTD, OTIR, OTDR instructions
 --
 --      0248 : add undocumented DDCB and FDCB opcodes by TobiFlex 20.04.2010
+--
+--      0249 : add undocumented XY-Flags for CPI/CPD by TobiFlex 22.07.2012
+--
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -101,6 +104,7 @@ entity T80_MCode is
                 Set_BusB_To     : out std_logic_vector(3 downto 0); -- B,C,D,E,H,L,DI,A,SP(L),SP(M),1,F,PC(L),PC(M),0
                 ALU_Op                  : out std_logic_vector(3 downto 0);
                         -- ADD, ADC, SUB, SBC, AND, XOR, OR, CP, ROT, BIT, SET, RES, DAA, RLD, RRD, None
+                ALU_cpi                 : out std_logic; --for undoc XY-Flags
                 Save_ALU                : out std_logic;
                 PreserveC               : out std_logic;
                 Arith16                 : out std_logic;
@@ -208,6 +212,7 @@ begin
                 Set_BusB_To <= "0000";
                 Set_BusA_To <= "0000";
                 ALU_Op <= "0" & IR(5 downto 3);
+                ALU_cpi <= '0';
                 Save_ALU <= '0';
                 PreserveC <= '0';
                 Arith16 <= '0';
@@ -1528,7 +1533,7 @@ begin
                     when others => null;
                     end case;
                 end if;
-                
+
             when "10000110"|"10001110"|"10010110"|"10011110"|"10100110"|"10101110"|"10110110"|"10111110" =>
                 -- RES b,(HL)
                 MCycles <= "011";
@@ -1710,6 +1715,7 @@ begin
                                         Set_BusB_To <= "0110";
                                         Set_BusA_To(2 downto 0) <= "111";
                                         ALU_Op <= "0111";
+                                        ALU_cpi <= '1';
                                         Save_ALU <= '1';
                                         PreserveC <= '1';
                                         if IR(3) = '0' then

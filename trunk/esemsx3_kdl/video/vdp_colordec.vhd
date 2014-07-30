@@ -37,18 +37,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -86,21 +86,21 @@ ENTITY VDP_COLORDEC IS
         VDPMODEGRAPHIC6     : IN    STD_LOGIC;
         VDPMODEGRAPHIC7     : IN    STD_LOGIC;
 
-        WINDOW              : IN    STD_LOGIC;                          -- JP: 有効表示領域だけ 1 になる 
-        SPRITECOLOROUT      : IN    STD_LOGIC;                          -- JP: スプライトの画素位置だけ 1 になる 
-        COLORCODET12        : IN    STD_LOGIC_VECTOR(  3 DOWNTO 0 );    -- JP: TEXT1, 2 の色 
-        COLORCODEG123M      : IN    STD_LOGIC_VECTOR(  3 DOWNTO 0 );    -- JP: GRAPHIC1,2,3,MOSAIC の色 
-        COLORCODEG4567      : IN    STD_LOGIC_VECTOR(  7 DOWNTO 0 );    -- JP: GRAPHIC4,5,6,7 の色 
-        COLORCODESPRITE     : IN    STD_LOGIC_VECTOR(  3 DOWNTO 0 );    -- JP: スプライトの色 
+        WINDOW              : IN    STD_LOGIC;                          -- JP: 有効表示領域だけ 1 になる
+        SPRITECOLOROUT      : IN    STD_LOGIC;                          -- JP: スプライトの画素位置だけ 1 になる
+        COLORCODET12        : IN    STD_LOGIC_VECTOR(  3 DOWNTO 0 );    -- JP: TEXT1, 2 の色
+        COLORCODEG123M      : IN    STD_LOGIC_VECTOR(  3 DOWNTO 0 );    -- JP: GRAPHIC1,2,3,MOSAIC の色
+        COLORCODEG4567      : IN    STD_LOGIC_VECTOR(  7 DOWNTO 0 );    -- JP: GRAPHIC4,5,6,7 の色
+        COLORCODESPRITE     : IN    STD_LOGIC_VECTOR(  3 DOWNTO 0 );    -- JP: スプライトの色
         P_YJK_R             : IN    STD_LOGIC_VECTOR(  5 DOWNTO 0 );
         P_YJK_G             : IN    STD_LOGIC_VECTOR(  5 DOWNTO 0 );
         P_YJK_B             : IN    STD_LOGIC_VECTOR(  5 DOWNTO 0 );
         P_YJK_EN            : IN    STD_LOGIC;
 
-        PVIDEOR_VDP         : OUT   STD_LOGIC_VECTOR(  5 DOWNTO 0 );    -- JP: モニタへ出力する色 
+        PVIDEOR_VDP         : OUT   STD_LOGIC_VECTOR(  5 DOWNTO 0 );    -- JP: モニタへ出力する色
         PVIDEOG_VDP         : OUT   STD_LOGIC_VECTOR(  5 DOWNTO 0 );
         PVIDEOB_VDP         : OUT   STD_LOGIC_VECTOR(  5 DOWNTO 0 );
-        -- REGISTERS 
+        -- REGISTERS
         REG_R1_DISP_ON      : IN    STD_LOGIC;
         REG_R7_FRAME_COL    : IN    STD_LOGIC_VECTOR(  7 DOWNTO 0 );
         REG_R8_COL0_ON      : IN    STD_LOGIC;
@@ -217,8 +217,8 @@ BEGIN
             FF_PALETTE_ADDR_G5  <= (OTHERS => '0');
         ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
             IF( W_EVEN_DOTSTATE = '1' )THEN
-                IF( WINDOW = '0' OR REG_R1_DISP_ON = '0' OR 
-                        (DOTSTATE(1) = '0' AND W_FORE_COLOR( 1 DOWNTO 0 ) = "00" AND REG_R8_COL0_ON = '0') OR 
+                IF( WINDOW = '0' OR REG_R1_DISP_ON = '0' OR
+                        (DOTSTATE(1) = '0' AND W_FORE_COLOR( 1 DOWNTO 0 ) = "00" AND REG_R8_COL0_ON = '0') OR
                         (DOTSTATE(1) = '1' AND W_FORE_COLOR( 3 DOWNTO 2 ) = "00" AND REG_R8_COL0_ON = '0') )THEN
                     IF( DOTSTATE(1) = '0' )THEN
                         FF_PALETTE_ADDR_G5  <= W_BACK_COLOR( 1 DOWNTO 0 );

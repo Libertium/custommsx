@@ -1,30 +1,30 @@
--- 
--- Operator.vhd 
+--
+-- Operator.vhd
 --
 -- Copyright (c) 2006 Mitsutaka Okazaki (brezza@pokipoki.org)
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --
@@ -52,13 +52,13 @@ entity Operator is
         FB      : in    FB_TYPE;
 
         noise   : in    std_logic;
-        pgout   : in    std_logic_vector( 17 downto 0 );    --  整数部 9bit, 小数部 9bit 
+        pgout   : in    std_logic_vector( 17 downto 0 );    --  整数部 9bit, 小数部 9bit
         egout   : in    std_logic_vector( 12 downto 0 );
 
         faddr   : out   CH_TYPE;
         fdata   : in    SIGNED_LI_TYPE;
 
-        opout   : out   std_logic_vector( 13 downto 0 )     -- 整数部 8bit, 小数部 6bit 
+        opout   : out   std_logic_vector( 13 downto 0 )     -- 整数部 8bit, 小数部 6bit
     );
 end Operator;
 
@@ -108,37 +108,37 @@ begin
                         w_modula_m;
 
     process( reset, clk )
-        variable opout_buf  : std_logic_vector( 13 downto 0 );  --  整数部 8bit, 小数部 6bit 
+        variable opout_buf  : std_logic_vector( 13 downto 0 );  --  整数部 8bit, 小数部 6bit
     begin
         if( reset = '1' )then
             opout       <= (others => '0');
             ff_egout    <= (others => '0');
         elsif( clk'event and clk='1' )then
             if( clkena = '1' )then
-                if( stage = "00" )then          
-                    --  サイン波の参照アドレス（位相）を決定するステージ 
+                if( stage = "00" )then
+                    --  サイン波の参照アドレス（位相）を決定するステージ
                     if(    rhythm = '1' and ( slot = 14 or slot = 17 ))then -- HH or CYM
                         addr <= (not noise) & "01111111" & "000000000";
                     elsif( rhythm = '1' and slot = 15 )then -- SD
                         addr <= (not pgout(pgout'high)) & "01111111" & "000000000";
                     elsif( rhythm = '1' and slot = 16 )then -- TOM
                         addr <= pgout;
-                    else 
+                    else
                         if( fdata.sign = '0' )then      -- modula は fdata の絶対値をシフトした値だから、ここで符号処理してる
                             addr <= pgout + w_modula(pgout'range);
-                        else                    
+                        else
                             addr <= pgout - w_modula(pgout'range);
                         end if;
                     end if;
-                    
+
                 elsif( stage = "01" )then
-                    --  決定された参照アドレスが u_sine_table へ供給されるステージ 
+                    --  決定された参照アドレスが u_sine_table へ供給されるステージ
                 elsif( stage = "10" )then
                     ff_egout <= egout;
 
-                    --  フィードバックメモリのアドレスを決めるステージ 
+                    --  フィードバックメモリのアドレスを決めるステージ
                     if( slot(0) = '1' )then
-                        if( conv_integer(slot)/2 = 8 )then 
+                        if( conv_integer(slot)/2 = 8 )then
                             faddr <= 0;
                         else
                             faddr <= conv_integer(slot)/2 + 1;  --  次のモジュレータのアドレスなので +1
@@ -147,12 +147,12 @@ begin
                 elsif( stage = "11" )then
                     -- SineTable からデータが出てくるステージ
                     if ( ( '0' & ff_egout ) + ('0'& data(12 downto 0) ) ) < "10000000000000" then
-                        opout_buf := data(13) & (ff_egout + data(12 downto 0) ); 
+                        opout_buf := data(13) & (ff_egout + data(12 downto 0) );
                     else
                         opout_buf := data(13) & "1111111111111";
                     end if;
                     opout <= opout_buf;
-                    --  決定されたフィードバックメモリアドレスが FeedBackMemory へ供給されるステージ 
+                    --  決定されたフィードバックメモリアドレスが FeedBackMemory へ供給されるステージ
                 end if;
             end if;
         end if;

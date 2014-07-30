@@ -1,7 +1,7 @@
 --
 -- Z80 compatible microprocessor core
 --
--- Version : 0247
+-- Version : 0249
 --
 -- Copyright (c) 2001-2002 Daniel Wallner (jesus@opencores.org)
 --
@@ -54,6 +54,8 @@
 --
 --  0247 : Cleanup
 --
+--  0249 : add undocumented XY-Flags for CPI/CPD by TobiFlex 22.07.2012
+--
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -61,7 +63,7 @@ use IEEE.numeric_std.all;
 
 entity T80_ALU is
     generic(
-        Mode : integer := 0;
+        Mode   : integer := 0;
         Flag_C : integer := 0;
         Flag_N : integer := 1;
         Flag_P : integer := 2;
@@ -74,6 +76,7 @@ entity T80_ALU is
     port(
         Arith16     : in std_logic;
         Z16         : in std_logic;
+        ALU_cpi     : in std_logic;
         ALU_Op      : in std_logic_vector(3 downto 0);
         IR          : in std_logic_vector(5 downto 0);
         ISet        : in std_logic_vector(1 downto 0);
@@ -113,6 +116,7 @@ architecture rtl of T80_ALU is
     signal  HalfCarry_v     : std_logic;
     signal  Carry_v         : std_logic;
     signal  Q_v             : std_logic_vector(7 downto 0);
+    signal  Q_cpi           : std_logic_vector(4 downto 0);
 
     signal  BitMask         : std_logic_vector(7 downto 0);
 
@@ -133,7 +137,9 @@ begin
     AddSub(BusA(7 downto 7), BusB(7 downto 7), ALU_Op(1), Carry7_v, Q_v(7 downto 7), Carry_v);
     OverFlow_v <= Carry_v xor Carry7_v;
 
-    process (Arith16, ALU_OP, F_In, BusA, BusB, IR, Q_v, Carry_v, HalfCarry_v, OverFlow_v, BitMask, ISet, Z16)
+    AddSub(BusA(3 downto 0), BusB(3 downto 0), '1', HalfCarry_v, Q_cpi(3 downto 0), Q_cpi(4));
+
+    process (Arith16, ALU_OP, ALU_cpi, F_In, BusA, BusB, IR, Q_v, Q_cpi, Carry_v, HalfCarry_v, OverFlow_v, BitMask, ISet, Z16)
         variable Q_t : std_logic_vector(7 downto 0);
         variable DAA_Q : unsigned(8 downto 0);
     begin
@@ -167,8 +173,13 @@ begin
                 F_Out(Flag_H) <= '0';
             end case;
             if ALU_Op(2 downto 0) = "111" then -- CP
-                F_Out(Flag_X) <= BusB(3);
-                F_Out(Flag_Y) <= BusB(5);
+                if ALU_cpi='1' then --CPI
+                    F_Out(Flag_X) <= Q_cpi(3);
+                    F_Out(Flag_Y) <= Q_cpi(1);
+                else
+                    F_Out(Flag_X) <= BusB(3);
+                    F_Out(Flag_Y) <= BusB(5);
+                end if;
             else
                 F_Out(Flag_X) <= Q_t(3);
                 F_Out(Flag_Y) <= Q_t(5);

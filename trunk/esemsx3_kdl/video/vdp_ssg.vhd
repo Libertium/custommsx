@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -197,7 +197,7 @@ BEGIN
 
         PAL_MODE            => VDPR9PALMODE         ,
         INTERLACE_MODE      => REG_R9_INTERLACE_MODE,
-        Y212_MODE           => REG_R9_Y_DOTS        
+        Y212_MODE           => REG_R9_Y_DOTS
     );
 
     --------------------------------------------------------------------------
@@ -282,7 +282,7 @@ BEGIN
         ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
             IF( W_H_CNT = ("00" & OFFSET_X & "10") )THEN
                 FF_PRE_X_CNT <= W_PRE_X_CNT_START2;
-            ELSIF( W_H_CNT(1 DOWNTO 0) = "10" )THEN 
+            ELSIF( W_H_CNT(1 DOWNTO 0) = "10" )THEN
                 FF_PRE_X_CNT <= FF_PRE_X_CNT + 1;
             END IF;
         END IF;
@@ -295,7 +295,7 @@ BEGIN
         ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
             IF( W_H_CNT = ("00" & OFFSET_X & "10" ) )THEN
                 -- HOLD
-            ELSIF( W_H_CNT(1 DOWNTO 0) = "10") THEN 
+            ELSIF( W_H_CNT(1 DOWNTO 0) = "10") THEN
                 IF( FF_PRE_X_CNT = "111111111" )THEN
                     -- JP: FF_PRE_X_CNT が -1から0にカウントアップする時にFF_X_CNTを-8にする
                     FF_X_CNT <= "111111000";        -- -8
@@ -421,7 +421,11 @@ BEGIN
                     FF_MONITOR_LINE <= PREDOTCOUNTERYPSTART + W_Y_ADJ;
                     PREWINDOW_Y_SP <= '1';
                 ELSE
-                    PREDOTCOUNTER_YP_V := FF_MONITOR_LINE + 1;
+                    IF( FF_MONITOR_LINE = 227 )THEN
+                        PREDOTCOUNTER_YP_V := FF_MONITOR_LINE;
+                    ELSE
+                        PREDOTCOUNTER_YP_V := FF_MONITOR_LINE + 1;
+                    END IF;
                     IF( PREDOTCOUNTER_YP_V = 0 ) THEN
                         PREWINDOW_Y <= '1';
                     ELSIF(  ((REG_R9_Y_DOTS = '0') AND (PREDOTCOUNTER_YP_V = 192)) OR
@@ -455,7 +459,7 @@ BEGIN
                             '0';
 
     PROCESS( CLK21M )
-        VARIABLE VSYNCINTSTARTLINE : STD_LOGIC_VECTOR(10 DOWNTO 0);
+--      VARIABLE VSYNCINTSTARTLINE : STD_LOGIC_VECTOR(10 DOWNTO 0);                -- unused
     BEGIN
         IF( CLK21M'EVENT AND CLK21M = '1' )THEN
             IF( W_HSYNC = '1' )THEN

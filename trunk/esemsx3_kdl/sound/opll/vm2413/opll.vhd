@@ -1,30 +1,30 @@
--- 
--- Opll.vhd 
+--
+-- Opll.vhd
 --
 -- Copyright (c) 2006 Mitsutaka Okazaki (brezza@pokipoki.org)
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --
@@ -72,14 +72,14 @@ architecture rtl of opll is
         clk     : in    std_logic;
         reset   : in    std_logic;
         clkena  : in    std_logic;
-        
+
         slot    : in    slot_type;
         stage   : in    stage_type;
-    
+
         wr      : in    std_logic;
         addr    : in    std_logic_vector( 7 downto 0 );
         data    : in    std_logic_vector( 7 downto 0 );
-        
+
         am      : out   am_type;
         pm      : out   pm_type;
         wf      : out   wf_type;
@@ -103,7 +103,7 @@ architecture rtl of opll is
         clk     : in    std_logic;
         reset   : in    std_logic;
         clkena  : in    std_logic;
-    
+
         slot    : in    slot_type;
         stage   : in    stage_type;
         rhythm  : in    std_logic;
@@ -141,7 +141,7 @@ architecture rtl of opll is
         pgout   : out   std_logic_vector( 17 downto 0 )
     );
     end component;
-    
+
     component operator
     port (
         clk     : in    std_logic;
@@ -150,21 +150,21 @@ architecture rtl of opll is
         slot    : in    slot_type;
         stage   : in    stage_type;
         rhythm  : in    std_logic;
-                
+
         wf      : in    wf_type;
         fb      : in    fb_type;
-             
+
         noise   : in    std_logic;
         pgout   : in    std_logic_vector( 17 downto 0 );
         egout   : in    std_logic_vector( 12 downto 0 );
-        
+
         faddr   : out   ch_type;
         fdata   : in    signed_li_type;
-        
+
         opout   : out   std_logic_vector( 13 downto 0 )
-    );              
+    );
     end component;
-    
+
     component outputgenerator
     port (
         clk     : in    std_logic;
@@ -173,9 +173,9 @@ architecture rtl of opll is
         slot    : in    slot_type;
         stage   : in    stage_type;
         rhythm  : in    std_logic;
-        
+
         opout   : in    std_logic_vector( 13 downto 0 );
-        
+
         faddr   : in    ch_type;
         fdata   : out   signed_li_type;
 
@@ -183,28 +183,28 @@ architecture rtl of opll is
         mdata   : out   signed_li_type
     );
     end component;
-    
+
     component temporalmixer
     port (
         clk     : in std_logic;
         reset   : in std_logic;
         clkena  : in std_logic;
-        
+
         slot    : in slot_type;
         stage   : in stage_type;
 
         rhythm  : in std_logic;
-        
+
         maddr   : out slot_type;
         mdata   : in signed_li_type;
-        
+
         mo      : out std_logic_vector(9 downto 0);
         ro      : out std_logic_vector(9 downto 0)
-    );              
+    );
     end component;
 
     signal reset    : std_logic;
-    
+
     signal opllptr  : std_logic_vector( 7 downto 0 );
     signal oplldat  : std_logic_vector( 7 downto 0 );
     signal opllwr   : std_logic;
@@ -223,17 +223,17 @@ architecture rtl of opll is
     signal blk      : blk_type;
     signal rks      : rks_type;
     signal key      : std_logic;
-    
+
     signal rhythm   : std_logic;
 
     signal noise    : std_logic;
-    signal pgout    : std_logic_vector( 17 downto 0 );  --  整数部 9bit, 小数部 9bit 
-    
+    signal pgout    : std_logic_vector( 17 downto 0 );  --  整数部 9bit, 小数部 9bit
+
     signal egout    : std_logic_vector( 12 downto 0 );
-    
+
     signal opout    : std_logic_vector( 13 downto 0 );
-    
-    
+
+
     signal faddr    : ch_type;
     signal maddr    : slot_type;
     signal fdata    : signed_li_type;
@@ -265,11 +265,11 @@ begin
         elsif( xin'event and xin = '1' )then
             if( xena = '1' )then
                 if(    cs_n = '0' and we_n = '0' and a = '0' )then
-                    --  内部レジスタアドレス指定レジスタ への書き込み 
+                    --  内部レジスタアドレス指定レジスタ への書き込み
                     opllptr <= d;
                     opllwr  <= '0';
                 elsif( cs_n = '0' and we_n = '0' and a = '1' )then
-                    --  内部レジスタ への書き込み 
+                    --  内部レジスタ への書き込み
                     oplldat <= d;
                     opllwr  <= '1';
                 end if;
@@ -333,37 +333,37 @@ begin
 
     -- 2 stages delay
     eg: envelopegenerator port map (
-        xin,reset,xena, 
-        slot2, stage2, rhythm, 
-        am, tl, ar, dr, sl, rr, rks, key, 
+        xin,reset,xena,
+        slot2, stage2, rhythm,
+        am, tl, ar, dr, sl, rr, rks, key,
         egout
     );
 
     pg: phasegenerator port map (
-        xin,reset,xena, 
+        xin,reset,xena,
         slot2, stage2, rhythm,
-        pm, ml, blk, fnum, key, 
+        pm, ml, blk, fnum, key,
         noise, pgout
     );
 
     -- 5 stages delay
-    op: operator port map ( 
-        xin,reset,xena, 
-        slot5, stage5, rhythm, 
+    op: operator port map (
+        xin,reset,xena,
+        slot5, stage5, rhythm,
         wf, fb, noise, pgout, egout, faddr, fdata, opout
     );
 
     -- 8 stages delay
     og: outputgenerator port map (
-        xin, reset, xena, slot8, stage8, rhythm, 
+        xin, reset, xena, slot8, stage8, rhythm,
         opout, faddr, fdata, maddr, mdata
     );
 
     -- independent from delay
     tm: temporalmixer port map (
-        xin, reset, xena, 
-        slot, stage, rhythm, 
-        maddr, mdata, 
+        xin, reset, xena,
+        slot, stage, rhythm,
+        maddr, mdata,
         mo, ro
     );
 

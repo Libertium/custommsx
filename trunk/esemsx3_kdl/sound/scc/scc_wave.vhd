@@ -1,34 +1,34 @@
--- 
+--
 -- scc_wave.vhd
 --   Sound generator with wave table
 --   Revision 1.00
--- 
+--
 -- Copyright (c) 2006 Kazuhiro Tsujikawa (ESE Artists' factory)
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--- 
+--
 
 --  2007/01/31  modified by t.hara
 
@@ -38,9 +38,9 @@ library ieee;
 
 entity scc_wave_mul is
     port(
-        a           : in    std_logic_vector(  7 downto 0 );    -- 8bit ２の補数 
-        b           : in    std_logic_vector(  3 downto 0 );    -- 4bit バイナリ 
-        c           : out   std_logic_vector( 11 downto 0 )     -- 12bit ２の補数 
+        a           : in    std_logic_vector(  7 downto 0 );    -- 8bit ２の補数
+        b           : in    std_logic_vector(  3 downto 0 );    -- 4bit バイナリ
+        c           : out   std_logic_vector( 11 downto 0 )     -- 12bit ２の補数
     );
 end scc_wave_mul;
 
@@ -58,9 +58,9 @@ library ieee;
 
 entity scc_mix_mul is
     port(
-        a           : in    std_logic_vector( 15 downto 0 );    -- 16bit ２の補数 
-        b           : in    std_logic_vector(  2 downto 0 );    -- 3bit バイナリ 
-        c           : out   std_logic_vector( 18 downto 0 )     -- 19bit ２の補数 
+        a           : in    std_logic_vector( 15 downto 0 );    -- 16bit ２の補数
+        b           : in    std_logic_vector(  2 downto 0 );    -- 3bit バイナリ
+        c           : out   std_logic_vector( 18 downto 0 )     -- 19bit ２の補数
     );
 end scc_mix_mul;
 
@@ -105,9 +105,9 @@ architecture rtl of scc_wave is
 
     component scc_wave_mul
         port(
-            a   : in    std_logic_vector(  7 downto 0 );    -- 8bit ２の補数 
-            b   : in    std_logic_vector(  3 downto 0 );    -- 4bit バイナリ 
-            c   : out   std_logic_vector( 11 downto 0 )     -- 12bit ２の補数 
+            a   : in    std_logic_vector(  7 downto 0 );    -- 8bit ２の補数
+            b   : in    std_logic_vector(  3 downto 0 );    -- 4bit バイナリ
+            c   : out   std_logic_vector( 11 downto 0 )     -- 12bit ２の補数
         );
     end component;
 
@@ -328,7 +328,7 @@ begin
         clk => clk21m       ,
         we  => w_wave_we    ,
         dbo => dbo          ,
-        dbi => ram_dbi  
+        dbi => ram_dbi
     );
 
     --  wave memory read
@@ -389,35 +389,35 @@ begin
         reg_vol_ch_e        when "101",
         (others => '0') when others;
 
-    w_wave  <=  (w_ch_mask and ff_wave_dat);        -- 8bit 二の補数 
+    w_wave  <=  (w_ch_mask and ff_wave_dat);        -- 8bit 二の補数
 
     u_mul: scc_wave_mul
     port map (
-        a   => w_wave   ,   -- 8bit 二の補数 
-        b   => w_ch_vol ,   -- 4bit バイナリ（符号無し） 
-        c   => w_mul        -- 12bit 二の補数 
+        a   => w_wave   ,   -- 8bit 二の補数
+        b   => w_ch_vol ,   -- 4bit バイナリ（符号無し）
+        c   => w_mul        -- 12bit 二の補数
     );
 
     -- -------------------------------------------------------------
-    --  ff_ch_num   X 0   X 1   X 2   X 3   X 4   X 5   X 0   
-    --  ff_ch_num_dl      X 0   X 1   X 2   X 3   X 4   X 5   X 0   
+    --  ff_ch_num   X 0   X 1   X 2   X 3   X 4   X 5   X 0
+    --  ff_ch_num_dl      X 0   X 1   X 2   X 3   X 4   X 5   X 0
     --  w_wave_adr  X chA X chB X chC X chD X chE
     --  ram_dbi           X chA X chB X chC X chD X chE
     --  ff_wave_dat             X chA X chB X chC X chD X chE
     --  ff_mix                        X a   X ab  X a-c X a-d X a-e X 0
-    --  wave                                                        X a-e 
+    --  wave                                                        X a-e
     -- -------------------------------------------------------------
     --  w_wave_ce   X 0   X 1   X 0
     --  ff_wave_ce  X 0         X 1   X 0
     --  ff_wave_ce_dl     X 0         X 1   X 0
     --
-    --  ff_ch_num   X 0   X 1         X 2   X 3   X 4   X 5   X 0   
-    --  ff_ch_num_dl      X 0   X 1         X 2   X 3   X 4   X 5   X 0   
+    --  ff_ch_num   X 0   X 1         X 2   X 3   X 4   X 5   X 0
+    --  ff_ch_num_dl      X 0   X 1         X 2   X 3   X 4   X 5   X 0
     --  w_wave_adr  X chA X chB       X chC X chD X chE
     --  ram_dbi           X chA X chB       X chC X chD X chE
     --  ff_wave_dat             X chA X chB       X chC X chD X chE
     --  ff_mix                        X a         X ab  X a-c X a-d X a-e X 0
-    --  wave                                                              X a-e 
+    --  wave                                                              X a-e
     -- -------------------------------------------------------------
     --  w_wave_ce   X 0                           X 1   X 0
     --  ff_wave_ce  X 0                                 X 1   X 0
@@ -430,9 +430,9 @@ begin
     --  ram_dbi           X chA X chB X chC X chD X chE       X chA       X chB X chC X
     --  ff_wave_dat             X chA X chB X chC X chD X chE       X chA       X chB X chC X
     --  ff_mix                        X a   X ab  X a-c X a-d X a-e       X 0   X a   X ab  X
-    --  wave                                                              X a-e 
+    --  wave                                                              X a-e
     --                                                                     ~~~~~
-    --  wave は、ff_wave_ce_dl = 0 and ff_ch_num_dl = 0 のとき ff_mix を取り込む 
+    --  wave は、ff_wave_ce_dl = 0 and ff_ch_num_dl = 0 のとき ff_mix を取り込む
     ----------------------------------------------------------------
     process( reset, clk21m )
     begin
@@ -459,7 +459,7 @@ begin
                 if( ff_ch_num_dl = "000" )then
                     ff_mix  <=  (others => '0');
                 else
-                    ff_mix  <=  (w_mul(11) & w_mul(11) & w_mul(11) & w_mul) + ff_mix;   -- 15bit 二の補数 
+                    ff_mix  <=  (w_mul(11) & w_mul(11) & w_mul(11) & w_mul) + ff_mix;   -- 15bit 二の補数
                 end if;
             end if;
         end if;
