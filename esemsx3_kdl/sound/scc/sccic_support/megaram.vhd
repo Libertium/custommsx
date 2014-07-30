@@ -1,34 +1,34 @@
--- 
+--
 -- megaram.vhd
 --   Mega-ROM emulation, ASC8K/16K/SCC+(8Mbits)
 --   Revision 1.00
--- 
+--
 -- Copyright (c) 2006 Kazuhiro Tsujikawa (ESE Artists' factory)
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--- 
+--
 
 --
 --  modified by t.hara
@@ -162,9 +162,9 @@ begin
                 (others => '1');
 
     -- SCC address decoder
-    SccSel  <= 
+    SccSel  <=
             "10" when   -- memory access (scc_wave)
-                        (adr(8) = '0' and SccModeB(4) = '0' and mapsel(0) = '0' and 
+                        (adr(8) = '0' and SccModeB(4) = '0' and mapsel(0) = '0' and
                         (DecSccA = '1' or DecSccB = '1')) else
             "01" when   -- memory access (MEGA-ROM)
                         -- 4000-7FFFh(R/-, ASC8K/16K)
@@ -220,33 +220,33 @@ begin
             if( mapsel(0) = '0' )then
 
                 -- Mapped I/O port access on 5000-57FFh ... Bank register write
-                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 11) = "01010" and 
+                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 11) = "01010" and
                         SccModeA(6) = '0' and SccModeA(4) = '0' and SccModeB(4) = '0') then
                     SccBank0 <= dbo;
                 end if;
                 -- Mapped I/O port access on 7000-77FFh ... Bank register write
-                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 11) = "01110" and 
+                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 11) = "01110" and
                         SccModeA(6) = '0' and SccModeA(4) = '0' and SccModeB(4) = '0') then
                     SccBank1 <= dbo;
                 end if;
                 -- Mapped I/O port access on 9000-97FFh ... Bank register write
-                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 11) = "10010" and 
+                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 11) = "10010" and
                         SccModeB(4) = '0') then
                     SccBank2 <= dbo;
                 end if;
                 -- Mapped I/O port access on B000-B7FFh ... Bank register write
-                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 11) = "10110" and 
+                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 11) = "10110" and
                         SccModeA(6) = '0' and SccModeA(4) = '0' and SccModeB(4) = '0') then
                     SccBank3 <= dbo;
                 end if;
                 -- Mapped I/O port access on 7FFE-7FFFh ... Register write
-                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 13) = "011" and 
-                        Dec1FFE = '1' and SccModeB(5 downto 4) = "00") then 
+                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 13) = "011" and
+                        Dec1FFE = '1' and SccModeB(5 downto 4) = "00") then
                     SccModeA <= dbo;
                 end if;
                 -- Mapped I/O port access on BFFE-BFFFh ... Register write
-                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 13) = "101" and 
-                        Dec1FFE = '1' and SccModeA(6) = '0' and SccModeA(4) = '0') then 
+                if (req = '1' and SccSel = "00" and wrt = '1' and adr(15 downto 13) = "101" and
+                        Dec1FFE = '1' and SccModeA(6) = '0' and SccModeA(4) = '0') then
                     SccModeB <= dbo;
                 end if;
 
@@ -299,7 +299,7 @@ begin
         adr     => WavAdr       ,
         dbi     => WavDbi       ,
         dbo     => dbo          ,
-        wave    => SccAmp       
+        wave    => SccAmp
     );
 
     ----------------------------------------------------------------

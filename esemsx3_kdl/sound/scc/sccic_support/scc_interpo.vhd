@@ -1,34 +1,34 @@
--- 
+--
 -- scc_interpo.vhd
 --   SCC intelligent interpolation
 --   Revision 1.00
--- 
+--
 -- Copyright (c) 2007 Takayuki Hara.
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--- 
+--
 
 library ieee;
     use ieee.std_logic_1164.all;
@@ -36,34 +36,34 @@ library ieee;
 
 entity scc_interpo is
     port(
-        reset       : in    std_logic;                          -- 非同期リセット 
-        clk         : in    std_logic;                          -- ベースクロック 
-        clkena      : in    std_logic;                          -- クロックイネーブラ 
-        clear       : in    std_logic;                          -- 同期リセット 
-        left        : in    std_logic_vector(  7 downto 0 );    -- 補間左側サンプル 
-        right       : in    std_logic_vector(  7 downto 0 );    -- 補間右側サンプル 
-        wave        : out   std_logic_vector(  7 downto 0 );    -- 出力サンプル 
-        reg_en      : in    std_logic;                          -- 補間有効/無効 
-        reg_th1     : in    std_logic_vector(  7 downto 0 );    -- 閾値1 
-        reg_th2     : in    std_logic_vector(  7 downto 0 );    -- 閾値2 
-        reg_th3     : in    std_logic_vector(  7 downto 0 );    -- 閾値3 
-        reg_cnt     : in    std_logic_vector( 11 downto 0 )     -- 分周比 
+        reset       : in    std_logic;                          -- 非同期リセット
+        clk         : in    std_logic;                          -- ベースクロック
+        clkena      : in    std_logic;                          -- クロックイネーブラ
+        clear       : in    std_logic;                          -- 同期リセット
+        left        : in    std_logic_vector(  7 downto 0 );    -- 補間左側サンプル
+        right       : in    std_logic_vector(  7 downto 0 );    -- 補間右側サンプル
+        wave        : out   std_logic_vector(  7 downto 0 );    -- 出力サンプル
+        reg_en      : in    std_logic;                          -- 補間有効/無効
+        reg_th1     : in    std_logic_vector(  7 downto 0 );    -- 閾値1
+        reg_th2     : in    std_logic_vector(  7 downto 0 );    -- 閾値2
+        reg_th3     : in    std_logic_vector(  7 downto 0 );    -- 閾値3
+        reg_cnt     : in    std_logic_vector( 11 downto 0 )     -- 分周比
     );
 end scc_interpo;
 
 architecture rtl of scc_interpo is
-    signal ff_sign      : std_logic_vector(  1 downto 0 );      -- 符号付き 
+    signal ff_sign      : std_logic_vector(  1 downto 0 );      -- 符号付き
     signal ff_abs       : std_logic_vector(  7 downto 0 );
-    signal ff_left_d1   : std_logic_vector(  7 downto 0 );      -- 符号付き 
+    signal ff_left_d1   : std_logic_vector(  7 downto 0 );      -- 符号付き
     signal ff_itg       : std_logic_vector( 12 downto 0 );
-    signal ff_add       : std_logic_vector(  8 downto 0 );      -- 符号付き 
-    signal ff_ch_x      : std_logic_vector(  7 downto 0 );      -- 符号付き 
+    signal ff_add       : std_logic_vector(  8 downto 0 );      -- 符号付き
+    signal ff_ch_x      : std_logic_vector(  7 downto 0 );      -- 符号付き
 
-    signal w_diff       : std_logic_vector(  8 downto 0 );      -- 符号付き 
-    signal w_dir        : std_logic_vector(  8 downto 0 );      -- 符号付き 
-    signal w_sign       : std_logic_vector(  1 downto 0 );      -- 符号付き 
+    signal w_diff       : std_logic_vector(  8 downto 0 );      -- 符号付き
+    signal w_dir        : std_logic_vector(  8 downto 0 );      -- 符号付き
+    signal w_sign       : std_logic_vector(  1 downto 0 );      -- 符号付き
     signal w_msbfil     : std_logic_vector(  7 downto 0 );
-    signal w_comp       : std_logic_vector(  7 downto 0 );      -- １の補数 
+    signal w_comp       : std_logic_vector(  7 downto 0 );      -- １の補数
     signal w_abs        : std_logic_vector(  7 downto 0 );
     signal w_abssft     : std_logic_vector(  7 downto 0 );
     signal w_preitg     : std_logic_vector( 12 downto 0 );
@@ -72,9 +72,9 @@ architecture rtl of scc_interpo is
     signal w_carry      : std_logic_vector( 11 downto 0 );
     signal w_addsign    : std_logic_vector(  1 downto 0 );
     signal w_addsign_s  : std_logic_vector(  8 downto 1 );
-    signal w_preadd     : std_logic_vector(  8 downto 0 );      -- 符号付き 
-    signal w_prech_x    : std_logic_vector(  9 downto 0 );      -- 符号付き 
-    signal w_ch_x       : std_logic_vector(  7 downto 0 );      -- 符号付き 
+    signal w_preadd     : std_logic_vector(  8 downto 0 );      -- 符号付き
+    signal w_prech_x    : std_logic_vector(  9 downto 0 );      -- 符号付き
+    signal w_ch_x       : std_logic_vector(  7 downto 0 );      -- 符号付き
 begin
 
     --  stage1
@@ -154,10 +154,10 @@ begin
         elsif( clk'event and clk = '1' )then
             if( clkena = '1' )then
                 if( reg_en = '1' )then
-                    --  補間有効 
+                    --  補間有効
                     ff_ch_x <=  w_ch_x;
                 else
-                    --  補間無効 
+                    --  補間無効
                     ff_ch_x <=  ff_left_d1;
                 end if;
             end if;

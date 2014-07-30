@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -124,7 +124,7 @@ package vdp_package is
       hCounterIn : in std_logic_vector(10 downto 0);
       vCounterIn : in std_logic_vector(10 downto 0);
       interlaceMode : in std_logic;
-      
+
       -- Video Output
       videoRout : out std_logic_vector( 5 downto 0);
       videoGout : out std_logic_vector( 5 downto 0);
@@ -149,7 +149,7 @@ package vdp_package is
       hCounterIn : in std_logic_vector(10 downto 0);
       vCounterIn : in std_logic_vector(10 downto 0);
       interlaceMode : in std_logic;
-      
+
       -- Video Output
       videoRout : out std_logic_vector( 5 downto 0);
       videoGout : out std_logic_vector( 5 downto 0);
@@ -158,7 +158,7 @@ package vdp_package is
       videoVSout_n : out std_logic
       );
   end component;
-  
+
   component vga
     port(
       -- VDP clock ... 21.477MHz
@@ -174,7 +174,7 @@ package vdp_package is
       hCounterIn : in std_logic_vector(10 downto 0);
       vCounterIn : in std_logic_vector(10 downto 0);
       interlaceMode : in std_logic;
-      
+
       -- Video Output
       videoRout : out std_logic_vector( 5 downto 0);
       videoGout : out std_logic_vector( 5 downto 0);
@@ -227,7 +227,7 @@ package vdp_package is
       vdpR7FrameColor : in std_logic_vector( 7 downto 0);
       vdpR12BlinkColor : in std_logic_vector( 7 downto 0);
       vdpR13BlinkPeriod : in std_logic_vector( 7 downto 0);
-      
+
       vdpR2PtnNameTblBaseAddr : in std_logic_vector(6 downto 0);
       vdpR4PtnGeneTblBaseAddr : in std_logic_vector(5 downto 0);
       vdpR10R3ColorTblBaseAddr : in std_logic_vector(10 downto 0);
@@ -356,7 +356,7 @@ package vdp_package is
       -- VDP clock ... 21.477MHz
       clk21m  : in std_logic;
       reset   : in std_logic;
-      
+
       -- video timing
       h_counter  : in std_logic_vector(10 downto 0);
       dotCounterY : in std_logic_vector( 7 downto 0);
@@ -375,9 +375,9 @@ package vdp_package is
       );
   end component;
 
-  -- convert character to 8 bit signed 
+  -- convert character to 8 bit signed
   function char_to_std_logic_vector (char : character) return std_logic_vector;
-  
+
 end vdp_package;
 
 
@@ -389,8 +389,8 @@ end vdp_package;
 package body vdp_package is
 function char_to_std_logic_vector (char : character) return std_logic_vector is
     variable result: std_logic_vector(7 downto 0);
-  begin 
-    case char is 
+  begin
+    case char is
       when ' ' =>  result := X"20";
       when '!' =>  result := X"21";
       when '"' =>  result := X"22";
@@ -488,9 +488,9 @@ function char_to_std_logic_vector (char : character) return std_logic_vector is
       when '~' =>  result := X"7e";
 --      when ' ' =>  result := X"7f";
       when others =>  result := X"20";
-    end case; 
-    
-    return result; 
+    end case;
+
+    return result;
   end;
-    
+
 end vdp_package;

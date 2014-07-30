@@ -1,34 +1,34 @@
--- 
+--
 -- vencode.vhd
 --   RGB to NTSC video encoder
 --   Revision 1.00
--- 
+--
 -- Copyright (c) 2006 Kazuhiro Tsujikawa (ESE Artists' factory)
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--- 
+--
 
 LIBRARY IEEE;
     USE IEEE.STD_LOGIC_1164.ALL;
@@ -46,7 +46,7 @@ ENTITY VENCODE IS
         VIDEOB          : IN    STD_LOGIC_VECTOR(  5 DOWNTO 0 );
         VIDEOHS_N       : IN    STD_LOGIC;
         VIDEOVS_N       : IN    STD_LOGIC;
-        
+
         -- VIDEO OUTPUT
         VIDEOY          : OUT   STD_LOGIC_VECTOR(  5 DOWNTO 0 );
         VIDEOC          : OUT   STD_LOGIC_VECTOR(  5 DOWNTO 0 );
@@ -72,7 +72,7 @@ ARCHITECTURE RTL OF VENCODE IS
     SIGNAL FF_TABLEDAT      : STD_LOGIC_VECTOR(  7 DOWNTO 0 );
     SIGNAL FF_PAL_DET_CNT   : STD_LOGIC_VECTOR(  8 DOWNTO 0 );
     SIGNAL FF_PAL_MODE      : STD_LOGIC;
-    
+
     SIGNAL FF_IVIDEOR       : STD_LOGIC_VECTOR(  5 DOWNTO 0 );
     SIGNAL FF_IVIDEOG       : STD_LOGIC_VECTOR(  5 DOWNTO 0 );
     SIGNAL FF_IVIDEOB       : STD_LOGIC_VECTOR(  5 DOWNTO 0 );
@@ -103,10 +103,10 @@ ARCHITECTURE RTL OF VENCODE IS
 
     TYPE TYPTABLE IS ARRAY (0 TO 31) OF STD_LOGIC_VECTOR(7 DOWNTO 0);
     CONSTANT TABLE : TYPTABLE :=(
-        X"00", X"FA", X"0C", X"EE", X"18", X"E7", X"18", X"E7", 
-        X"18", X"E7", X"18", X"E7", X"18", X"E7", X"18", X"E7", 
-        X"18", X"E7", X"18", X"EE", X"0C", X"FA", X"00", X"00", 
-        X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00"  
+        X"00", X"FA", X"0C", X"EE", X"18", X"E7", X"18", X"E7",
+        X"18", X"E7", X"18", X"E7", X"18", X"E7", X"18", X"E7",
+        X"18", X"E7", X"18", X"EE", X"0C", X"FA", X"00", X"00",
+        X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00"
     );
 
 BEGIN

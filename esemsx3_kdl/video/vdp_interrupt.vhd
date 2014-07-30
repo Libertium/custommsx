@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -60,6 +60,7 @@ LIBRARY IEEE;
     USE IEEE.STD_LOGIC_1164.ALL;
     USE IEEE.STD_LOGIC_UNSIGNED.ALL;
     USE IEEE.STD_LOGIC_ARITH.ALL;
+    USE WORK.VDP_PACKAGE.ALL;
 
 ENTITY VDP_INTERRUPT IS
     PORT(
@@ -91,7 +92,7 @@ BEGIN
     -----------------------------------------------------------------------------
     -- VSYNC INTERRUPT REQUEST
     -----------------------------------------------------------------------------
-    W_VSYNC_INTR_TIMING <=  '1' WHEN( H_CNT = 235 )ELSE
+    W_VSYNC_INTR_TIMING <=  '1' WHEN( H_CNT = LEFT_BORDER )ELSE
                             '0';
 
     PROCESS( RESET, CLK21M )
@@ -102,7 +103,7 @@ BEGIN
             IF( CLR_VSYNC_INT = '1' )THEN
                 -- V-BLANKING INTERRUPT CLEAR
                 FF_VSYNC_INT_N <= '1';
-            ELSIF( W_VSYNC_INTR_TIMING = '1' AND V_BLANKING_START = '1' )THEN
+            ELSIF( ( W_VSYNC_INTR_TIMING = '1' ) AND ( V_BLANKING_START = '1' ) )THEN
                 -- V-BLANKING INTERRUPT REQUEST
                 FF_VSYNC_INT_N <= '0';
             END IF;
@@ -117,10 +118,10 @@ BEGIN
         IF (RESET = '1') THEN
             FF_HSYNC_INT_N <= '1';
         ELSIF (CLK21M'EVENT AND CLK21M = '1') THEN
-            IF( CLR_HSYNC_INT = '1' OR (W_VSYNC_INTR_TIMING = '1' AND V_BLANKING_START = '1') )THEN
+            IF( CLR_HSYNC_INT = '1' OR ( ( W_VSYNC_INTR_TIMING = '1' ) AND ( V_BLANKING_START = '1' ) ) )THEN
                 -- H-BLANKING INTERRUPT CLEAR
                 FF_HSYNC_INT_N <= '1';
-            ELSIF( H_CNT = 1235 AND ACTIVE_LINE = '1' AND Y_CNT = REG_R19_HSYNC_INT_LINE )THEN
+            ELSIF( ( ACTIVE_LINE = '1' ) AND ( Y_CNT = REG_R19_HSYNC_INT_LINE ) )THEN
                 -- H-BLANKING INTERRUPT REQUEST
                 FF_HSYNC_INT_N <= '0';
             END IF;

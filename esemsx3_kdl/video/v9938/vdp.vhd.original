@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -57,7 +57,7 @@
 --
 -------------------------------------------------------------------------------
 -- Contributors
---  
+--
 --   Kazuhiro Tsujikawa
 --     - Bug fixes
 --   Alex Wulms
@@ -328,7 +328,7 @@ architecture rtl of vdp is
   signal dotState : std_logic_vector( 1 downto 0);
   signal eightDotState : std_logic_vector( 2 downto 0);
 
-  -- display field signal  
+  -- display field signal
   signal field  : std_logic;
 
   -- for vsync interrupt
@@ -344,7 +344,7 @@ architecture rtl of vdp is
   signal hsyncIntAck : std_logic;
   signal dVideoHS_n : std_logic;
   signal enaHsync : std_logic;
-  
+
   -- display area flags
   signal window_x :std_logic;
   signal window :std_logic;
@@ -379,7 +379,7 @@ architecture rtl of vdp is
   signal registerRamReadData : std_logic_vector( 7 downto 0);
   signal registerRamData_out : std_logic_vector( 7 downto 0);
   signal registerRamData_in  : std_logic_vector( 7 downto 0);
-  
+
   signal VdpP1Is1stByte : std_logic;
   signal VdpP2Is1stByte : std_logic;
   signal VdpP0Data : std_logic_vector( 7 downto 0);
@@ -479,7 +479,7 @@ architecture rtl of vdp is
   -- for graphic 4,5,6,7
   signal pRamAdrG4567 : std_logic_vector(16 downto 0);
   signal colorCodeG4567 : std_logic_vector( 7 downto 0);
-  
+
   -- sprite
   signal spMode2 : std_logic;
   signal spVramAccessing : std_logic;
@@ -511,7 +511,7 @@ architecture rtl of vdp is
   signal paletteWrAck : std_logic;
 
   signal colorCodeG7 : std_logic_vector(7 downto 0);
-  
+
   -- VDP Command Signals - Can be set by CPU
   signal VdpCmdSX : std_logic_vector( 8 downto 0);  -- R33,32
   signal VdpCmdSY : std_logic_vector( 9 downto 0);  -- R35,34
@@ -596,7 +596,7 @@ architecture rtl of vdp is
   signal iVideoB_pal : std_logic_vector( 5 downto 0);
   signal iVideoHS_n_pal : std_logic;
   signal iVideoVS_n_pal : std_logic;
-  
+
   signal iVideoR_vga : std_logic_vector( 5 downto 0);
   signal iVideoG_vga : std_logic_vector( 5 downto 0);
   signal iVideoB_vga : std_logic_vector( 5 downto 0);
@@ -610,7 +610,7 @@ architecture rtl of vdp is
 
   signal debugRegNumSel : std_logic_vector( 7 downto 0);
   signal debugRegData   : std_logic_vector( 7 downto 0);
-  
+
   -- for debug window
   signal debugWindowMode : std_logic_vector(2 downto 0);
   signal debWindow : std_logic;
@@ -635,7 +635,7 @@ architecture rtl of vdp is
   signal osdCharCodeInLocal : std_logic_vector( 7 downto 0);
   signal osdCharLocalWrReq : std_logic;
   signal osdCharLocalWrAck : std_logic;
-  
+
 begin
 
   pRamAdr <= iRamAdr;
@@ -648,7 +648,7 @@ begin
   ----------------------------------------------------------------
 --  VdpR9PALMode <= VdpR9PALModeX when dispModeVGA = '0' else '0';
   VdpR9PALMode <= VdpR9PALModeX;
-  
+
   iVideoR <= (others => '0') when bwindow = '0' else
              iVideoR_debwin & iVideoR_vdp(5 downto 2) when debWindow = '1' else
              iVideoR_vdp;
@@ -690,7 +690,7 @@ begin
                        iVideoB_pal,
                        iVideoHS_n_pal,
                        iVideoVS_n_pal);
-  
+
   vga1 : vga port map( clk21m,
                        reset,
                        iVideoR,
@@ -706,18 +706,18 @@ begin
                        iVideoB_vga,
                        iVideoHS_n_vga,
                        iVideoVS_n_vga);
-  
+
   -- Change display mode by external input port.
   pVideoR <= iVideoR_ntsc when dispModeVGA = '0' and VdpR9PALMode = '0' else
              iVideoR_pal  when dispModeVGA = '0' and VdpR9PALMode = '1' else
-             iVideoR_vga; 
+             iVideoR_vga;
   pVideoG <= iVideoG_ntsc when dispModeVGA = '0' and VdpR9PALMode = '0' else
              iVideoG_pal  when dispModeVGA = '0' and VdpR9PALMode = '1' else
-             iVideoG_vga; 
+             iVideoG_vga;
   pVideoB <= iVideoB_ntsc when dispModeVGA = '0' and VdpR9PALMode = '0' else
              iVideoB_pal  when dispModeVGA = '0' and VdpR9PALMode = '1' else
              iVideoB_vga;
-  
+
   -- H Sync signal
   pVideoHS_n <= iVideoHS_n_ntsc when dispModeVGA = '0' and VdpR9PALMode = '0' else
                 iVideoHS_n_pal  when dispModeVGA = '0' and VdpR9PALMode = '1' else
@@ -727,11 +727,11 @@ begin
                 iVideoVS_n_pal  when dispModeVGA = '0' and VdpR9PALMode = '1' else
                 iVideoVS_n_vga;
 
-  
+
   pVideoSYNC <= not (iVideoHS_n_ntsc xor iVideoVS_n_ntsc) when dispModeVGA = '0' and VdpR9PALMode = '0' else
                 not (iVideoHS_n_pal  xor iVideoVS_n_pal ) when dispModeVGA = '0' and VdpR9PALMode = '1' else
                 not (iVideoHS_n_vga xor iVideoVS_n_vga);
-  
+
   -- These signals below are output directly regardless of display mode.
   pVideoCS_n <= not (iVideoHS_n_ntsc xor iVideoVS_n_ntsc) when VdpR9PALMode = '0' else
                 not (iVideoHS_n_pal  xor iVideoVS_n_pal);
@@ -890,9 +890,9 @@ begin
       elsif( v_counter2 = 12 ) then
         -- sstate = sstate_A
         iVideoVS_n <= '1';
-      end if;   
+      end if;
 
-      
+
       -- V Sync Interrupt Request
       if( VdpR9YDots = '0' ) then
         -- JP: 238は適当
@@ -927,13 +927,13 @@ begin
       end if;
 
       dVsWindow_y <= vsWindow_y;
-      
+
       if( dVsWindow_y = '0' and vsWindow_y = '1') then
         -- rising edge
           vsyncIntReq <= not vsyncIntAck;
       end if;
 
-      
+
       -- H Sync Interrupt Request
       -- JP: R19で指定している"ライン番号"は，垂直スクロールレジスタの
       -- JP: 影響を受ける、つまり画面上の物理的な位置ではなく、表示している
@@ -948,7 +948,7 @@ begin
       if( dVsWindow_y= '0' and vsWindow_y = '1') then
         hsyncIntReq <= hsyncIntAck;
       elsif( (preDotCounter_x = 255) and
---      elsif( (preDotCounter_x = 250) and 
+--      elsif( (preDotCounter_x = 250) and
       -- JP:実測だとHSYNCの立ち下がりから57μsくらいという結果もあるので、250くらいなのかも？
       -- ((57000/46.5) - 100 - 102 - 56 + 4*8)/4 = 249.95
       -- しかし、250だとURのHorizontal Spritで問題があるので、やはり255くらいが良い。
@@ -999,7 +999,7 @@ begin
         preDotCounter_x <= "111111000" +  -- -8
                            (VdpR18Adjust(3) & VdpR18Adjust(3) & VdpR18Adjust(3) &
                             VdpR18Adjust(3) & VdpR18Adjust(3) & VdpR18Adjust(3 downto 0));
-      elsif( h_counter(1 downto 0) = "10") then 
+      elsif( h_counter(1 downto 0) = "10") then
         preDotCounter_x <= preDotCounter_x + 1;
         if( preDotCounter_x = "111111111" ) then
           -- JP: preDotCounter_x が -1から0にカウントアップする時にwindowを1にする
@@ -1023,8 +1023,8 @@ begin
           eightDotState <= eightDotState + 1;
         end if;
       end if;
-      
-      
+
+
       if( (h_counter( 1 downto 0) = "10") and
           (preDotCounter_x = "111111111") ) then
         -- JP: preWindow_xが 1になるタイミングと同じタイミングでY座標の計算
@@ -1070,10 +1070,10 @@ begin
         end if;
       end if;
 
-      -- JP: R23の変更が即座に反映されるようにした. 
+      -- JP: R23の変更が即座に反映されるようにした.
       preDotCounter_y <= preDotCounter_yp + ('0' & VdpR23VStartLine);
-      
-      
+
+
 
       -- generate bwindow
       if( h_counter = 200 ) then
@@ -1209,7 +1209,7 @@ begin
       -- VRAM access arbiter.
       --
       if( dotState = "10" ) then
-        if( (preWindow = '1') and (VdpR1DispOn = '1') and 
+        if( (preWindow = '1') and (VdpR1DispOn = '1') and
           ((eightDotState="000") or (eightDotState="001") or (eightDotState="010") or
            (eightDotState="011") or (eightDotState="100")) ) then
           vramAccessSwitch := VRAM_ACCESS_DRAW;
@@ -1391,7 +1391,7 @@ begin
       --                     |-----------|-----------|-----------|-----------|
       -- eightDotState    7=><====0=====><====1=====><====2=====><====3=====>
       -- dotState         "10"00"01"11"10"00"01"11"10"00"01"11"10"00"01"11"10"
-      -- window_x         ======0=><1====  
+      -- window_x         ======0=><1====
       -- (GRAPHIC4)
       -- Color Code                <D0>        <D0>        <D1>        <D1>
       -- Palette Data                    <D0>        <D0>        <D1>        <D1>
@@ -1411,7 +1411,7 @@ begin
         when "11" | "00" =>
           if( (window = '1') and (VdpR1DispOn = '1')) then
 --            if( spriteColorOut = '1' and VdpR8SpOff = '0' and
-            if( spriteColorOut = '1' and 
+            if( spriteColorOut = '1' and
                 VdpModeText1 = '0' and VdpModeText2 = '0' ) then
               -- Sprite has highest priority.
               colorCode := "0000" & colorCodeSprite;
@@ -1440,7 +1440,7 @@ begin
             else
               -- Display output
               if( VdpModeGraphic1 = '1' or VdpModeGraphic2 = '1' or
-                  VdpModeGraphic3 = '1' or VdpModeMulti = '1' ) then 
+                  VdpModeGraphic3 = '1' or VdpModeMulti = '1' ) then
                 colorCode := "0000" & colorCodeG123M;
               elsif( (VdpModeText1 = '1') or (VdpModeText2 = '1') ) then
                 colorCode := "0000" & colorCodeT12;
@@ -1472,10 +1472,10 @@ begin
             end if;
           end if;
 
-          
-          -- save original color code.          
+
+          -- save original color code.
           colorCodeG7 <= colorCode;
-          
+
           -- set palette address
           paletteAddr_out <= colorCode( 3 downto 0);
           paletteIn <= '0';
@@ -1557,16 +1557,16 @@ begin
                             pRamDat, pRamAdrSprite,
                             spriteColorOut,
                             colorCodeSprite);
-  
+
   -----------------------------------------------------------------------------
   --
-  -- VDP register access 
+  -- VDP register access
   --
   -----------------------------------------------------------------------------
   registerRam : ram port map(registerRamAddr, clk21m, registerRamWe, registerRamData_in, registerRamData_out);
   registerRamAddr <= registerRamAddr_in when (registerRamWe = '1') else
                      registerRamAddr_out;
-  
+
 
   process( clk21m, reset )
   begin
@@ -1617,7 +1617,7 @@ begin
       VdpCmdRegData <= (others => '0');
       VdpCmdRegWrReq <= '0';
       VdpCmdTRClrReq <= '0';
-      
+
       -- palette
       paletteDataRB_in <= (others => '0');
       paletteDataG_in  <= (others => '0');
@@ -1633,7 +1633,7 @@ begin
         registerRamReadData <= registerRamData_out;
       end if;
       registerRamWe <= VdpRegWrPulse;
-      
+
       --
       if (req = '1' and wrt = '0') then
         -- Read request
@@ -1912,7 +1912,7 @@ begin
       VdpCmdTRClrAck <= '0';
       VdpVramAccessY := (others => '0');
       VdpVramAccessX := (others => '0');
-      VdpCmdVramAccessAddr <= (others => '0');  
+      VdpCmdVramAccessAddr <= (others => '0');
     elsif (clk21m'event and clk21m = '1') then
       if( (VdpModeGraphic4 = '1') or (VdpModeGraphic6 = '1') ) then
         graphic4_or_6 := '1';
@@ -1984,7 +1984,7 @@ begin
       -- Determine if x-loop is finished
       case VdpCmdCMR(7 downto 4) is
         when VdpCmdHMMV | VdpCmdHMMC | VdpCmdLMMV | VdpCmdLMMC =>
-          if ((VdpCmdNXTmp = 0) or 
+          if ((VdpCmdNXTmp = 0) or
               ((VdpCmdDXTHigh and maxXmask) = maxXmask)) then
             nxLoopEnd := '1';
           else
@@ -1997,7 +1997,7 @@ begin
             nxLoopEnd := '0';
           end if;
         when VdpCmdHMMM | VdpCmdLMMM =>
-          if ((VdpCmdNXTmp = 0) or 
+          if ((VdpCmdNXTmp = 0) or
               ((VdpCmdSXTHigh and maxXmask) = maxXmask) or
               ((VdpCmdDXTHigh and maxXmask) = maxXmask)) then
             nxLoopEnd := '1';
@@ -2005,7 +2005,7 @@ begin
             nxLoopEnd := '0';
           end if;
         when VdpCmdLMCM =>
-          if ((VdpCmdNXTmp = 0) or 
+          if ((VdpCmdNXTmp = 0) or
               ((VdpCmdSXTHigh and maxXmask) = maxXmask)) then
             nxLoopEnd := '1';
           else
@@ -2020,7 +2020,7 @@ begin
         when others =>
           nxLoopEnd := '1';
       end case;
-      
+
       -- Retrieve the 'point' out of the byte that was most recently read
       if (graphic4_or_6 = '1') then
         -- Screen 5, 7
@@ -2069,7 +2069,7 @@ begin
       else
         logOpDestCol := rdpoint;
       end if;
-      
+
       -- process register update request, clear 'Transfer Ready' request
       -- or process any ongoing command.
       if( VdpCmdRegWrReq /= VdpCmdRegWrAck ) then
@@ -2305,7 +2305,7 @@ begin
                   VdpCmdNXTmp <= VdpCmdNXTmp - 1;
                   VdpCmdState <= stVdpCmdChkLoop;
               end case;
-            end if;            
+            end if;
 
           when stVdpCmdLineNewPos =>
             -- Applicable to LINE
@@ -2316,7 +2316,7 @@ begin
               else
                 VdpCmdDXTmp <= VdpCmdDXTmp + xCountDelta(9 downto 0);
               end if;
-            end if;           
+            end if;
             VdpCmdState <= stVdpCmdLineChkLoop;
 
           when stVdpCmdLineChkLoop =>
@@ -2343,7 +2343,7 @@ begin
             end if;
 
           when stVdpCmdChkLoop =>
-            -- When initializing = '1': 
+            -- When initializing = '1':
             --   Applicable to all commands
             -- When initializing = '0':
             -- Applicable to HMMC, YMMM, HMMM, HMMV, LMMC, LMCM, LMMM, LMMV
@@ -2469,7 +2469,7 @@ begin
           debugWindowMode <= debugWindowMode + 1;
         end if;
       end if;
-      
+
       debWindowV := '0';
 
       if( (dotState = "00") or (dotState = "01") ) then
@@ -2540,7 +2540,7 @@ begin
       end if;
     end if;
   end process;
-  
+
   osd0: osd port map(clk21m, reset, h_counter, preDotCounter_yp(7 downto 0),
                      osdLocateXMaster, osdLocateYMaster, osdCharCodeInMaster, osdCharMasterWrReq, osdCharMasterWrAck,
                      osdVideoR, osdVideoG, osdVideoB);
@@ -2549,7 +2549,7 @@ begin
   -- osd arbitor
   --
   osdCharWrAck <= iOsdCharWrAck;
-  
+
   process( clk21m, reset )
     variable state : std_logic_vector(1 downto 0);
   begin
@@ -2616,9 +2616,9 @@ begin
       x2 := (others => '0');
       state := (others => '0');
     elsif (clk21m'event and clk21m = '1') then
-      
+
       case state is
-        -- print str 
+        -- print str
         when X"0" =>
           osdLocateXLocal <= (others => '0');
           osdLocateYLocal <= conv_std_logic_vector(2, osdLocateYLocal'length);

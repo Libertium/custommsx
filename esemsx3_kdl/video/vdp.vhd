@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -57,7 +57,7 @@
 --
 -------------------------------------------------------------------------------
 -- Contributors
---  
+--
 --   Kazuhiro Tsujikawa
 --     - Bug fixes
 --   Alex Wulms
@@ -77,26 +77,30 @@
 -------------------------------------------------------------------------------
 -- Revision History
 --
+-- 23th,January,2013 modified by KdL
+--  - Fixed V-SYNC and H-SYNC interrupt
+--  - Added an extra signal to force NTSC/PAL modes
+--
 -- 29th,October,2006 modified by Kunihiko Ohnaka
---   - Insert the license text.
---   - Add the document part below.
+--  - Added the license text.
+--  - Added the document part below.
 --
 -- 3rd,Sep,2006 modified by Kunihiko Ohnaka
---  - fix several UNKNOWN REALITY problems
---    - Horizontal Sprit problem
---    - Overscan problem
---    - [NOP] zoom demo problem
---    - 'Star Wars Scroll' demo problem
+--  - Fix several UNKNOWN REALITY problems
+--  - Horizontal Sprite problem
+--  - Overscan problem
+--  - [NOP] zoom demo problem
+--  - 'Star Wars Scroll' demo problem
 --
 -- 20th,Aug,2006 modified by Kunihiko Ohnaka
 --  - Separate SPRITE module.
---  - Fix the palette rewriting timing problem.
---  - Add interlace double resolution function. (Two page mode)
+--  - Fixed the palette rewriting timing problem.
+--  - Added the interlace double resolution function. (Two page mode)
 --
 -- 15th,Aug,2006 modified by Kunihiko Ohnaka
 --  - Separate VDP_NTSC sync generator module.
 --  - Separate screen mode modules.
---  - Fix the sprite posision problem on GRAPHIC6.
+--  - Fixed the sprite posision problem on GRAPHIC6.
 --
 -- 15th,Jan,2006 modified by Alex Wulms
 -- text 2 mode  : debug blink function
@@ -105,7 +109,7 @@
 -- all modi     : precalculate adjustx, adjusty once per line
 
 -- 1th,Jan,2006 modified by Alex Wulms
--- Add blink support to text 2 mode
+-- Added the blink support to text 2 mode
 --
 -- 16th,Aug,2005 modified by Kazuhiro Tsujikawa
 -- JP: TMS9918モードでVRAMインクリメントを下位14ビットに限定
@@ -172,9 +176,9 @@
 --
 -- 21st,March,2004 modified by Alex Wulms
 -- Several enhancements to command engine:
---   Add PSET,LINE,SRCH,POINT
---   Add screen 6,7,8 support
---   Improve existing commands
+--   Added PSET,LINE,SRCH,POINT
+--   Added the screen 6,7,8 support
+--   Improved the existing commands
 --
 -- 15th,January,2004 modified by Kunihiko Ohnaka
 -- JP: VDPコマンドの実装を開始
@@ -274,8 +278,12 @@ ENTITY VDP IS
         -- DISPLAY RESOLUTION (0=15KHZ, 1=31KHZ)
         DISPRESO            : IN    STD_LOGIC;
 
+        NTSC_PAL_TYPE       : IN    STD_LOGIC;
+        FORCED_V_MODE       : IN    STD_LOGIC;
+        VALLOW_N            : IN    STD_LOGIC
+
         -- DEBUG OUTPUT
-        DEBUG_OUTPUT        : OUT   STD_LOGIC_VECTOR( 15 DOWNTO 0 ) -- ★ 
+    --  DEBUG_OUTPUT        : OUT   STD_LOGIC_VECTOR( 15 DOWNTO 0 ) -- ★
     );
 END VDP;
 
@@ -424,6 +432,8 @@ ARCHITECTURE RTL OF VDP IS
             VIDEOVSIN_N         : IN    STD_LOGIC;
             HCOUNTERIN          : IN    STD_LOGIC_VECTOR( 10 DOWNTO 0 );
             VCOUNTERIN          : IN    STD_LOGIC_VECTOR( 10 DOWNTO 0 );
+            -- MODE
+            PALMODE             : IN    STD_LOGIC;
             INTERLACEMODE       : IN    STD_LOGIC;
             -- VIDEO OUTPUT
             VIDEOROUT           : OUT   STD_LOGIC_VECTOR(  5 DOWNTO 0 );
@@ -546,7 +556,7 @@ ARCHITECTURE RTL OF VDP IS
             REG_R7_FRAME_COL            : IN    STD_LOGIC_VECTOR(  7 DOWNTO 0 );
             REG_R12_BLINK_MODE          : IN    STD_LOGIC_VECTOR(  7 DOWNTO 0 );
             REG_R13_BLINK_PERIOD        : IN    STD_LOGIC_VECTOR(  7 DOWNTO 0 );
-            
+
             REG_R2_PT_NAM_ADDR          : IN    STD_LOGIC_VECTOR(  6 DOWNTO 0 );
             REG_R4_PT_GEN_ADDR          : IN    STD_LOGIC_VECTOR(  5 DOWNTO 0 );
             REG_R10R3_COL_ADDR          : IN    STD_LOGIC_VECTOR( 10 DOWNTO 0 );
@@ -732,7 +742,10 @@ ARCHITECTURE RTL OF VDP IS
             VDPMODEGRAPHIC7             : OUT   STD_LOGIC;
             VDPMODEISHIGHRES            : OUT   STD_LOGIC;
             SPMODE2                     : OUT   STD_LOGIC;
-            VDPMODEISVRAMINTERLEAVE     : OUT   STD_LOGIC
+            VDPMODEISVRAMINTERLEAVE     : OUT   STD_LOGIC;
+
+            -- SWITCHED I/O SIGNALS
+            FORCED_V_MODE               : IN    STD_LOGIC
         );
     END COMPONENT;
 
@@ -746,10 +759,11 @@ ARCHITECTURE RTL OF VDP IS
     SIGNAL DOTSTATE                     : STD_LOGIC_VECTOR(  1 DOWNTO 0 );
     SIGNAL EIGHTDOTSTATE                : STD_LOGIC_VECTOR(  2 DOWNTO 0 );
 
-    -- DISPLAY FIELD SIGNAL  
+    -- DISPLAY FIELD SIGNAL
     SIGNAL FIELD                        : STD_LOGIC;
     SIGNAL HD                           : STD_LOGIC;
     SIGNAL VD                           : STD_LOGIC;
+    SIGNAL ENAHSYNC                     : STD_LOGIC;
     SIGNAL ACTIVE_LINE                  : STD_LOGIC;
     SIGNAL V_BLANKING_START             : STD_LOGIC;
 
@@ -781,7 +795,7 @@ ARCHITECTURE RTL OF VDP IS
     -- DOT COUNTER - 8 ( READING ADDR )
     SIGNAL PREDOTCOUNTER_X              : STD_LOGIC_VECTOR(  8 DOWNTO 0 );
     SIGNAL PREDOTCOUNTER_Y              : STD_LOGIC_VECTOR(  8 DOWNTO 0 );
-    -- Y COUNTERS INDEPENDENT OF VIRTICAL SCROLL REGISTER
+    -- Y COUNTERS INDEPENDENT OF VERTICAL SCROLL REGISTER
     SIGNAL PREDOTCOUNTER_YP             : STD_LOGIC_VECTOR(  8 DOWNTO 0 );
 
     -- VDP REGISTER ACCESS
@@ -859,7 +873,7 @@ ARCHITECTURE RTL OF VDP IS
     SIGNAL YJK_G                        : STD_LOGIC_VECTOR(  5 DOWNTO 0 );
     SIGNAL YJK_B                        : STD_LOGIC_VECTOR(  5 DOWNTO 0 );
     SIGNAL YJK_EN                       : STD_LOGIC;
-    
+
     -- SPRITE
     SIGNAL SPMODE2                      : STD_LOGIC;
     SIGNAL SPVRAMACCESSING              : STD_LOGIC;
@@ -949,20 +963,21 @@ ARCHITECTURE RTL OF VDP IS
     CONSTANT VRAM_ACCESS_VDPS           : INTEGER := 7;
 BEGIN
 
-  PRAMADR       <=  IRAMADR;
-  XRAMSEL       <=  IRAMADR(16);
-  PRAMDAT       <=  PRAMDBI(  7 DOWNTO 0 ) WHEN( XRAMSEL = '0' )ELSE
+    PRAMADR     <=  IRAMADR;
+    XRAMSEL     <=  IRAMADR(16);
+    PRAMDAT     <=  PRAMDBI(  7 DOWNTO 0 ) WHEN( XRAMSEL = '0' )ELSE
                     PRAMDBI( 15 DOWNTO 8 );
-  PRAMDATPAIR   <=  PRAMDBI(  7 DOWNTO 0 ) WHEN( XRAMSEL = '1' )ELSE
+    PRAMDATPAIR <=  PRAMDBI(  7 DOWNTO 0 ) WHEN( XRAMSEL = '1' )ELSE
                     PRAMDBI( 15 DOWNTO 8 );
 
-  ----------------------------------------------------------------
-  -- DISPLAY COMPONENTS
-  ----------------------------------------------------------------
+    ----------------------------------------------------------------
+    -- DISPLAY COMPONENTS
+    ----------------------------------------------------------------
     DISPMODEVGA     <=  DISPRESO;   -- DISPLAY RESOLUTION (0=15KHZ, 1=31KHZ)
 
-    VDPR9PALMODE    <=  REG_R9_PAL_MODE WHEN( DISPMODEVGA = '0' )ELSE
-                        '0';
+    VDPR9PALMODE    <=  FORCED_V_MODE WHEN( VALLOW_N = '1' )ELSE
+                        REG_R9_PAL_MODE WHEN( NTSC_PAL_TYPE = '1' )ELSE
+                        FORCED_V_MODE;
 
     IVIDEOR <=  (OTHERS => '0') WHEN( BWINDOW = '0' )ELSE
                 IVIDEOR_VDP;
@@ -994,6 +1009,7 @@ BEGIN
     PORT MAP(
         CLK21M              => CLK21M,
         RESET               => RESET,
+        PALMODE             => VDPR9PALMODE,
         INTERLACEMODE       => REG_R9_INTERLACE_MODE,
         VIDEORIN            => IVIDEOR,
         VIDEOGIN            => IVIDEOG,
@@ -1010,9 +1026,9 @@ BEGIN
 
     -- CHANGE DISPLAY MODE BY EXTERNAL INPUT PORT.
     PVIDEOR     <=  IVIDEOR_NTSC_PAL WHEN( DISPMODEVGA = '0' )ELSE
-                    IVIDEOR_VGA; 
+                    IVIDEOR_VGA;
     PVIDEOG     <=  IVIDEOG_NTSC_PAL WHEN( DISPMODEVGA = '0' )ELSE
-                    IVIDEOG_VGA; 
+                    IVIDEOG_VGA;
     PVIDEOB     <=  IVIDEOB_NTSC_PAL WHEN( DISPMODEVGA = '0' )ELSE
                     IVIDEOB_VGA;
 
@@ -1035,7 +1051,7 @@ BEGIN
                     REQ_VSYNC_INT_N;
 
     -- HSYNC INTERRUPT
-    HSYNCINT_N  <=  '1' WHEN( REG_R0_HSYNC_INT_EN = '0' )ELSE
+    HSYNCINT_N  <=  '1' WHEN( ( REG_R0_HSYNC_INT_EN = '0' ) OR ( ENAHSYNC = '0' ) )ELSE
                     REQ_HSYNC_INT_N;
 
     INT_N       <=  '0' WHEN( (VSYNCINT_N = '0') OR (HSYNCINT_N = '0') )ELSE
@@ -1054,10 +1070,30 @@ BEGIN
         CLR_HSYNC_INT           => CLR_HSYNC_INT                ,
         REQ_VSYNC_INT_N         => REQ_VSYNC_INT_N              ,
         REQ_HSYNC_INT_N         => REQ_HSYNC_INT_N              ,
-        REG_R19_HSYNC_INT_LINE  => REG_R19_HSYNC_INT_LINE       
+        REG_R19_HSYNC_INT_LINE  => REG_R19_HSYNC_INT_LINE
     );
 
-    ACTIVE_LINE <= NOT PREDOTCOUNTER_YP(8);
+    PROCESS( CLK21M )
+    BEGIN
+        IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+            IF( PREDOTCOUNTER_YP = "000000000" )THEN
+                ENAHSYNC <= '1';
+            ELSIF( PREWINDOW_Y = '0' )THEN
+                ENAHSYNC <= '0';
+            END IF;
+        END IF;
+    END PROCESS;
+
+    PROCESS( CLK21M )
+    BEGIN
+        IF( CLK21M'EVENT AND CLK21M = '1' )THEN
+            IF( PREDOTCOUNTER_X = 255 )THEN
+                ACTIVE_LINE <= '1';
+            ELSE
+                ACTIVE_LINE <= '0';
+            END IF;
+        END IF;
+    END PROCESS;
 
     -----------------------------------------------------------------------------
     -- SYNCHRONOUS SIGNAL GENERATOR
@@ -1093,7 +1129,7 @@ BEGIN
         REG_R18_ADJ             => REG_R18_ADJ              ,
         REG_R23_VSTART_LINE     => REG_R23_VSTART_LINE      ,
         REG_R25_MSK             => REG_R25_MSK              ,
-        REG_R27_H_SCROLL        => REG_R27_H_SCROLL         
+        REG_R27_H_SCROLL        => REG_R27_H_SCROLL
     );
 
     -- GENERATE BWINDOW
@@ -1166,7 +1202,7 @@ BEGIN
             PREWINDOW_X <= '0';
         ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
             IF( H_CNT = ("00" & OFFSET_X & "10" ) ) THEN
-            ELSIF( H_CNT(1 DOWNTO 0) = "10") THEN 
+            ELSIF( H_CNT(1 DOWNTO 0) = "10") THEN
                 IF( PREDOTCOUNTER_X = "111111111" ) THEN
                     -- JP: PREDOTCOUNTER_X が -1から0にカウントアップする時にWINDOWを1にする
                     PREWINDOW_X <= '1';
@@ -1243,7 +1279,7 @@ BEGIN
             --
             -- VRAMアクセスタイミングを、EIGHTDOTSTATE によって制御している
             IF( DOTSTATE = "10" ) THEN
-                IF( (PREWINDOW = '1') AND (REG_R1_DISP_ON = '1') AND 
+                IF( (PREWINDOW = '1') AND (REG_R1_DISP_ON = '1') AND
                     ((EIGHTDOTSTATE="000") OR (EIGHTDOTSTATE="001") OR (EIGHTDOTSTATE="010") OR
                      (EIGHTDOTSTATE="011") OR (EIGHTDOTSTATE="100")) ) THEN
                     --  EIGHTDOTSTATE が 0～4 で、表示中の場合
@@ -1457,7 +1493,7 @@ BEGIN
         REG_R1_DISP_ON      => REG_R1_DISP_ON       ,
         REG_R7_FRAME_COL    => REG_R7_FRAME_COL     ,
         REG_R8_COL0_ON      => REG_R8_COL0_ON       ,
-        REG_R25_YJK         => REG_R25_YJK          
+        REG_R25_YJK         => REG_R25_YJK
     );
 
     -----------------------------------------------------------------------------
@@ -1465,7 +1501,7 @@ BEGIN
     -----------------------------------------------------------------------------
     U_VDP_TEXT12: VDP_TEXT12
     PORT MAP(
-        CLK21M                      => CLK21M, 
+        CLK21M                      => CLK21M,
         RESET                       => RESET,
         DOTSTATE                    => DOTSTATE,
         DOTCOUNTERX                 => PREDOTCOUNTER_X,
@@ -1677,11 +1713,13 @@ BEGIN
         VDPMODEGRAPHIC7             => VDPMODEGRAPHIC7              ,
         VDPMODEISHIGHRES            => VDPMODEISHIGHRES             ,
         SPMODE2                     => SPMODE2                      ,
-        VDPMODEISVRAMINTERLEAVE     => VDPMODEISVRAMINTERLEAVE      
+        VDPMODEISVRAMINTERLEAVE     => VDPMODEISVRAMINTERLEAVE      ,
+
+        FORCED_V_MODE               => FORCED_V_MODE
     );
 
-    -- ★ 
-    DEBUG_OUTPUT <= REG_R19_HSYNC_INT_LINE & REG_R23_VSTART_LINE;
+    -- ★
+--  DEBUG_OUTPUT <= REG_R19_HSYNC_INT_LINE & REG_R23_VSTART_LINE;
 
     -----------------------------------------------------------------------------
     -- VDP COMMAND
@@ -1716,7 +1754,7 @@ BEGIN
         PTR                 => VDPCMDTR             ,
         PSXTMP              => VDPCMDSXTMP          ,
         CUR_VDP_COMMAND     => CUR_VDP_COMMAND      ,
-        REG_R25_CMD         => REG_R25_CMD          
+        REG_R25_CMD         => REG_R25_CMD
     );
 
     U_VDP_WAIT_CONTROL: VDP_WAIT_CONTROL
@@ -1728,7 +1766,7 @@ BEGIN
         HISPEED_MODE        => HISPEED_MODE         ,
         DRIVE               => VDP_COMMAND_DRIVE    ,
 
-        ACTIVE              => VDP_COMMAND_ACTIVE   
+        ACTIVE              => VDP_COMMAND_ACTIVE
     );
 
 END RTL;

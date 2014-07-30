@@ -37,18 +37,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -173,7 +173,10 @@ ENTITY VDP_REGISTER IS
         VDPMODEGRAPHIC7             : OUT   STD_LOGIC;
         VDPMODEISHIGHRES            : OUT   STD_LOGIC;
         SPMODE2                     : OUT   STD_LOGIC;
-        VDPMODEISVRAMINTERLEAVE     : OUT   STD_LOGIC
+        VDPMODEISVRAMINTERLEAVE     : OUT   STD_LOGIC;
+
+        -- SWITCHED I/O SIGNALS
+        FORCED_V_MODE               : IN    STD_LOGIC
     );
 END VDP_REGISTER;
 
@@ -485,7 +488,7 @@ BEGIN
             REG_R7_FRAME_COL <= (OTHERS => '0');
             REG_R8_SP_OFF <= '1';
             REG_R8_COL0_ON <= '0';
-            REG_R9_PAL_MODE <= '0';
+            REG_R9_PAL_MODE <= FORCED_V_MODE;
             FF_R9_2PAGE_MODE <= '0';
             REG_R9_INTERLACE_MODE <= '0';
             REG_R9_Y_DOTS <= '0';
@@ -507,7 +510,7 @@ BEGIN
             VDPCMDREGDATA <= (OTHERS => '0');
             VDPCMDREGWRREQ <= '0';
             VDPCMDTRCLRREQ <= '0';
-            
+
             -- PALETTE
             PALETTEDATARB_IN <= (OTHERS => '0');
             PALETTEDATAG_IN  <= (OTHERS => '0');
@@ -548,7 +551,7 @@ BEGIN
                         IF(VDPP1IS1STBYTE = '1') THEN
                             -- IT IS THE FIRST BYTE; BUFFER IT
                             VDPP1IS1STBYTE <= '0';
-                            VDPP1DATA <= DBO;
+                            VDPP1DATA      <= DBO;
                         ELSE
                             -- IT IS THE SECOND BYTE; PROCESS BOTH BYTES
                             VDPP1IS1STBYTE <= '1';

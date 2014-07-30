@@ -1,34 +1,34 @@
--- 
+--
 -- scc_wave.vhd
 --   Sound generator with wave table
 --   Revision 1.00
--- 
+--
 -- Copyright (c) 2006 Kazuhiro Tsujikawa (ESE Artists' factory)
 -- All rights reserved.
--- 
--- Redistribution and use of this source code or any derivative works, are 
+--
+-- Redistribution and use of this source code or any derivative works, are
 -- permitted provided that the following conditions are met:
 --
--- 1. Redistributions of source code must retain the above copyright notice, 
+-- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright 
---    notice, this list of conditions and the following disclaimer in the 
+-- 2. Redistributions in binary form must reproduce the above copyright
+--    notice, this list of conditions and the following disclaimer in the
 --    documentation and/or other materials provided with the distribution.
--- 3. Redistributions may not be sold, nor may they be used in a commercial 
+-- 3. Redistributions may not be sold, nor may they be used in a commercial
 --    product or activity without specific prior written permission.
 --
--- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
--- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
--- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
--- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
--- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
--- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+-- TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+-- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+-- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+-- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 -- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
--- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
--- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
--- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+-- OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+-- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+-- OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--- 
+--
 
 --  2007/01/31  modified by t.hara
 
@@ -38,9 +38,9 @@ library ieee;
 
 entity scc_wave_mul is
     port(
-        a           : in    std_logic_vector(  7 downto 0 );    -- 8bit ２の補数 
-        b           : in    std_logic_vector(  3 downto 0 );    -- 4bit バイナリ 
-        c           : out   std_logic_vector( 11 downto 0 )     -- 12bit ２の補数 
+        a           : in    std_logic_vector(  7 downto 0 );    -- 8bit ２の補数
+        b           : in    std_logic_vector(  3 downto 0 );    -- 4bit バイナリ
+        c           : out   std_logic_vector( 11 downto 0 )     -- 12bit ２の補数
     );
 end scc_wave_mul;
 
@@ -58,9 +58,9 @@ library ieee;
 
 entity scc_mix_mul is
     port(
-        a           : in    std_logic_vector( 15 downto 0 );    -- 16bit ２の補数 
-        b           : in    std_logic_vector(  2 downto 0 );    -- 3bit バイナリ 
-        c           : out   std_logic_vector( 18 downto 0 )     -- 19bit ２の補数 
+        a           : in    std_logic_vector( 15 downto 0 );    -- 16bit ２の補数
+        b           : in    std_logic_vector(  2 downto 0 );    -- 3bit バイナリ
+        c           : out   std_logic_vector( 18 downto 0 )     -- 19bit ２の補数
     );
 end scc_mix_mul;
 
@@ -106,26 +106,26 @@ architecture rtl of scc_wave is
 
     component scc_interpo is
         port(
-            reset       : in    std_logic;                          -- 非同期リセット 
-            clk         : in    std_logic;                          -- ベースクロック 
-            clkena      : in    std_logic;                          -- クロックイネーブラ 
-            clear       : in    std_logic;                          -- 同期リセット 
-            left        : in    std_logic_vector(  7 downto 0 );    -- 補間左側サンプル 
-            right       : in    std_logic_vector(  7 downto 0 );    -- 補間右側サンプル 
-            wave        : out   std_logic_vector(  7 downto 0 );    -- 出力サンプル 
-            reg_en      : in    std_logic;                          -- 補間有効/無効 
-            reg_th1     : in    std_logic_vector(  7 downto 0 );    -- 閾値1 
-            reg_th2     : in    std_logic_vector(  7 downto 0 );    -- 閾値2 
-            reg_th3     : in    std_logic_vector(  7 downto 0 );    -- 閾値3 
-            reg_cnt     : in    std_logic_vector( 11 downto 0 )     -- 分周比 
+            reset       : in    std_logic;                          -- 非同期リセット
+            clk         : in    std_logic;                          -- ベースクロック
+            clkena      : in    std_logic;                          -- クロックイネーブラ
+            clear       : in    std_logic;                          -- 同期リセット
+            left        : in    std_logic_vector(  7 downto 0 );    -- 補間左側サンプル
+            right       : in    std_logic_vector(  7 downto 0 );    -- 補間右側サンプル
+            wave        : out   std_logic_vector(  7 downto 0 );    -- 出力サンプル
+            reg_en      : in    std_logic;                          -- 補間有効/無効
+            reg_th1     : in    std_logic_vector(  7 downto 0 );    -- 閾値1
+            reg_th2     : in    std_logic_vector(  7 downto 0 );    -- 閾値2
+            reg_th3     : in    std_logic_vector(  7 downto 0 );    -- 閾値3
+            reg_cnt     : in    std_logic_vector( 11 downto 0 )     -- 分周比
         );
     end component;
 
     component scc_wave_mul
         port(
-            a   : in    std_logic_vector(  7 downto 0 );    -- 8bit ２の補数 
-            b   : in    std_logic_vector(  3 downto 0 );    -- 4bit バイナリ 
-            c   : out   std_logic_vector( 11 downto 0 )     -- 12bit ２の補数 
+            a   : in    std_logic_vector(  7 downto 0 );    -- 8bit ２の補数
+            b   : in    std_logic_vector(  3 downto 0 );    -- 4bit バイナリ
+            c   : out   std_logic_vector( 11 downto 0 )     -- 12bit ２の補数
         );
     end component;
 
@@ -245,7 +245,7 @@ begin
             ff_rst_ch_d     <= '0';
             ff_rst_ch_e     <= '0';
 
-            -- 補間関連のレジスタ初期値設定 
+            -- 補間関連のレジスタ初期値設定
             reg_th1         <= "00100000";
             reg_th2         <= "01000000";
             reg_th3         <= "10000000";
@@ -253,7 +253,7 @@ begin
 
         elsif (clk21m'event and clk21m = '1') then
             -- mapped i/o port access on b8a0-b8afh (9880-988fh) ... register write
-            if( req = '1' and ff_req_dl = '0' and adr(7 downto 5) = "101" and wrt = '1' )then   -- xxAxh, xxBxh が該当 
+            if( req = '1' and ff_req_dl = '0' and adr(7 downto 5) = "101" and wrt = '1' )then   -- xxAxh, xxBxh が該当
                 case adr(3 downto 0) is
                     when "0000" => reg_freq_ch_a(  7 downto 0 ) <= dbo( 7 downto 0 ); ff_rst_ch_a <= reg_mode_sel(5);
                     when "0001" => reg_freq_ch_a( 11 downto 8 ) <= dbo( 3 downto 0 ); ff_rst_ch_a <= reg_mode_sel(5);
@@ -280,12 +280,12 @@ begin
                 ff_rst_ch_e <= '0';
             end if;
 
-            -- mapped i/o port access on b8c0-b8dfh (98e0-98ffh) ... register write             -- xxCxh, xxDxh が該当 
+            -- mapped i/o port access on b8c0-b8dfh (98e0-98ffh) ... register write             -- xxCxh, xxDxh が該当
             if( req = '1' and wrt = '1' and adr(7 downto 5) = "110" )then
                 reg_mode_sel <= dbo;
             end if;
 
-            -- mapped i/o port access on b8e0-b8ffh (98c0-98dfh) ... register write             -- xxExh, xxFxh が該当 
+            -- mapped i/o port access on b8e0-b8ffh (98c0-98dfh) ... register write             -- xxExh, xxFxh が該当
             if( req = '1' and wrt = '1' and adr(7 downto 5) = "111" )then
                 case adr(1 downto 0) is
                     when "00"   => reg_interpo_en   <= dbo( 4 downto 0 );
@@ -484,7 +484,7 @@ begin
         we      => w_wave_we    ,
         dbi     => dbo          ,
         dbo1    => ram_dbi1     ,
-        dbo2    => ram_dbi2     
+        dbo2    => ram_dbi2
     );
 
     --  wave memory read
@@ -618,13 +618,13 @@ begin
         w_wav_ch_e          when "100",
         (others => 'X')     when others;
 
-    w_wave  <=  (w_ch_mask and w_wave_dat);     -- 8bit 二の補数 
+    w_wave  <=  (w_ch_mask and w_wave_dat);     -- 8bit 二の補数
 
     u_mul: scc_wave_mul
     port map (
-        a   => w_wave   ,   -- 8bit 二の補数 
-        b   => w_ch_vol ,   -- 4bit バイナリ（符号無し） 
-        c   => w_mul        -- 12bit 二の補数 
+        a   => w_wave   ,   -- 8bit 二の補数
+        b   => w_ch_vol ,   -- 4bit バイナリ（符号無し）
+        c   => w_mul        -- 12bit 二の補数
     );
 
     ----------------------------------------------------------------
@@ -639,8 +639,8 @@ begin
                 --  stage5
                 ff_mix  <=  (others => '0');
             else
-                --  stage0～4 
-                ff_mix  <=  (w_mul(11) & w_mul(11) & w_mul(11) & w_mul) + ff_mix;   -- 15bit 二の補数 
+                --  stage0～4
+                ff_mix  <=  (w_mul(11) & w_mul(11) & w_mul(11) & w_mul) + ff_mix;   -- 15bit 二の補数
             end if;
         end if;
     end process;

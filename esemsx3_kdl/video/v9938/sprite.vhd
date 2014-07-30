@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -70,7 +70,7 @@
 -- 26th,August,2006 modified by Kunihiko Ohnaka
 --   - latch the base addresses every eight dot cycle
 --     (DRAM RAS/CAS access emulation)
--- 
+--
 -- 20th,August,2006 modified by Kunihiko Ohnaka
 --   - Change the drawing algorithm.
 --   - Add sprite collision checking function.
@@ -172,7 +172,7 @@
 -- JP:   きれいなサイクルにしています。
 -- JP:   どうしても実機と同じタイミングにしたいという方は
 -- JP:   チャレンジしてみてください。
--- JP:  
+-- JP:
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -234,7 +234,7 @@ architecture rtl of sprite is
 
   signal vdpS0ResetAck : std_logic;
   signal vdpS5ResetAck : std_logic;
-  
+
   -- for spinforam
   signal spInfoRamAddr     : std_logic_vector(2 downto 0);
   signal spInfoRamWe       : std_logic;
@@ -251,7 +251,7 @@ architecture rtl of sprite is
   signal spInfoRamColor_out   : std_logic_vector( 3 downto 0);
   signal spInfoRamCC_out      : std_logic;
   signal spInfoRamIC_out      : std_logic;
-  
+
   type typeSpState is (spstate_idle, spstate_ytest_draw, spstate_prepare);
   signal spState : typeSpState;
 
@@ -264,7 +264,7 @@ architecture rtl of sprite is
   signal iRamAdr        : std_logic_vector(16 downto 0);
   signal iRamAdrYTest   : std_logic_vector(16 downto 0);
   signal iRamAdrPrepare : std_logic_vector(16 downto 0);
-  
+
   signal spAttrTblBaseAddr   : std_logic_vector( vdpR11R5SpAttrTblBaseAddr'length -1 downto 0);
   signal spPtnGeneTblBaseAddr: std_logic_vector( vdpR6SpPtnGeneTblBaseAddr'length -1 downto 0);
   signal readVramAddrYRead   : std_logic_vector(16 downto 0);
@@ -298,7 +298,7 @@ architecture rtl of sprite is
   signal spDrawX : std_logic_vector(8 downto 0);  -- -32 - 287 (=256+31)
   signal spDrawPattern :std_logic_vector(15 downto 0);
   signal spDrawColor :std_logic_vector(3 downto 0);
-  
+
   -- JP: スプライト描画ラインバッファの制御信号
   signal spLineBufAddr_e : std_logic_vector( 7 downto 0);
   signal spLineBufAddr_o : std_logic_vector( 7 downto 0);
@@ -308,7 +308,7 @@ architecture rtl of sprite is
   signal spLineBufData_in_o : std_logic_vector( 7 downto 0);
   signal spLineBufData_out_e : std_logic_vector( 7 downto 0);
   signal spLineBufData_out_o : std_logic_vector( 7 downto 0);
-  
+
   signal spLineBufDispWe : std_logic;
   signal spLineBufDrawWe : std_logic;
   signal spLineBufDispX : std_logic_vector( 7 downto 0);
@@ -329,7 +329,7 @@ begin
   iSpinforam : spinforam port map(spInfoRamAddr, clk21m, spInfoRamWe,
                                   spInfoRamData_in, spInfoRamData_out);
 
-  spInfoRamData_in <= "0" & 
+  spInfoRamData_in <= "0" &
                       spInfoRamX_in & spInfoRamPattern_in &
                       spInfoRamColor_in & spInfoRamCC_in & spInfoRamIC_in;
   spInfoRamX_out       <= spInfoRamData_out(30 downto 22);
@@ -337,7 +337,7 @@ begin
   spInfoRamColor_out   <= spInfoRamData_out( 5 downto  2);
   spInfoRamCC_out      <= spInfoRamData_out(1);
   spInfoRamIC_out      <= spInfoRamData_out(0);
-  
+
   spInfoRamAddr <= spPrepareLocalPlaneNum when spState = spstate_prepare else
                    spPreDrawLocalPlaneNum;
 
@@ -358,8 +358,8 @@ begin
   spLineBufData_in_o    <= spLineBufDrawColor  when dotCounterYp(0) = '0' else "00000000";
   spLineBufWe_o         <= spLineBufDrawWe     when dotCounterYp(0) = '0' else spLineBufDispWe;
   spLineBufDrawData_out <= spLineBufData_out_o when dotCounterYp(0) = '0' else spLineBufData_out_e;
-  
-  
+
+
 
   -----------------------------------------------------------------------------
 
@@ -383,7 +383,7 @@ begin
              iRamAdrPrepare;
   pRamAdr <= iRamAdr(16 downto 0)  when vramInterleaveMode = '0' else
              iRamAdr(0) & iRamAdr(16 downto 1);
-  
+
   -----------------------------------------------------------------------------
   -- SPRITE main process.
   -----------------------------------------------------------------------------
@@ -411,7 +411,7 @@ begin
       for i in 0 to SpMode2_nSprites -1 loop
         spRenderPlanes(i) <= (others => '0');
       end loop;
-      vdpS0SpCollisionIncidenceV := '0'; 
+      vdpS0SpCollisionIncidenceV := '0';
       vdpS0SpOverMappedV := '0';
       vdpS0SpOverMappedNumV := (others => '0');
       vdpS3S4SpCollisionXV := (others => '0');
@@ -421,10 +421,10 @@ begin
     elsif (clk21m'event and clk21m = '1') then
 
       -- latching address signals
-      if( (dotCounterX = 0) and (dotState = "01") ) then  
+      if( (dotCounterX = 0) and (dotState = "01") ) then
         --   +1 should be needed. Because it will be drawn in the next line.
         dotCounterYLatched <= dotCounterYp + ('0' & vdpR23VStartLine) + 1;
-        
+
         spPtnGeneTblBaseAddr <= vdpR6SpPtnGeneTblBaseAddr;
         if( spMode2 = '0' ) then
           spAttrTblBaseAddr <= vdpR11R5SpAttrTblBaseAddr(9 downto 0);
@@ -486,7 +486,7 @@ begin
             spYTestListUpCounter  <= (others => '0');
             spYTestEnd <= '0';
             spOffLatched <= vdpR8SpOff;
-          elsif( (eightDotState = "110") and (spYTestEnd = '0') ) then  
+          elsif( (eightDotState = "110") and (spYTestEnd = '0') ) then
             -- JP: Y座標のアドレスはdotStae="10"の時に出ている。
             spYTestPlaneNum <= spYTestPlaneNum + 1;
             if( spYTestPlaneNum = 31 ) then
@@ -527,14 +527,14 @@ begin
           end if;
         when others => null;
       end case;
-        
+
       -- prepareing
       case dotState is
         when "11" =>
           spInfoRamWe <= '0';
           case eightDotState is
-            -- Sprite Attribute Table 
-            --        7 6 5 4 3 2 1 0 
+            -- Sprite Attribute Table
+            --        7 6 5 4 3 2 1 0
             --  +0 : |       Y       |
             --  +1 : |       X       |
             --  +2 : | Pattern Num   |
@@ -596,7 +596,7 @@ begin
                   -- EC = '1';
                   spInfoRamX_in <= spInfoRamX_in - 32;
                 end if;
-                
+
                 -- If all of the sprites list-uped are readed,
                 -- the sprites left should not be drawn.
                 if( (spPrepareLocalPlaneNum >= spYTestListUpCounter) or
@@ -716,7 +716,7 @@ begin
         vdpS3S4SpCollisionXV := (others => '0');
         vdpS5S6SpCollisionYV := (others => '0');
       end if;
-      
+
       pVdpS0SpCollisionIncidence <= vdpS0SpCollisionIncidenceV;
       pVdpS0SpOverMapped    <= vdpS0SpOverMappedV;
       pVdpS0SpOverMappedNum <= vdpS0SpOverMappedNumV;
@@ -725,7 +725,7 @@ begin
 
     end if;
   end process;
-          
+
 
   -----------------------------------------------------------------------------
   -- JP: 画面へのレンダリング。vdpエンティティがdotState="11"の時に値を取得できるように、
@@ -771,6 +771,6 @@ begin
 
     end if;
   end process;
-  
+
 end rtl;
 

@@ -38,18 +38,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -97,7 +97,7 @@ entity osd is
     charCodeIn : in std_logic_vector( 7 downto 0);
     charWrReq  : in std_logic;
     charWrAck  : out std_logic;
-      
+
     -- Video Output
     videoR     : out std_logic_vector( 3 downto 0);
     videoG     : out std_logic_vector( 3 downto 0);
@@ -142,7 +142,7 @@ architecture rtl of osd is
   signal charY : std_logic_vector(2 downto 0);
 
   signal iCharWrAck : std_logic;
-  
+
   signal iVideoR     : std_logic_vector( 3 downto 0);
   signal iVideoG     : std_logic_vector( 3 downto 0);
   signal iVideoB     : std_logic_vector( 3 downto 0);
@@ -185,7 +185,7 @@ begin
         when "00" =>
           patternNameTableWe <= '0';
           patternNameTableAddr <= charLocateY & charLocateX( 5 downto 0);
-         
+
           if( h_counter(10 downto 2) = WINDOW_START_X/4 ) then
             charLocateX <= (others => '0');
             charX <= conv_std_logic_vector(1, charX'length);
@@ -239,7 +239,7 @@ begin
           end if;
           pattern <= pattern(2 downto 0) & '0';
           charX <= charX + 1;
- 
+
           -- pattern name table write address
           if( charWrReq /= iCharWrAck ) then
             patternNameTableWe <= '1';
@@ -257,5 +257,5 @@ begin
   videoR <= iVideoR when window = '1' else (others => '0');
   videoG <= iVideoG when window = '1' else (others => '0');
   videoB <= iVideoB when window = '1' else (others => '0');
-  
+
 end rtl;

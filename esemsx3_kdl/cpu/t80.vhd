@@ -1,7 +1,7 @@
 --
 -- Z80 compatible microprocessor core
 --
--- Version : 0247
+-- Version : 0249
 --
 -- Copyright (c) 2001-2002 Daniel Wallner (jesus@opencores.org)
 --
@@ -68,6 +68,8 @@
 --
 --  0248 : add undocumented DDCB and FDCB opcodes by TobiFlex 20.04.2010
 --
+--  0249 : add undocumented XY-Flags for CPI/CPD by TobiFlex 22.07.2012
+--
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -77,7 +79,7 @@ use work.T80_Pack.all;
 entity T80 is
     generic(
         Mode : integer := 0;    -- 0 => Z80, 1 => Fast Z80, 2 => 8080, 3 => GB
-        IOWait : integer := 0;  -- 1 => Single cycle I/O, 1 => Std I/O cycle
+        IOWait : integer := 0;  -- 0 => Single cycle I/O, 1 => Std I/O cycle
         Flag_C : integer := 0;
         Flag_N : integer := 1;
         Flag_P : integer := 2;
@@ -189,6 +191,7 @@ architecture rtl of T80 is
     signal Arith16_r        : std_logic;
     signal Z16_r            : std_logic;
     signal ALU_Op_r         : std_logic_vector(3 downto 0);
+    signal ALU_cpi_r        : std_logic;
     signal Save_ALU_r       : std_logic;
     signal PreserveC_r      : std_logic;
     signal MCycles          : std_logic_vector(2 downto 0);
@@ -207,6 +210,7 @@ architecture rtl of T80 is
     signal Set_BusB_To      : std_logic_vector(3 downto 0);
     signal Set_BusA_To      : std_logic_vector(3 downto 0);
     signal ALU_Op           : std_logic_vector(3 downto 0);
+    signal ALU_cpi          : std_logic;
     signal Save_ALU         : std_logic;
     signal PreserveC        : std_logic;
     signal Arith16          : std_logic;
@@ -274,6 +278,7 @@ begin
             Set_BusB_To => Set_BusB_To,
             Set_BusA_To => Set_BusA_To,
             ALU_Op => ALU_Op,
+            ALU_cpi => ALU_cpi,
             Save_ALU => Save_ALU,
             PreserveC => PreserveC,
             Arith16 => Arith16,
@@ -325,6 +330,7 @@ begin
         port map(
             Arith16 => Arith16_r,
             Z16 => Z16_r,
+            ALU_cpi => ALU_cpi_r,
             ALU_Op => ALU_Op_r,
             IR => IR(5 downto 0),
             ISet => ISet,
@@ -375,6 +381,7 @@ begin
             BTR_r <= '0';
             Z16_r <= '0';
             ALU_Op_r <= "0000";
+            ALU_cpi_r <= '0';
             Save_ALU_r <= '0';
             PreserveC_r <= '0';
             XY_Ind <= '0';
@@ -384,6 +391,7 @@ begin
             if ClkEn = '1' then
 
             ALU_Op_r <= "0000";
+            ALU_cpi_r <= '0';
             Save_ALU_r <= '0';
             Read_To_Reg_r <= "00000";
 
@@ -523,6 +531,7 @@ begin
                     end if;
 
                     Save_ALU_r <= Save_ALU;
+                    ALU_cpi_r <= ALU_cpi;
                     ALU_Op_r <= ALU_Op;
 
                     if I_CPL = '1' then

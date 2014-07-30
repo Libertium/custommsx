@@ -53,7 +53,7 @@ package T80_Pack is
     component T80
     generic(
         Mode : integer := 0;    -- 0 => Z80, 1 => Fast Z80, 2 => 8080, 3 => GB
-        IOWait : integer := 0;  -- 1 => Single cycle I/O, 1 => Std I/O cycle
+        IOWait : integer := 0;  -- 0 => Single cycle I/O, 1 => Std I/O cycle
         Flag_C : integer := 0;
         Flag_N : integer := 1;
         Flag_P : integer := 2;
@@ -142,6 +142,7 @@ package T80_Pack is
         Set_BusB_To : out std_logic_vector(3 downto 0); -- B,C,D,E,H,L,DI,A,SP(L),SP(M),1,F,PC(L),PC(M),0
         ALU_Op          : out std_logic_vector(3 downto 0);
             -- ADD, ADC, SUB, SBC, AND, XOR, OR, CP, ROT, BIT, SET, RES, DAA, RLD, RRD, None
+        ALU_cpi         : out std_logic;
         Save_ALU        : out std_logic;
         PreserveC       : out std_logic;
         Arith16         : out std_logic;
@@ -196,6 +197,7 @@ package T80_Pack is
     port(
         Arith16     : in std_logic;
         Z16         : in std_logic;
+        ALU_cpi     : in std_logic;
         ALU_Op      : in std_logic_vector(3 downto 0);
         IR          : in std_logic_vector(5 downto 0);
         ISet        : in std_logic_vector(1 downto 0);

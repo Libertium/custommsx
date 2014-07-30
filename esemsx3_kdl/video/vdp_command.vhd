@@ -37,18 +37,18 @@
 --     copyright notice, this list of conditions and the following
 --     disclaimer in the documentation and/or other materials
 --     provided with the distribution.
---  3. Redistributions may not be sold, nor may they be used in a 
+--  3. Redistributions may not be sold, nor may they be used in a
 --     commercial product or activity without specific prior written
 --     permission.
 --
---  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
---  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+--  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+--  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 --  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 --  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 --  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 --  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 --  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
---  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+--  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 --  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 --  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 --  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -254,7 +254,7 @@ BEGIN
             TRCLRACK <= '0';
             VDPVRAMACCESSY := (OTHERS => '0');
             VDPVRAMACCESSX := (OTHERS => '0');
-            VRAMACCESSADDR <= (OTHERS => '0');  
+            VRAMACCESSADDR <= (OTHERS => '0');
         ELSIF (CLK21M'EVENT AND CLK21M = '1') THEN
             IF( (VDPMODEGRAPHIC4 = '1') OR (VDPMODEGRAPHIC6 = '1') ) THEN
                 GRAPHIC4_OR_6 := '1';
@@ -326,7 +326,7 @@ BEGIN
             -- DETERMINE IF X-LOOP IS FINISHED
             CASE CMR(7 DOWNTO 4) IS
                 WHEN HMMV | HMMC | LMMV | LMMC =>
-                    IF ((NXTMP = 0) OR 
+                    IF ((NXTMP = 0) OR
                             ((DXTMP(9 DOWNTO 8) AND MAXXMASK) = MAXXMASK)) THEN
                         NXLOOPEND := '1';
                     ELSE
@@ -339,7 +339,7 @@ BEGIN
                         NXLOOPEND := '0';
                     END IF;
                 WHEN HMMM | LMMM =>
-                    IF ((NXTMP = 0) OR 
+                    IF ((NXTMP = 0) OR
                             ((SXTMP(9 DOWNTO 8) AND MAXXMASK) = MAXXMASK) OR
                             ((DXTMP(9 DOWNTO 8) AND MAXXMASK) = MAXXMASK)) THEN
                         NXLOOPEND := '1';
@@ -347,7 +347,7 @@ BEGIN
                         NXLOOPEND := '0';
                     END IF;
                 WHEN LMCM =>
-                    IF ((NXTMP = 0) OR 
+                    IF ((NXTMP = 0) OR
                             ((SXTMP(9 DOWNTO 8) AND MAXXMASK) = MAXXMASK)) THEN
                         NXLOOPEND := '1';
                     ELSE
@@ -362,7 +362,7 @@ BEGIN
                 WHEN OTHERS =>
                     NXLOOPEND := '1';
             END CASE;
-            
+
             -- RETRIEVE THE 'POINT' OUT OF THE BYTE THAT WAS MOST RECENTLY READ
             IF (GRAPHIC4_OR_6 = '1') THEN
                 -- SCREEN 5, 7
@@ -411,7 +411,7 @@ BEGIN
             ELSE
                 LOGOPDESTCOL := RDPOINT;
             END IF;
-            
+
             -- PROCESS REGISTER UPDATE REQUEST, CLEAR 'TRANSFER READY' REQUEST
             -- OR PROCESS ANY ONGOING COMMAND.
             IF( REGWRREQ /= REGWRACK ) THEN
@@ -647,7 +647,7 @@ BEGIN
                                     NXTMP <= NXTMP - 1;
                                     STATE <= STCHKLOOP;
                             END CASE;
-                        END IF;                     
+                        END IF;
 
                     WHEN STLINENEWPOS =>
                         -- APPLICABLE TO LINE
@@ -658,7 +658,7 @@ BEGIN
                             ELSE
                                 DXTMP <= DXTMP + XCOUNTDELTA(9 DOWNTO 0);
                             END IF;
-                        END IF;                  
+                        END IF;
                         STATE <= STLINECHKLOOP;
 
                     WHEN STLINECHKLOOP =>
@@ -685,7 +685,7 @@ BEGIN
                         END IF;
 
                     WHEN STCHKLOOP =>
-                        -- WHEN INITIALIZING = '1': 
+                        -- WHEN INITIALIZING = '1':
                         --   APPLICABLE TO ALL COMMANDS
                         -- WHEN INITIALIZING = '0':
                         -- APPLICABLE TO HMMC, YMMM, HMMM, HMMV, LMMC, LMCM, LMMM, LMMV
