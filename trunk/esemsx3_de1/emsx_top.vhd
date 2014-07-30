@@ -388,7 +388,7 @@ architecture rtl of emsx_top is
       kana    : out std_logic;
       cmtin   : in std_logic;
       keymode : in std_logic;
-      wave    : out std_logic_vector(7 downto 0)
+      wave    : out std_logic_vector(9 downto 0)
     );
   end component;
 
@@ -766,7 +766,7 @@ end component;
   -- PSG signals
   signal PsgReq      : std_logic;
   signal PsgDbi      : std_logic_vector(7 downto 0);
-  signal PsgAmp      : std_logic_vector(7 downto 0);
+  signal PsgAmp      : std_logic_vector(9 downto 0);
 
   -- SCC signals
   signal Scc1Req     : std_logic;
@@ -796,20 +796,22 @@ end component;
   -- Sound signals
   constant DAC_MSBI  : integer := 13;
   signal DACin       : std_logic_vector(DAC_MSBI downto 0);
+  signal DACin_L     : std_logic_vector(DAC_MSBI downto 0);
+  signal DACin_R     : std_logic_vector(DAC_MSBI downto 0);
   signal DACout      : std_logic;
   signal Sound_level : std_logic_vector(8 downto 0);
-  signal Sound_A     : std_logic_vector(15 downto 0);
+  signal Sound_L     : std_logic_vector(15 downto 0);
+  signal Sound_R     : std_logic_vector(15 downto 0);
 
   signal MstrVol     : std_logic_vector(2 downto 0);
-
-  signal pSltSndL    : std_logic_vector(5 downto 0);
-  signal pSltSndR    : std_logic_vector(5 downto 0);
-  signal pSltSound   : std_logic_vector(5 downto 0);
+  signal PsgVol     : std_logic_vector(2 downto 0);
+  signal SccVol     : std_logic_vector(2 downto 0);
+  signal OpllVol     : std_logic_vector(2 downto 0);
 
   signal vFKeys			: std_logic_vector(  7 downto 0 );
 
 -- mixer
-  signal    ff_prepsg   : std_logic_vector( 8 downto 0 );
+  signal    ff_prepsg   : std_logic_vector( 9 downto 0 );
   signal    ff_prescc   : std_logic_vector( 15 downto 0 );
   signal    ff_psg      : std_logic_vector( DACin'high + 2 downto DACin'low );
   signal    ff_scc      : std_logic_vector( DACin'high + 2 downto DACin'low );
@@ -820,13 +822,16 @@ end component;
   signal    ff_psg_offset : std_logic_vector( DACin'high + 2 downto DACin'low );
   signal    ff_scc_offset : std_logic_vector( DACin'high + 2 downto DACin'low );
   signal    ff_pre_dacin  : std_logic_vector( DACin'high + 2 downto DACin'low );
+  signal    ff_pre_dacin_L  : std_logic_vector( DACin'high + 2 downto DACin'low );
+  signal    ff_pre_dacin_R  : std_logic_vector( DACin'high + 2 downto DACin'low );
   constant  c_amp_offset  : std_logic_vector( DACin'high + 2 downto DACin'low ) := ( ff_pre_dacin'high => '1', others => '0' );
   constant  c_opll_zero   : std_logic_vector( OpllAmp'range ) := ( OpllAmp'high => '1', others => '0' );
 
 -- sound output filter
   signal lpf1_wave	: std_logic_vector( DACin'high downto 0 );
   signal lpf5_wave	: std_logic_vector( DACin'high downto 0 );
-  signal lpf18_wave	: std_logic_vector( DACin'high downto 0 );
+  signal lpf18_wave_L	: std_logic_vector( DACin'high downto 0 );
+  signal lpf18_wave_R	: std_logic_vector( DACin'high downto 0 );
 
 -- Exernal memory signals
   signal RamReq      : std_logic;
@@ -1567,6 +1572,66 @@ end process;
 		end if;
 	end process;
 
+	-- PSG volume
+	process( clk21m,lock_n )
+	begin
+		if( clk21m'event and clk21m = '1' )then
+			if( lock_n = '0' )then
+				PsgVol <= "111";	-- original "011";
+			elsif( Fkeys(3) /= vFKeys(3) )then	-- F9
+				if( Fkeys(7) = '1' )then		-- SHIFT
+					if( PsgVol /= "000" )then	-- F9+SHIFT
+						PsgVol <= PsgVol - '1';
+					end if;
+				else
+					if( PsgVol /= "111" )then	-- F9
+						PsgVol <= PsgVol + '1';
+					end if;
+				end if;
+			end if;
+		end if;
+	end process;
+
+	-- SCC volume
+	process( clk21m,lock_n )
+	begin
+		if( clk21m'event and clk21m = '1' )then
+			if( lock_n = '0' )then
+				SccVol <= "111";	-- orignal "110";
+			elsif( Fkeys(2) /= vFKeys(2) )then	-- F10
+				if( Fkeys(7) = '1' )then		-- SHIFT
+					if( SccVol /= "000" )then	-- F10+SHIFT
+						SccVol <= SccVol - '1';
+					end if;
+				else
+					if( SccVol /= "111" )then	-- F10
+						SccVol <= SccVol + '1';
+					end if;
+				end if;
+			end if;
+		end if;
+	end process;
+
+	-- OPLL volume
+	process( clk21m,lock_n )
+	begin
+		if( clk21m'event and clk21m = '1' )then
+			if( lock_n = '0' )then
+				OpllVol <= "111";	-- original "110";
+			elsif( Fkeys(1) /= vFKeys(1) )then	-- F11
+				if( Fkeys(7) = '1' )then		-- SHIFT
+					if( OpllVol /= "000" )then	-- F11+SHIFT
+						OpllVol <= OpllVol - '1';
+					end if;
+				else
+					if( OpllVol /= "111" )then	-- F11
+						OpllVol <= OpllVol + '1';
+					end if;
+				end if;
+			end if;			 
+		end if;
+	end process;
+
 	process( clk21m )
 	begin
 		if( clk21m'event and clk21m = '1' )then
@@ -1574,38 +1639,41 @@ end process;
 		end if;
 	end process;
 
-	w_scc <= ff_prescc & "000"; -- * 8
-	
+	-- mixer (pipe lined)
+	u_mul: scc_mix_mul
+	port map (
+		a	=> ff_prescc,	-- 16bit 
+		b	=> SccVol,		-- 3bit 
+		c	=> w_scc		-- 19bit 
+	);
+
 	w_s <= (others => w_scc(18));
 	with MstrVol select w_scc_sft <=
-		w_s( 15 )       	& w_scc( 18 downto  4 )	when "000",
-		w_s( 15 downto 14 ) & w_scc( 18 downto  5 )	when "001",
-		w_s( 15 downto 13 ) & w_scc( 18 downto  6 )	when "010",
-		w_s( 15 downto 12 ) & w_scc( 18 downto  7 )	when "011",
-		w_s( 15 downto 11 ) & w_scc( 18 downto  8 )	when "100",
-		w_s( 15 downto 10 ) & w_scc( 18 downto  9 )	when "101",
-		w_s( 15 downto  9 ) & w_scc( 18 downto 10 )	when "110",
-		w_s( 15 downto  8 ) & w_scc( 18 downto 11 )	when "111",
+		                      w_scc( 18 downto  3 )	when "000",
+		w_s( 15 )           & w_scc( 18 downto  4 )	when "001",
+		w_s( 15 downto 14 ) & w_scc( 18 downto  5 )	when "010",
+		w_s( 15 downto 13 ) & w_scc( 18 downto  6 )	when "011",
+		w_s( 15 downto 12 ) & w_scc( 18 downto  7 )	when "100",
+		w_s( 15 downto 11 ) & w_scc( 18 downto  8 )	when "101",
+		w_s( 15 downto 10 ) & w_scc( 18 downto  9 )	when "110",
+		w_s( 15 downto  9 ) & w_scc( 18 downto 10 )	when "111",
 		(others => 'X') when others;
 
 	process( clk21m )
 		variable chAmp : std_logic_vector( ff_pre_dacin'range );
 	begin
 		if( clk21m'event and clk21m = '1' )then
-			ff_prepsg <= (('0' & PsgAmp  ) + (KeyClick & "00000"));
+			ff_prepsg <= (PsgAmp + (KeyClick & "000000"));
 			ff_prescc <= ((Scc1AmpL(14) & Scc1AmpL) + (Scc2AmpL(14) & Scc2AmpL));
 
---			ff_psg <= "000" & SHR((ff_prepsg * PsgVol) &  "0", MstrVol);
-			ff_psg <= "00" & SHR( ff_prepsg &  "00000", MstrVol);
+			ff_psg <= "00" & SHR((ff_prepsg * PsgVol) &  "0", MstrVol);
 			ff_scc <= w_scc_sft;
 
 			if( OpllAmp < c_opll_zero )then
---				chAmp := "00" & SHR( ((c_opll_zero - OpllAmp) * OpllVol) & "0", MstrVol );
-				chAmp := "0"  & SHR( (c_opll_zero - OpllAmp) & "00000", MstrVol );
+				chAmp := SHR( ((c_opll_zero - OpllAmp) * OpllVol) & "000", MstrVol );
 				ff_opll <= c_amp_offset - ( chAmp - chAmp( chAmp'high downto 3 ) );
 			else
---				chAmp := "00" & SHR( ((OpllAmp - c_opll_zero) * OpllVol) & "0", MstrVol );
-				chAmp := "0"  & SHR( (OpllAmp - c_opll_zero) & "00000", MstrVol );
+				chAmp := SHR( ((OpllAmp - c_opll_zero) * OpllVol) & "000", MstrVol );
 				ff_opll <= c_amp_offset + ( chAmp - chAmp( chAmp'high downto 3 ) );
 			end if;
 		end if;
@@ -1635,7 +1703,33 @@ end process;
 		end if;
 	end process;
     pDac_S <= DACout;
-    Sound_A <= "0" & lpf18_wave(lpf18_wave'high downto 0) & "0";
+    -- Left chanel
+	process( clk21m )
+	begin
+		if( clk21m'event and clk21m = '1' )then
+			DACin_L	<=	"1000000000000" + ff_psg(ff_psg'high - 2 downto 0);
+		end if;
+	end process;
+	-- Right chanel
+	process( clk21m )
+	begin
+		if( clk21m'event and clk21m = '1' )then
+			ff_pre_dacin_R	<=	(ff_scc + ff_opll);
+				-- Limitter
+			case ff_pre_dacin_R( ff_pre_dacin_R'high downto ff_pre_dacin_R'high - 2 ) is
+				when "111" => DACin_R	<= (others=>'1');
+				when "110" => DACin_R	<= (others=>'1');
+				when "101" => DACin_R	<= (others=>'1');
+				when "100" => DACin_R	<= "1" & ff_pre_dacin_R( ff_pre_dacin_R'high - 3 downto 0 );
+				when "011" => DACin_R	<= "0" & ff_pre_dacin_R( ff_pre_dacin_R'high - 3 downto 0 );
+				when "010" => DACin_R	<= (others=>'0');
+				when "001" => DACin_R	<= (others=>'0');
+				when "000" => DACin_R	<= (others=>'0');
+			end case;
+		end if;
+	end process;
+    Sound_L <= "1" & lpf18_wave_L(lpf18_wave_L'high downto 0) & "0";
+    Sound_R <= "1" & lpf18_wave_R(lpf18_wave_R'high downto 0) & "0";
   ----------------------------------------------------------------
   -- Cassette Magnetic Tape (CMT) interface
   ----------------------------------------------------------------
@@ -2085,7 +2179,7 @@ pMemDat		<= SdrDat;
   U38 :  mega_ram
     port map(clk21m, reset, clkena, MRAMreq, mem, wrt, adr, MRAMdbi, dbo, 
              MRAMram, MRAMwrt, MRAMadr, RamDbi, Open);
-
+-- hara
 	u_interpo: interpo
 	generic map (
 		msbi	=> DACin'high
@@ -2111,17 +2205,30 @@ pMemDat		<= SdrDat;
 	);
 -- end hara
 
-  U_LPF: LPF48K
+  U_LPFL: LPF48K
 	GENERIC MAP (
-		MSBI		=> lpf5_wave'high,
-		MSBO		=> lpf18_wave'high
+		MSBI		=> DACin_L'high, --lpf5_wave'high,
+		MSBO		=> lpf18_wave_L'high
 	)
 	PORT MAP (
 		CLK21M		=> clk21m,
 		RESET		=> reset,
 		CLKENA		=> clkena,
-		IDATA		=> lpf5_wave,
-		ODATA		=> lpf18_wave		
+		IDATA		=> DACin_L,	-- lpf5_wave,
+		ODATA		=> lpf18_wave_L		
+	);
+
+  U_LPFR: LPF48K
+	GENERIC MAP (
+		MSBI		=> DACin_R'high, --lpf5_wave'high,
+		MSBO		=> lpf18_wave_R'high
+	)
+	PORT MAP (
+		CLK21M		=> clk21m,
+		RESET		=> reset,
+		CLKENA		=> clkena,
+		IDATA		=> DACin_R,	-- lpf5_wave,
+		ODATA		=> lpf18_wave_R		
 	);
 
   U33: esepwm
@@ -2133,8 +2240,8 @@ pMemDat		<= SdrDat;
   U35: a_codec
 	port map (
 	  iCLK	  => CLOCK_27,
-	  iSL     => SOUND_A,
-	  iSR     => SOUND_A,
+	  iSL     => SOUND_L,
+	  iSR     => SOUND_R,
 	  oAUD_XCK  => AUD_XCK,
 	  oAUD_DATA => AUD_DACDAT,
 	  oAUD_LRCK => AUD_DACLRCK,
