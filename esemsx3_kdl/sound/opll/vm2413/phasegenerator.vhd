@@ -30,7 +30,7 @@
 --
 
 --
---	modified by t.hara
+--  modified by t.hara
 --
 
 library IEEE;
@@ -93,12 +93,12 @@ architecture RTL of PhaseGenerator is
   
 begin
 
-	process(clk, reset)
-		variable lastkey : std_logic_vector(18-1 downto 0); 
-		variable dphase : PHASE_TYPE;   
-		variable noise14 : std_logic;
-		variable noise17 : std_logic;
-		variable pgout_buf : std_logic_vector( 17 downto 0 );	--	®”•” 9bit, ¬”•” 9bit 
+    process(clk, reset)
+        variable lastkey : std_logic_vector(18-1 downto 0); 
+        variable dphase : PHASE_TYPE;   
+        variable noise14 : std_logic;
+        variable noise17 : std_logic;
+        variable pgout_buf : std_logic_vector( 17 downto 0 );   --  ®”•” 9bit, ¬”•” 9bit 
   begin
 
     if reset = '1' then

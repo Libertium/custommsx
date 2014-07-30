@@ -36,8 +36,8 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 package VM2413 is
 
   subtype CH_TYPE is integer range 0 to 9-1;
-  subtype SLOT_TYPE		is std_logic_vector( 4 downto 0 );
-  subtype STAGE_TYPE	is std_logic_vector( 1 downto 0 );
+  subtype SLOT_TYPE     is std_logic_vector( 4 downto 0 );
+  subtype STAGE_TYPE    is std_logic_vector( 1 downto 0 );
   
   subtype REGS_VECTOR_TYPE is std_logic_vector(23 downto 0);
   

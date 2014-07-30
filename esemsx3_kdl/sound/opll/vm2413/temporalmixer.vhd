@@ -98,7 +98,7 @@ begin
             when "01111" => mmute <= '1';
             when "10000" => mmute <= '1';
             when "10001" => mmute <= '1';
-			when others  =>
+            when others  =>
           end case;
           rmute <= '1';
           
@@ -123,7 +123,7 @@ begin
             when "01111" => maddr <= "10000"; mmute <='1'; rmute <='0'; -- TOM
             when "10000" => maddr <= "01101"; mmute <='1'; rmute <='0'; -- BD
             when "10001" =>                   mmute <='1'; rmute <='1';
-			when others  =>
+            when others  =>
           end case;
           
         end if;
