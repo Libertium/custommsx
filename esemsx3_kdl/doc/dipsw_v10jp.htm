@@ -1,0 +1,161 @@
+<!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="Content-Language" content="ja">
+	<title>1chipMSX改 DIP-SW</title>
+</head>
+<body>
+	<strong>DIP-SW の設定について</strong><br>
+	<br>
+	<img src="dipsw_v10jp.png"><br>
+	<br>
+	上の写真の向きで見たときに、突起を上へ動かすと ON, 下へ動かすと OFF となります。<br>
+	スイッチの下側に書いてある数値は、スイッチ番号となります。<br>
+	つまり、写真の状態で、DIP-SW1 と SW2 は OFF, SW3 は ON といった具合です。<br>
+	<br>
+	各種改造によって、一部のスイッチの意味が、オリジナルの 1chipMSX から変わっています。<br>
+	<br>
+	各スイッチは、下記のような意味を持っています。<br>
+	<table border=1>
+		<tr>
+			<th>
+				スイッチ番号
+			</th><th>
+				設定項目
+			</th><th>
+				値
+			</th><th>
+				意味
+			</th>
+
+		</tr><tr>
+			<td rowspan=4>
+				SW1, SW2
+			</td><td rowspan=4>
+				映像出力設定
+			</td><td>
+				OFF, OFF
+			</td><td>
+				コンポジット/Ｓ出力
+			</td>
+		</tr><tr>
+			<td>
+				OFF, ON
+			</td><td>
+				RGB出力(15kHz)
+			</td>
+		</tr><tr>
+			<td>
+				ON, OFF
+			</td><td>
+				VGA出力(31kHz)
+			</td>
+		</tr><tr>
+			<td>
+				ON, ON
+			</td><td>
+				VGA出力(31kHz) 高輝度
+			</td>
+
+		</tr><tr>
+			<td rowspan=2>
+				SW3
+			</td><td rowspan=2>
+				SLOT1設定
+			</td><td>
+				OFF
+			</td><td>
+				カートリッジスロット（手前側）
+			</td>
+		</tr><tr>
+			<td>
+				ON
+			</td><td>
+				似非SCC+ (1MB) ※カートリッジスロット（手前側）は無効
+			</td>
+
+		</tr><tr>
+			<td rowspan=2>
+				SW4
+			</td><td rowspan=2>
+				キーボード種別
+			</td><td>
+				OFF
+			</td><td>
+				日本語キーボード（106/109）
+			</td>
+		</tr><tr>
+			<td>
+				ON
+			</td><td>
+				英語キーボード（101/104）
+			</td>
+
+		</tr><tr>
+			<td rowspan=2>
+				SW5
+			</td><td rowspan=2>
+				SD/MMCスロット
+			</td><td>
+				OFF
+			</td><td>
+				無効
+			</td>
+		</tr><tr>
+			<td>
+				ON
+			</td><td>
+				有効
+			</td>
+
+		</tr><tr>
+			<td rowspan=2>
+				SW6
+			</td><td rowspan=2>
+				CPUクロック
+			</td><td>
+				OFF
+			</td><td>
+				標準モード（3.579MHz）
+			</td>
+		</tr><tr>
+			<td>
+				ON
+			</td><td>
+				高速モード（10.74MHz）<br>
+				※外部カートリッジにも 10.74MHz が供給されるため、オーバークロック動作になります。<br>
+				※内部は 10.74MHz も考慮した設計になっています。<br>
+			</td>
+
+		</tr><tr>
+			<td rowspan=4>
+				SW7, SW8
+			</td><td rowspan=4>
+				SLOT2設定
+			</td><td>
+				OFF, OFF
+			</td><td>
+				カートリッジスロット（奥側）
+			</td>
+		</tr><tr>
+			<td>
+				OFF, ON
+			</td><td>
+				似非SCC+ (512KB) ※カートリッジスロット（奥側）は無効
+			</td>
+		</tr><tr>
+			<td>
+				ON, OFF
+			</td><td>
+				似非RAM[ASCII-8KB-BANK] (512KB) ※カートリッジスロット（奥側）は無効
+			</td>
+		</tr><tr>
+			<td>
+				ON, ON
+			</td><td>
+				似非RAM[ASCII-16KB-BANK] (512KB) ※カートリッジスロット（奥側）は無効
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

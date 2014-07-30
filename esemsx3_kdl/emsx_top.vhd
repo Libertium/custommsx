@@ -739,7 +739,12 @@ begin
     end if;
   end process;
 
-  pCpuClk <= cpuclk    when SelfMode = '1' and clksel = "00" else
+--  pCpuClk <= cpuclk    when SelfMode = '1' and clksel = "00" else
+--             clkdiv(0) when SelfMode = '1' and clksel = "01" else
+--             clkdiv(1) when SelfMode = '1' and clksel = "10" else
+--             clk21m    when SelfMode = '1' and clksel = "11" else 'Z';
+
+  pCpuClk <= cpuclk    when SelfMode = '1' and(clksel = "00" or iSltBot = '1')else
              clkdiv(0) when SelfMode = '1' and clksel = "01" else
              clkdiv(1) when SelfMode = '1' and clksel = "10" else
              clk21m    when SelfMode = '1' and clksel = "11" else 'Z';
@@ -785,61 +790,64 @@ begin
 ----------------------------------------------------------------
 -- Operation mode
 ----------------------------------------------------------------
-  process(clk21m)
+ process(clk21m)
 
-    variable seq : std_logic_vector(3 downto 0) := (others => '0');
-    variable cnt : std_logic_vector(20 downto 0) := (others => '0');
+  variable seq : std_logic_vector(3 downto 0) := (others => '0');
+  variable cnt : std_logic_vector(20 downto 0) := (others => '0');
 
-  begin
+ begin
 
-    if (clk21m'event and clk21m = '1') then
+  if (clk21m'event and clk21m = '1') then
 
-      if (reset = '1') then
-        SelfMode  <= '1';               -- Operation mode : 0=slave, 1=master
-        pLedPwr   <= seq(0);            -- Reset status, factory use
-      else
-        pLedPwr   <= not MmcEna;        -- SD/MMC access lamp
-      end if;
+   if (reset = '1') then
+    SelfMode <= '1';        -- Operation mode : 0=slave, 1=master
+    pLedPwr  <= seq(0);      -- Reset status, factory use
+   else
+    pLedPwr  <= '1';
+--   pLedPwr  <= not MmcEna;    -- SD/MMC access lamp
+   end if;
 
-      if (seq(3 downto 1) = "000") then
-        RstEna   <= '0';
-      else
-        RstEna   <= '1';
-      end if;
+   if (seq(3 downto 1) = "000") then
+    RstEna  <= '0';
+   else
+    RstEna  <= '1';
+   end if;
 
-      if (cnt = "000000000000000000000") then	-- 21.48MHz / 2^21(approx:2M) => 10Hz
-        case seq is
-          when "0010"  => pLed <= "000000Z1";  iDipLed(2) <= not pDip(2);
-          when "0011"  => pLed <= "0000001Z";  iDipLed(1) <= not pDip(1);
-          when "0100"  => pLed <= "000001Z0";  iDipLed(0) <= not pDip(0);
-          when "0101"  => pLed <= "00001Z00";  iDipLed(1) <= not pDip(1);
-          when "0110"  => pLed <= "0001Z000";  iDipLed(2) <= not pDip(2);
-          when "0111"  => pLed <= "001Z0000";  iDipLed(3) <= not pDip(3);
-          when "1000"  => pLed <= "01Z00000";  iDipLed(4) <= not pDip(4);
-          when "1001"  => pLed <= "1Z000000";  iDipLed(5) <= not pDip(5);
-          when "1010"  => pLed <= "Z1000000";  iDipLed(6) <= not pDip(6);
-          when "1011"  => pLed <= "0Z100000";  iDipLed(7) <= not pDip(7);
-          when "1100"  => pLed <= "00Z10000";  iDipLed(6) <= not pDip(6);
-          when "1101"  => pLed <= "000Z1000";  iDipLed(5) <= not pDip(5);
-          when "1110"  => pLed <= "0000Z100";  iDipLed(4) <= not pDip(4);
-          when "1111"  => pLed <= "00000Z10";  iDipLed(3) <= not pDip(3);
-          when others  => pLed <= "ZZZZZZZZ";  iDipLed    <= not pDip   ;
-        end case;
-      end if;
+   if (cnt = "000000000000000000000") then -- 21.48MHz / 2^21(approx:2M) => 10Hz
+--    case seq is
+--     when "0010" => pLed <= "000000Z1"; iDipLed(2) <= not pDip(2);
+--     when "0011" => pLed <= "0000001Z"; iDipLed(1) <= not pDip(1);
+--     when "0100" => pLed <= "000001Z0"; iDipLed(0) <= not pDip(0);
+--     when "0101" => pLed <= "00001Z00"; iDipLed(1) <= not pDip(1);
+--     when "0110" => pLed <= "0001Z000"; iDipLed(2) <= not pDip(2);
+--     when "0111" => pLed <= "001Z0000"; iDipLed(3) <= not pDip(3);
+--     when "1000" => pLed <= "01Z00000"; iDipLed(4) <= not pDip(4);
+--     when "1001" => pLed <= "1Z000000"; iDipLed(5) <= not pDip(5);
+--     when "1010" => pLed <= "Z1000000"; iDipLed(6) <= not pDip(6);
+--     when "1011" => pLed <= "0Z100000"; iDipLed(7) <= not pDip(7);
+--     when "1100" => pLed <= "00Z10000"; iDipLed(6) <= not pDip(6);
+--     when "1101" => pLed <= "000Z1000"; iDipLed(5) <= not pDip(5);
+--     when "1110" => pLed <= "0000Z100"; iDipLed(4) <= not pDip(4);
+--     when "1111" => pLed <= "00000Z10"; iDipLed(3) <= not pDip(3);
+--     when others => pLed <= "ZZZZZZZZ"; iDipLed  <= not pDip  ;
+--    end case;
+    iDipLed <= not pDip;
+   end if;
 
-      if (cnt = "000000000000000000000") then
-        if (seq = "1111") then
-          seq := "0010";
-        else
-          seq := seq + 1;
-        end if;
-      end if;
+   pLed  <= MmcEna & "0000000";
 
-      cnt := cnt + 1;
-
+   if (cnt = "000000000000000000000") then
+    if (seq = "1111") then
+     seq := "0010";
+    else
+     seq := seq + 1;
     end if;
+   end if;
 
-  end process;
+   cnt := cnt + 1;
+
+  end if;
+ end process;
 
   KeyMode   <= '1';     -- Kana key board layout  : 1=JIS layout
 
