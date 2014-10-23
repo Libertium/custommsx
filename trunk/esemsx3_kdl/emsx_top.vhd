@@ -30,7 +30,7 @@
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --------------------------------------------------------------------------------
--- OCM-PLD Pack v3.2.2 by KdL (2014.07.27)
+-- OCM-PLD Pack v3.2.3 by KdL (2014.10.11)
 -- Special thx to t.hara, caro, mygodess & all MRC users (http://www.msx.org/)
 --------------------------------------------------------------------------------
 --
