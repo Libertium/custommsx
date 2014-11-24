@@ -1,0 +1,6 @@
+2014.06.05   -- v3.2.1      OPLL+OPL4 I/O fix                                                         // thanks to Retro fan for testing
+2014.07.27   -- v3.2.2      VDP TH9958 INT_n fix, alias M.M. MIDI-IN fix (PlaySoniq is ok now)        // thanks to msd       for testing
+2014.10.11   -- v3.2.3      MSX3 Logo Final Release, MegaSD Single Drive fix (CTRL forever at boot)   // thanks to pmt7ar    for testing
+2014.11.16   -- v3.3 RC1    IPL-ROM v1.03(K), MainRAM/MegaRAM clear function fix
+2014.11.20   -- v3.3 RC2    RstEna regression, other minor fixes
+2014.11.23   -- v3.3 RC3    IPL-ROM v1.04(K), new useful scripts
