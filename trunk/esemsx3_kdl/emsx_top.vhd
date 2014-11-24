@@ -30,7 +30,7 @@
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 --------------------------------------------------------------------------------
--- OCM-PLD Pack v3.2.3 by KdL (2014.10.11)
+-- OCM-PLD Pack v3.3 by KdL (2014.11.23) RC3
 -- Special thx to t.hara, caro, mygodess & all MRC users (http://www.msx.org/)
 --------------------------------------------------------------------------------
 --
@@ -644,7 +644,6 @@ architecture RTL of emsx_top is
     signal  RstEna          : std_logic := '0';
     signal  FirstBoot_n     : std_logic := '0';
     signal  RstSeq          : std_logic_vector(  4 downto 0 ) := (others => '0');
-    signal  ExtraRstCnt     : std_logic_vector(  1 downto 0 ) := (others => '0');
     signal  FreeCounter     : std_logic_vector( 15 downto 0 ) := (others => '0');
     signal  HoldRst_ena     : std_logic := '0';
     signal  HardRst_cnt     : std_logic_vector(  3 downto 0 ) := (others => '0');
@@ -1169,18 +1168,6 @@ begin
         end if;
     end process;
 
-    -- extra reset counter for megaram
-    process( memclk )
-    begin
-        if( memclk'event and memclk = '1' )then
-            if( ExtraRstCnt = "10" )then
-                ExtraRstCnt(1) <= '0';
-            else
-                ExtraRstCnt <= ExtraRstCnt + 1;
-            end if;
-        end if;
-    end process;
-
     --  Reset pulse width = 48 ms
     process( RstEna, memclk )
     begin
@@ -1191,9 +1178,8 @@ begin
         end if;
     end process;
 
-    reset       <=  '1' when( (pSltRst_n = '0' and io43_id212(5) = '0' and HardRst_cnt /= "0001") or swioRESET_n = '0' )else
-                    '1' when( HardRst_cnt = "0011" or HardRst_cnt = "0010" )else
-                    '1' when( RstSeq /= "11111" )else
+    reset       <=  '1' when( pSltRst_n = '0' and io43_id212(5) = '0' and HardRst_cnt /= "0001" )else
+                    '1' when( swioRESET_n = '0' or HardRst_cnt = "0011" or HardRst_cnt = "0010" or RstSeq /= "11111" )else
                     '0';
 
     ----------------------------------------------------------------
@@ -1332,7 +1318,7 @@ begin
         if( reset = '1' )then
             RstEna <= '0';
         elsif( clk21m'event and clk21m = '1' )then
-            if( ff_rst_seq = "11" and warmRESET /= '1' and RstSeq = "11111" )then
+            if( ff_rst_seq = "11" and warmRESET /= '1' )then
                 RstEna      <= '1';                         -- RstEna change to 1 after 200ms from power on
                 FirstBoot_n <= '1';
             else
@@ -1924,7 +1910,7 @@ begin
     ----------------------------------------------------------------
     -- Video output
     ----------------------------------------------------------------
-    V9938_n <= '1';                                     -- V9958
+    V9938_n <= '1';                                     -- '0' for V9938 (MSX2 VDP), '1' for V9958 (MSX2+ VDP)
 
     process (clk21m)
     begin
@@ -2124,7 +2110,7 @@ begin
     -- Slot 3-2 : MegaSD                600000-60FFFF (  64 kB)
     --            EseRAM                600000-63FFFF (BIOS:256 kB)
     -- Slot 3-3 : IPL-ROM               (blockRAM: < 1024 Bytes, see IPLROM.VHD)
-    -- VRAM     : VRAM                  700000-71FFFF ( 128 kB)
+    -- VRAM     : VRAM                  700000-7FFFFF (1024 kB)
 
     CpuAdr(22 downto 20) <= "00" & MapAdr(20)           when( iSltMap  = '1' and FullRAM = '0' )else    --  2048 kB RAM
                             "0" & MapAdr(21 downto 20)  when( iSltMap  = '1' )else                      --  4096 kB RAM
@@ -2284,15 +2270,15 @@ begin
                 when "010" =>
                     SdrAdr(12 downto 9) <= "0010";                                      -- A10=1 => enable auto precharge
                     if( RstSeq(4 downto 2) = "010" )then
-                        SdrAdr(8 downto 0) <= "11" & "1000" & ClrAdr(15 downto 13);     -- clear VRAM (128 kB)
+                        SdrAdr(8 downto 0) <= "111" & "000" & ClrAdr(15 downto 13);     -- clear VRAM (128 kB)        => start adr 700000h
                     elsif( RstSeq(4 downto 2) = "011" )then
-                        SdrAdr(8 downto 0) <= "11" & "0000" & ClrAdr(15 downto 13);     -- clear ERAM (128 kB)
-                    elsif( RstSeq(4 downto 3) = "10" and ExtraRstCnt = "00" )then
-                        SdrAdr(8 downto 0) <= "01" & "0000" & ClrAdr(15 downto 13);     -- clear MainRAM (128 kB)
-                    elsif( RstSeq(4 downto 3) = "10" and ExtraRstCnt = "01" )then
-                        SdrAdr(8 downto 0) <= "10" & "0000" & ClrAdr(15 downto 13);     -- clear MegaRam1 (128 kB)
-                    elsif( RstSeq(4 downto 3) = "10" and ExtraRstCnt = "10" )then
-                        SdrAdr(8 downto 0) <= "10" & "1000" & ClrAdr(15 downto 13);     -- clear MegaRam2 (128 kB)
+                        SdrAdr(8 downto 0) <= "110" & "000" & ClrAdr(15 downto 13);     -- clear ERAM (128 kB)        => start adr 600000h
+                    elsif( RstSeq(4 downto 2) = "100" )then
+                        SdrAdr(8 downto 0) <= "000" & "000" & ClrAdr(15 downto 13);     -- clear MainRAM (128 kB)     => start adr 000000h
+                    elsif( RstSeq(4 downto 1) = "1010" )then
+                        SdrAdr(8 downto 0) <= "100" & "000" & ClrAdr(15 downto 13);     -- clear MegaRam1             => start adr 400000h
+                    elsif( RstSeq(4 downto 1) = "1011" )then
+                        SdrAdr(8 downto 0) <= "101" & "000" & ClrAdr(15 downto 13);     -- clear MegaRam2             => start adr 500000h
                     elsif( VideoDLClk = '0' )then
                         SdrAdr(8 downto 0) <= CpuAdr(22 downto 14);
                     elsif( VdpAdr(15) = '0' )then
