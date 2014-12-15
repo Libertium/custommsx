@@ -6,25 +6,25 @@
 --  All rights reserved.
 --                                     http://www.ohnaka.jp/ese-vdp/
 --
---  –{ƒ\ƒtƒgƒEƒFƒA‚¨‚æ‚Ñ–{ƒ\ƒtƒgƒEƒFƒA‚ÉŠî‚Ã‚¢‚Äì¬‚³‚ê‚½”h¶•¨‚ÍAˆÈ‰º‚ÌðŒ‚ð
---  –ž‚½‚·ê‡‚ÉŒÀ‚èAÄ”Ð•z‚¨‚æ‚ÑŽg—p‚ª‹–‰Â‚³‚ê‚Ü‚·B
+--  ï¿½{ï¿½\ï¿½tï¿½gï¿½Eï¿½Fï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Ñ–{ï¿½\ï¿½tï¿½gï¿½Eï¿½Fï¿½Aï¿½ÉŠï¿½ï¿½Ã‚ï¿½ï¿½Äì¬ï¿½ï¿½ï¿½ê‚½ï¿½hï¿½ï¿½ï¿½ï¿½ï¿½ÍAï¿½È‰ï¿½ï¿½Ìï¿½ï¿½
+--  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ê‡ï¿½ÉŒï¿½ï¿½ï¿½Aï¿½Ä”Ð•zï¿½ï¿½ï¿½ï¿½ï¿½ÑŽgï¿½pï¿½ï¿½ï¿½ï¿½ï¿½Â‚ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B
 --
---  1.ƒ\[ƒXƒR[ƒhŒ`Ž®‚ÅÄ”Ð•z‚·‚éê‡Aã‹L‚Ì’˜ìŒ •\Ž¦A–{ðŒˆê——A‚¨‚æ‚Ñ‰º‹L
---    –ÆÓð€‚ð‚»‚Ì‚Ü‚Ü‚ÌŒ`‚Å•ÛŽ‚·‚é‚±‚ÆB
---  2.ƒoƒCƒiƒŠŒ`Ž®‚ÅÄ”Ð•z‚·‚éê‡A”Ð•z•¨‚É•t‘®‚ÌƒhƒLƒ…ƒƒ“ƒg“™‚ÌŽ‘—¿‚ÉAã‹L‚Ì
---    ’˜ìŒ •\Ž¦A–{ðŒˆê——A‚¨‚æ‚Ñ‰º‹L–ÆÓð€‚ðŠÜ‚ß‚é‚±‚ÆB
---  3.‘–Ê‚É‚æ‚éŽ–‘O‚Ì‹–‰Â‚È‚µ‚ÉA–{ƒ\ƒtƒgƒEƒFƒA‚ð”Ì”„A‚¨‚æ‚Ñ¤‹Æ“I‚È»•i‚âŠˆ“®
---    ‚ÉŽg—p‚µ‚È‚¢‚±‚ÆB
+--  1.ï¿½\ï¿½[ï¿½Xï¿½Rï¿½[ï¿½hï¿½`ï¿½ï¿½ï¿½ÅÄ”Ð•zï¿½ï¿½ï¿½ï¿½ï¿½ê‡ï¿½Aï¿½ï¿½ï¿½Lï¿½Ì’ï¿½ï¿½ìŒ ï¿½\ï¿½ï¿½ï¿½Aï¿½{ï¿½ï¿½ê——ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Ñ‰ï¿½ï¿½L
+--    ï¿½ÆÓï¿½ï¿½Ì‚Ü‚Ü‚ÌŒ`ï¿½Å•ÛŽï¿½ï¿½ï¿½ï¿½é‚±ï¿½ÆB
+--  2.ï¿½oï¿½Cï¿½iï¿½ï¿½ï¿½`ï¿½ï¿½ï¿½ÅÄ”Ð•zï¿½ï¿½ï¿½ï¿½ï¿½ê‡ï¿½Aï¿½Ð•zï¿½ï¿½ï¿½É•tï¿½ï¿½ï¿½Ìƒhï¿½Lï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ÌŽï¿½ï¿½ï¿½ï¿½ÉAï¿½ï¿½ï¿½Lï¿½ï¿½
+--    ï¿½ï¿½ï¿½ìŒ ï¿½\ï¿½ï¿½ï¿½Aï¿½{ï¿½ï¿½ê——ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Ñ‰ï¿½ï¿½Lï¿½ÆÓï¿½ï¿½ï¿½Ü‚ß‚é‚±ï¿½ÆB
+--  3.ï¿½ï¿½ï¿½Ê‚É‚ï¿½ï¿½éŽ–ï¿½Oï¿½Ì‹ï¿½ï¿½Â‚È‚ï¿½ï¿½ÉAï¿½{ï¿½\ï¿½tï¿½gï¿½Eï¿½Fï¿½Aï¿½ï¿½ï¿½Ì”ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Ñï¿½ï¿½Æ“Iï¿½Èï¿½ï¿½iï¿½âŠˆï¿½ï¿½
+--    ï¿½ÉŽgï¿½pï¿½ï¿½ï¿½È‚ï¿½ï¿½ï¿½ï¿½ÆB
 --
---  –{ƒ\ƒtƒgƒEƒFƒA‚ÍA’˜ìŒ ŽÒ‚É‚æ‚Á‚ÄuŒ»ó‚Ì‚Ü‚Üv’ñ‹Ÿ‚³‚ê‚Ä‚¢‚Ü‚·B’˜ìŒ ŽÒ‚ÍA
---  “Á’è–Ú“I‚Ö‚Ì“K‡«‚Ì•ÛØA¤•i«‚Ì•ÛØA‚Ü‚½‚»‚ê‚ÉŒÀ’è‚³‚ê‚È‚¢A‚¢‚©‚È‚é–¾Ž¦
---  “I‚à‚µ‚­‚ÍˆÃ–Ù‚È•ÛØÓ”C‚à•‰‚¢‚Ü‚¹‚ñB’˜ìŒ ŽÒ‚ÍAŽ–—R‚Ì‚¢‚©‚ñ‚ð–â‚í‚¸A‘¹ŠQ
---  ”­¶‚ÌŒ´ˆö‚¢‚©‚ñ‚ð–â‚í‚¸A‚©‚ÂÓ”C‚Ìª‹’‚ªŒ_–ñ‚Å‚ ‚é‚©ŒµŠiÓ”C‚Å‚ ‚é‚©i‰ßŽ¸
---  ‚»‚Ì‘¼‚Ìj•s–@sˆ×‚Å‚ ‚é‚©‚ð–â‚í‚¸A‰¼‚É‚»‚Ì‚æ‚¤‚È‘¹ŠQ‚ª”­¶‚·‚é‰Â”\«‚ð’m‚ç
---  ‚³‚ê‚Ä‚¢‚½‚Æ‚µ‚Ä‚àA–{ƒ\ƒtƒgƒEƒFƒA‚ÌŽg—p‚É‚æ‚Á‚Ä”­¶‚µ‚½i‘ã‘Ö•i‚Ü‚½‚Í‘ã—pƒT
---  [ƒrƒX‚Ì’²’BAŽg—p‚Ì‘rŽ¸Aƒf[ƒ^‚Ì‘rŽ¸A—˜‰v‚Ì‘rŽ¸A‹Æ–±‚Ì’†’f‚àŠÜ‚ßA‚Ü‚½‚»
---  ‚ê‚ÉŒÀ’è‚³‚ê‚È‚¢j’¼Ú‘¹ŠQAŠÔÚ‘¹ŠQA‹ô”­“I‚È‘¹ŠQA“Á•Ê‘¹ŠQA’¦”±“I‘¹ŠQA‚Ü
---  ‚½‚ÍŒ‹‰Ê‘¹ŠQ‚É‚Â‚¢‚ÄAˆêØÓ”C‚ð•‰‚í‚È‚¢‚à‚Ì‚Æ‚µ‚Ü‚·B
+--  ï¿½{ï¿½\ï¿½tï¿½gï¿½Eï¿½Fï¿½Aï¿½ÍAï¿½ï¿½ï¿½ìŒ ï¿½Ò‚É‚ï¿½ï¿½ï¿½Äuï¿½ï¿½ï¿½ï¿½ï¿½Ì‚Ü‚Üvï¿½ñ‹Ÿ‚ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½ï¿½Bï¿½ï¿½ï¿½ìŒ ï¿½Ò‚ÍA
+--  ï¿½ï¿½ï¿½ï¿½Ú“Iï¿½Ö‚Ì“Kï¿½ï¿½ï¿½ï¿½ï¿½Ì•ÛØAï¿½ï¿½ï¿½iï¿½ï¿½ï¿½Ì•ÛØAï¿½Ü‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÉŒï¿½è‚³ï¿½ï¿½ï¿½È‚ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½È‚é–¾ï¿½ï¿½
+--  ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½ÍˆÃ–Ù‚È•ÛØÓ”Cï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½ï¿½Bï¿½ï¿½ï¿½ìŒ ï¿½Ò‚ÍAï¿½ï¿½ï¿½Rï¿½Ì‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½í‚¸ï¿½Aï¿½ï¿½ï¿½Q
+--  ï¿½ï¿½ï¿½ï¿½ï¿½ÌŒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½í‚¸ï¿½Aï¿½ï¿½ï¿½ÂÓ”Cï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½Å‚ï¿½ï¿½é‚©ï¿½ï¿½ï¿½iï¿½Ó”Cï¿½Å‚ï¿½ï¿½é‚©ï¿½iï¿½ßŽï¿½
+--  ï¿½ï¿½ï¿½Ì‘ï¿½ï¿½Ìjï¿½sï¿½@ï¿½sï¿½×‚Å‚ï¿½ï¿½é‚©ï¿½ï¿½ï¿½ï¿½ï¿½í‚¸ï¿½Aï¿½ï¿½ï¿½É‚ï¿½ï¿½Ì‚æ‚¤ï¿½È‘ï¿½ï¿½Qï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â”\ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½ï¿½
+--  ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½ï¿½Ä‚ï¿½ï¿½Aï¿½{ï¿½\ï¿½tï¿½gï¿½Eï¿½Fï¿½Aï¿½ÌŽgï¿½pï¿½É‚ï¿½ï¿½ï¿½Ä”ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½Ö•iï¿½Ü‚ï¿½ï¿½Í‘ï¿½ï¿½pï¿½T
+--  ï¿½[ï¿½rï¿½Xï¿½Ì’ï¿½ï¿½Bï¿½Aï¿½gï¿½pï¿½Ì‘rï¿½ï¿½ï¿½Aï¿½fï¿½[ï¿½^ï¿½Ì‘rï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½vï¿½Ì‘rï¿½ï¿½ï¿½Aï¿½Æ–ï¿½ï¿½Ì’ï¿½ï¿½fï¿½ï¿½ï¿½Ü‚ßAï¿½Ü‚ï¿½ï¿½ï¿½
+--  ï¿½ï¿½ï¿½ÉŒï¿½è‚³ï¿½ï¿½ï¿½È‚ï¿½ï¿½jï¿½ï¿½ï¿½Ú‘ï¿½ï¿½Qï¿½Aï¿½ÔÚ‘ï¿½ï¿½Qï¿½Aï¿½ï¿½Iï¿½È‘ï¿½ï¿½Qï¿½Aï¿½ï¿½Ê‘ï¿½ï¿½Qï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½Qï¿½Aï¿½ï¿½
+--  ï¿½ï¿½ï¿½ÍŒï¿½ï¿½Ê‘ï¿½ï¿½Qï¿½É‚Â‚ï¿½ï¿½ÄAï¿½ï¿½ï¿½ØÓ”Cï¿½ð•‰‚ï¿½ï¿½È‚ï¿½ï¿½ï¿½ï¿½Ì‚Æ‚ï¿½ï¿½Ü‚ï¿½ï¿½B
 --
 --  Note that above Japanese version license is the formal document.
 --  The following translation is only for reference.
@@ -68,7 +68,7 @@
 -------------------------------------------------------------------------------
 -- Memo
 --   Japanese comment lines are starts with "JP:".
---   JP: “ú–{Œê‚ÌƒRƒƒ“ƒgs‚Í JP:‚ð“ª‚É•t‚¯‚éŽ–‚É‚·‚é
+--   JP: ï¿½ï¿½ï¿½{ï¿½ï¿½ï¿½ÌƒRï¿½ï¿½ï¿½ï¿½ï¿½gï¿½sï¿½ï¿½ JP:ï¿½ð“ª‚É•tï¿½ï¿½ï¿½éŽ–ï¿½É‚ï¿½ï¿½ï¿½
 --
 -------------------------------------------------------------------------------
 -- Todo
@@ -76,6 +76,9 @@
 --
 -------------------------------------------------------------------------------
 -- Revision History
+--
+-- 27th,July,2014 modified by KdL
+--  - Fixed H-SYNC interrupt reset control
 --
 -- 29th,October,2006 modified by Kunihiko Ohnaka
 --   - Insert the license text.
@@ -108,67 +111,67 @@
 -- Add blink support to text 2 mode
 --
 -- 16th,Aug,2005 modified by Kazuhiro Tsujikawa
--- JP: TMS9918ƒ‚[ƒh‚ÅVRAMƒCƒ“ƒNƒŠƒƒ“ƒg‚ð‰ºˆÊ14ƒrƒbƒg‚ÉŒÀ’è
+-- JP: TMS9918ï¿½ï¿½ï¿½[ï¿½hï¿½ï¿½VRAMï¿½Cï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½14ï¿½rï¿½bï¿½gï¿½ÉŒï¿½ï¿½
 --
 -- 08th,May,2005 modified by Kunihiko Ohnaka
--- JP: VGAƒRƒ“ƒ|[ƒlƒ“ƒg‚ÉInerlaceModeM†‚ð“`‚¦‚é‚æ‚¤‚É‚µ‚½
+-- JP: VGAï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½ï¿½InerlaceModeï¿½Mï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½É‚ï¿½ï¿½ï¿½
 --
 -- 26th,April,2005 modified by Kazuhiro Tsujikawa
--- JP: VRAM‚Æ‚Ìƒf[ƒ^ƒoƒX(pRamDbi/pRamDbo)‚ð’P•ûŒüƒoƒX‰»(SDRAM‘Î‰ž)
+-- JP: VRAMï¿½Æ‚Ìƒfï¿½[ï¿½^ï¿½oï¿½X(pRamDbi/pRamDbo)ï¿½ï¿½ï¿½Pï¿½ï¿½ï¿½ï¿½ï¿½oï¿½Xï¿½ï¿½(SDRAMï¿½Î‰ï¿½)
 --
 -- 08th,November,2004 modified by Kazuhiro Tsujikawa
--- JP: Vsync/HsyncŠ„‚èž‚ÝC³ƒ~ƒX’ù³
+-- JP: Vsync/Hsyncï¿½ï¿½ï¿½èžï¿½ÝCï¿½ï¿½ï¿½~ï¿½Xï¿½ï¿½ï¿½ï¿½
 --
 -- 03rd,November,2004 modified by Kazuhiro Tsujikawa
--- JP: SCREEN6‰æ–ÊŽü•ÓFC³¨MSX2ƒ^ƒCƒgƒ‹ƒƒS‘Î‰ž
+-- JP: SCREEN6ï¿½ï¿½ï¿½ÊŽï¿½ï¿½ÓFï¿½Cï¿½ï¿½ï¿½ï¿½MSX2ï¿½^ï¿½Cï¿½gï¿½ï¿½ï¿½ï¿½ï¿½Sï¿½Î‰ï¿½
 --
 -- 19th,September,2004 modified by Kazuhiro Tsujikawa
--- JP: ƒpƒ^[ƒ“ƒl[ƒ€ƒe[ƒuƒ‹‚Ìƒ}ƒXƒN‚ðŽÀ‘•¨ANMAƒfƒ‚‘Î‰ž
--- JP: MultiColorMode(SCREEN3)ŽÀ‘•¨ƒ}ƒWƒ‰ƒrƒfƒ‚‘Î‰ž
+-- JP: ï¿½pï¿½^ï¿½[ï¿½ï¿½ï¿½lï¿½[ï¿½ï¿½ï¿½eï¿½[ï¿½uï¿½ï¿½ï¿½Ìƒ}ï¿½Xï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ANMAï¿½fï¿½ï¿½ï¿½Î‰ï¿½
+-- JP: MultiColorMode(SCREEN3)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}ï¿½Wï¿½ï¿½ï¿½rï¿½fï¿½ï¿½ï¿½Î‰ï¿½
 --
 -- 12th,September,2004 modified by Kazuhiro Tsujikawa
--- JP: VdpR0DispNum“™‚ðƒ‰ƒCƒ“’PˆÊ‚Å”½‰f¨ƒXƒy[ƒXƒ}ƒ“ƒ{ƒE‚Å‚Ìƒ`ƒ‰ƒcƒL‘Îô
+-- JP: VdpR0DispNumï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Pï¿½Ê‚Å”ï¿½ï¿½fï¿½ï¿½ï¿½Xï¿½yï¿½[ï¿½Xï¿½}ï¿½ï¿½ï¿½{ï¿½Eï¿½Å‚Ìƒ`ï¿½ï¿½ï¿½cï¿½Lï¿½Îï¿½
 --
 -- 11th,September,2004 modified by Kazuhiro Tsujikawa
--- JP: …•½‹AüŠ„‚èž‚ÝC³¨MGSEL(ƒeƒ“ƒ|‘‘—‚è)‘Îô
+-- JP: ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½èžï¿½ÝCï¿½ï¿½ï¿½ï¿½MGSEL(ï¿½eï¿½ï¿½ï¿½|ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)ï¿½Îï¿½
 --
 -- 22nd,August,2004 modified by Kazuhiro Tsujikawa
--- JP: ƒpƒŒƒbƒg‚ÌRead/WriteÕ“Ë‚ðC³¨ƒKƒ[ƒ‹‚Å‚Ìƒ`ƒ‰ƒcƒL‘Îô
+-- JP: ï¿½pï¿½ï¿½ï¿½bï¿½gï¿½ï¿½Read/Writeï¿½Õ“Ë‚ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½Kï¿½[ï¿½ï¿½ï¿½Å‚Ìƒ`ï¿½ï¿½ï¿½cï¿½Lï¿½Îï¿½
 --
 -- 21st,August,2004 modified by Kazuhiro Tsujikawa
--- JP: R#1/IE0(‚’¼‹AüŠ„‚èž‚Ý‹–‰Â)‚Ì“®ì‚ðC³¨GALAGA‘Îô
+-- JP: R#1/IE0(ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½èžï¿½Ý‹ï¿½ï¿½ï¿½)ï¿½Ì“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½GALAGAï¿½Îï¿½
 --
 -- 2nd,August,2004 modified by Kazuhiro Tsujikawa
--- JP: Screen7/8‚Å‚ÌƒXƒvƒ‰ƒCƒg“Ç‚Ýž‚ÝƒAƒhƒŒƒX‚ðC³¨Snatcher‘Îô
+-- JP: Screen7/8ï¿½Å‚ÌƒXï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½Ç‚Ýï¿½ï¿½ÝƒAï¿½hï¿½ï¿½ï¿½Xï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½Snatcherï¿½Îï¿½
 --
 -- 31th,July,2004 modified by Kazuhiro Tsujikawa
--- JP: Screen7/8‚Å‚ÌVRAM“Ç‚Ýž‚ÝƒAƒhƒŒƒX‚ðC³¨Snatcher‘Îô
+-- JP: Screen7/8ï¿½Å‚ï¿½VRAMï¿½Ç‚Ýï¿½ï¿½ÝƒAï¿½hï¿½ï¿½ï¿½Xï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½Snatcherï¿½Îï¿½
 --
 -- 24th,July,2004 modified by Kazuhiro Tsujikawa
--- JP: ƒXƒvƒ‰ƒCƒg32–‡“¯Žž•\Ž¦Žž‚Ì—‚ê‚ðC³(248=256-8->preDotCounter_x_end)
+-- JP: ï¿½Xï¿½vï¿½ï¿½ï¿½Cï¿½g32ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½Ì—ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½(248=256-8->preDotCounter_x_end)
 --
 -- 18th,July,2004 modified by Kazuhiro Tsujikawa
--- JP: Screen6‚ÌƒŒƒ“ƒ_ƒŠƒ“ƒO•”‚ðì¬
+-- JP: Screen6ï¿½Ìƒï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½ì¬
 --
 -- 17th,July,2004 modified by Kazuhiro Tsujikawa
--- JP: Screen7‚ÌƒŒƒ“ƒ_ƒŠƒ“ƒO•”‚ðì¬
+-- JP: Screen7ï¿½Ìƒï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½ì¬
 --
 -- 29th,June,2004 modified by Kazuhiro Tsujikawa
--- JP: Screen8‚ÌƒŒƒ“ƒ_ƒŠƒ“ƒO•”‚ðC³
+-- JP: Screen8ï¿½Ìƒï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½
 --
 -- 26th,June,2004 modified by Kazuhiro Tsujikawa
--- JP: WebPack‚ÅƒRƒ“ƒpƒCƒ‹‚·‚é‚ÆHMMC/LMMC/LMCM‚ª“®ì‚µ‚È‚¢•s‹ï‡‚ðC³
+-- JP: WebPackï¿½ÅƒRï¿½ï¿½ï¿½pï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½HMMC/LMMC/LMCMï¿½ï¿½ï¿½ï¿½ï¿½ì‚µï¿½È‚ï¿½ï¿½sï¿½ï‡ï¿½ï¿½ï¿½Cï¿½ï¿½
 -- JP: onehot sequencer(VdpCmdState) must be initialized by asyncronus RESET
 --
 -- 22nd,June,2004 modified by Kazuhiro Tsujikawa
--- JP: R#1/IE0(‚’¼‹AüŠ„‚èž‚Ý‹–‰Â)‚Ì“®ì‚ðC³
--- JP: Ys2‚ÅƒoƒmƒA‚Ì‰Æ‚É“ü‚ê‚é—l‚É‚È‚Á‚½
+-- JP: R#1/IE0(ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½èžï¿½Ý‹ï¿½ï¿½ï¿½)ï¿½Ì“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½
+-- JP: Ys2ï¿½Åƒoï¿½mï¿½Aï¿½Ì‰Æ‚É“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½lï¿½É‚È‚ï¿½ï¿½
 --
 -- 13th,June,2004 modified by Kazuhiro Tsujikawa
--- JP: Šg‘åƒXƒvƒ‰ƒCƒg‚ª‰E‚É1ƒhƒbƒg‚¸‚ê‚é•s‹ï‡‚ðC³
--- JP: SCREEN5‚ÅƒXƒvƒ‰ƒCƒg‰E’[32ƒhƒbƒg‚ª•\Ž¦‚³‚ê‚È‚¢•s‹ï‡‚ðC³
--- JP: SCREEN5‚Å211ƒ‰ƒCƒ“(Å‰º)‚ÌƒXƒvƒ‰ƒCƒg‚ª•\Ž¦‚³‚ê‚È‚¢•s‹ï‡‚ðC³
--- JP: ‰æ–ÊÁ‹Žƒtƒ‰ƒO(VdpR1DispOn)‚ð1ƒ‰ƒCƒ“’PˆÊ‚Å”½‰f‚·‚é—l‚ÉC³
+-- JP: ï¿½gï¿½ï¿½ï¿½Xï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½ï¿½ï¿½Eï¿½ï¿½1ï¿½hï¿½bï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï‡ï¿½ï¿½ï¿½Cï¿½ï¿½
+-- JP: SCREEN5ï¿½ÅƒXï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½Eï¿½[32ï¿½hï¿½bï¿½gï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È‚ï¿½ï¿½sï¿½ï‡ï¿½ï¿½ï¿½Cï¿½ï¿½
+-- JP: SCREEN5ï¿½ï¿½211ï¿½ï¿½ï¿½Cï¿½ï¿½(ï¿½Å‰ï¿½)ï¿½ÌƒXï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È‚ï¿½ï¿½sï¿½ï‡ï¿½ï¿½ï¿½Cï¿½ï¿½
+-- JP: ï¿½ï¿½ï¿½Êï¿½ï¿½ï¿½tï¿½ï¿½ï¿½O(VdpR1DispOn)ï¿½ï¿½1ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Pï¿½Ê‚Å”ï¿½ï¿½fï¿½ï¿½ï¿½ï¿½ï¿½lï¿½ÉCï¿½ï¿½
 --
 -- 21st,March,2004 modified by Alex Wulms
 -- Several enhancements to command engine:
@@ -177,47 +180,47 @@
 --   Improve existing commands
 --
 -- 15th,January,2004 modified by Kunihiko Ohnaka
--- JP: VDPƒRƒ}ƒ“ƒh‚ÌŽÀ‘•‚ðŠJŽn
--- JP: HMMC,HMMM,YMMM,HMMV,LMMC,LMMM,LMMV‚ðŽÀ‘•.‚Ü‚¾•s‹ï‡‚ ‚è.
+-- JP: VDPï¿½Rï¿½}ï¿½ï¿½ï¿½hï¿½ÌŽï¿½ï¿½ï¿½ï¿½ï¿½Jï¿½n
+-- JP: HMMC,HMMM,YMMM,HMMV,LMMC,LMMM,LMMVï¿½ï¿½ï¿½ï¿½ï¿½.ï¿½Ü‚ï¿½ï¿½sï¿½ï‡ï¿½ï¿½ï¿½ï¿½.
 --
 -- 12th,January,2004 modified by Kunihiko Ohnaka
--- JP: ƒRƒƒ“ƒg‚ÌC³
+-- JP: ï¿½Rï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ÌCï¿½ï¿½
 --
 -- 30th,December,2003 modified by Kazuhiro Tsujikawa
--- JP: ‹N“®Žž‚Ì‰æ–Êƒ‚[ƒh‚ðVDP_NTSC‚Æ VGA‚Ì‚Ç‚¿‚ç‚É‚·‚é‚©‚ðCŠO•”“ü—Í‚ÅØ‘Ö
--- JP: DHClk/DLClk‚ðˆêŽž“I‚É•œŠˆ‚³‚¹‚½
+-- JP: ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½Ì‰ï¿½ï¿½Êƒï¿½ï¿½[ï¿½hï¿½ï¿½VDP_NTSCï¿½ï¿½ VGAï¿½Ì‚Ç‚ï¿½ï¿½ï¿½ï¿½É‚ï¿½ï¿½é‚©ï¿½ï¿½ï¿½Cï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½Í‚ÅØ‘ï¿½
+-- JP: DHClk/DLClkï¿½ï¿½ï¿½êŽžï¿½Iï¿½É•ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 --
 -- 16th,December,2003 modified by Kunihiko Ohnaka
--- JP: ‹N“®Žž‚Ì‰æ–Êƒ‚[ƒh‚ðVDP_NTSC‚Æ VGA‚Ì‚Ç‚¿‚ç‚É‚·‚é‚©‚ðCvdp_package.vhd
--- JP: “à‚Å’è‹`‚³‚ê‚½’è”‚ÅØ‘Ö‚¦‚é‚æ‚¤‚É‚µ‚½D
+-- JP: ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½Ì‰ï¿½ï¿½Êƒï¿½ï¿½[ï¿½hï¿½ï¿½VDP_NTSCï¿½ï¿½ VGAï¿½Ì‚Ç‚ï¿½ï¿½ï¿½ï¿½É‚ï¿½ï¿½é‚©ï¿½ï¿½ï¿½Cvdp_package.vhd
+-- JP: ï¿½ï¿½ï¿½Å’ï¿½ï¿½`ï¿½ï¿½ï¿½ê‚½ï¿½è”ï¿½ÅØ‘Ö‚ï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½É‚ï¿½ï¿½ï¿½ï¿½D
 --
 -- 10th,December,2003 modified by Kunihiko Ohnaka
--- JP: TEXT MODE 2 (SCREEN0 WIDTH80)‚ðƒTƒ|[ƒgD
--- JP: ‰‚Ì‰¡•ûŒü”{‰ð‘œ“xƒ‚[ƒh‚Å‚ ‚éDˆê‰ž«—ˆ‘Î‰ž‚Å‚«‚é‚æ‚¤‚Éì‚Á‚Ä
--- JP: ‚«‚½‚Â‚à‚è‚¾‚Á‚½‚ªC­‚µŽû‚Ü‚è‚ªˆ«‚¢•”•ª‚ª‚ ‚èC‚ ‚Ü‚è‚«‚ê‚¢‚È
--- JP: ‘Î‰ž‚É‚È‚Á‚Ä‚¢‚È‚¢•”•ª‚à‚ ‚è‚Ü‚·D
+-- JP: TEXT MODE 2 (SCREEN0 WIDTH80)ï¿½ï¿½ï¿½Tï¿½|ï¿½[ï¿½gï¿½D
+-- JP: ï¿½ï¿½ï¿½Ì‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½{ï¿½ð‘œ“xï¿½ï¿½ï¿½[ï¿½hï¿½Å‚ï¿½ï¿½ï¿½ï¿½Dï¿½ê‰žï¿½ï¿½ï¿½ï¿½ï¿½Î‰ï¿½ï¿½Å‚ï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½Éï¿½ï¿½ï¿½ï¿½
+-- JP: ï¿½ï¿½ï¿½ï¿½ï¿½Â‚ï¿½ï¿½è‚¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚è‚ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Ü‚è‚«ï¿½ê‚¢ï¿½ï¿½
+-- JP: ï¿½Î‰ï¿½ï¿½É‚È‚ï¿½Ä‚ï¿½ï¿½È‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½D
 --
 -- 13th,October,2003 modified by Kunihiko Ohnaka
--- JP: ESE-MSXŠî”Â‚Å‚Í 2S300E‚ð•¡”—p‚¢‚éŽ–‚ª‚Å‚«‚é‚æ‚¤‚É‚èCVDP’P‘Ì‚Å
--- JP: 2S300E‚â SRAM‚ðè—L‚·‚éŽ–‚ª‰Â”\‚Æ‚È‚Á‚½D
--- JP: ‚±‚ê‚É”º‚¢ˆÈ‰º‚Ì‚æ‚¤‚È•ÏX‚ðs‚¤D
--- JP: EVGAo—Í‘Î‰ž(ƒAƒbƒvƒXƒLƒƒƒ“ƒRƒ“ƒo[ƒg)
--- JP: ESCREEN7,8‚Ìƒ^ƒCƒ~ƒ“ƒO‚ðŽÀ‹@‚Æ“¯‚¶‚É
+-- JP: ESE-MSXï¿½ï¿½ï¿½Â‚Å‚ï¿½ 2S300Eï¿½ð•¡ï¿½ï¿½pï¿½ï¿½ï¿½éŽ–ï¿½ï¿½ï¿½Å‚ï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½É‚ï¿½ï¿½CVDPï¿½Pï¿½Ì‚ï¿½
+-- JP: 2S300Eï¿½ï¿½ SRAMï¿½ï¿½ï¿½ï¿½ï¿½Lï¿½ï¿½ï¿½éŽ–ï¿½ï¿½ï¿½Â”\ï¿½Æ‚È‚ï¿½ï¿½ï¿½D
+-- JP: ï¿½ï¿½ï¿½ï¿½ï¿½É”ï¿½ï¿½ï¿½ï¿½È‰ï¿½ï¿½Ì‚æ‚¤ï¿½È•ÏXï¿½ï¿½ï¿½sï¿½ï¿½ï¿½D
+-- JP: ï¿½EVGAï¿½oï¿½Í‘Î‰ï¿½(ï¿½Aï¿½bï¿½vï¿½Xï¿½Lï¿½ï¿½ï¿½ï¿½ï¿½Rï¿½ï¿½ï¿½oï¿½[ï¿½g)
+-- JP: ï¿½ESCREEN7,8ï¿½Ìƒ^ï¿½Cï¿½~ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½@ï¿½Æ“ï¿½ï¿½ï¿½ï¿½ï¿½
 --
 -- 15th,June,2003 modified by Kunihiko Ohnaka
--- JP:…•½‹AüŠúŠÔŠ„‚èž‚Ý‚ðŽÀ‘•‚µ‚ÄƒXƒy[ƒXƒ}ƒ“ƒ{ƒE‚ð—V‚×‚é‚æ‚¤‚É‚µ‚½D
--- JP:GraphicMode3(Screen4)‚ÅYƒ‰ƒCƒ“”‚ª 212ƒ‰ƒCƒ“‚É‚È‚ç‚È‚©‚Á‚½‚Ì‚ð
--- JP:C³‚µ‚½‚è‚µ‚½D
--- JP:‚½‚¾‚µCƒXƒy[ƒXƒ}ƒ“ƒ{ƒE‚Å set adjust‹@”\‚ª“®‚¢‚Ä‚¢‚È‚¢‚æ‚¤‚È
--- JP:Š´‚¶‚ÅC•\Ž¦‚ªƒKƒNƒKƒN‚µ‚Ä‚µ‚Ü‚¤D‰¡•ûŒü‚Ì“¯Žž•\Ž¦ƒXƒvƒ‰ƒCƒg”‚à
--- JP:‘«‚è‚Ä‚¢‚È‚¢‚æ‚¤‚ÉŒ©‚¦‚éDŒ´ˆö•s–¾D
+-- JP:ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½ÔŠï¿½ï¿½èžï¿½Ý‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÄƒXï¿½yï¿½[ï¿½Xï¿½}ï¿½ï¿½ï¿½{ï¿½Eï¿½ï¿½ï¿½Vï¿½×‚ï¿½ï¿½æ‚¤ï¿½É‚ï¿½ï¿½ï¿½ï¿½D
+-- JP:GraphicMode3(Screen4)ï¿½ï¿½Yï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 212ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½É‚È‚ï¿½ï¿½È‚ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚ï¿½
+-- JP:ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è‚µï¿½ï¿½ï¿½D
+-- JP:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½Xï¿½yï¿½[ï¿½Xï¿½}ï¿½ï¿½ï¿½{ï¿½Eï¿½ï¿½ set adjustï¿½@ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½È‚ï¿½ï¿½æ‚¤ï¿½ï¿½
+-- JP:ï¿½ï¿½ï¿½ï¿½ï¿½ÅCï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½Kï¿½Nï¿½Kï¿½Nï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½ï¿½Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì“ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½Xï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½ï¿½ï¿½ï¿½
+-- JP:ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½È‚ï¿½ï¿½æ‚¤ï¿½ÉŒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Dï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½D
 --
 -- 15th,June,2003 modified by Kunihiko Ohnaka
--- JP:’·‚¢ƒuƒ‰ƒ“ƒN‚ª‹ó‚¢‚Ä‚µ‚Ü‚Á‚½‚ªCSpartan-II E + IOŠî”Â‚ÅƒXƒvƒ‰ƒCƒg‚ª
--- JP:•\Ž¦‚³‚ê‚é‚æ‚¤‚É‚È‚Á‚½DŒ´ˆö‚Í‚¨‚»‚ç‚­ƒRƒ“ƒpƒCƒ‰‚ÌƒoƒO‚ÅCISE 5.2‚É
--- JP:ƒo[ƒWƒ‡ƒ“ƒAƒbƒv‚µ‚½‚ç•\Ž¦‚³‚ê‚é‚æ‚¤‚É‚È‚Á‚½D
--- JP:‚Â‚¢‚Å‚ÉCƒXƒvƒ‰ƒCƒgƒ‚[ƒh2‚Å‰¡ 8–‡•À‚Ô‚æ‚¤‚É‚µ‚½(‚Â‚à‚è)D
--- JP:‚»‚Ì‘¼×‚©‚ÈC³‚ª“ü‚Á‚Ä‚¢‚Ü‚·D
+-- JP:ï¿½ï¿½ï¿½ï¿½ï¿½uï¿½ï¿½ï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½ó‚¢‚Ä‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½ï¿½ï¿½CSpartan-II E + IOï¿½ï¿½ï¿½Â‚ÅƒXï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½ï¿½
+-- JP:ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½É‚È‚ï¿½ï¿½ï¿½Dï¿½ï¿½ï¿½ï¿½ï¿½Í‚ï¿½ï¿½ï¿½ï¿½ç‚­ï¿½Rï¿½ï¿½ï¿½pï¿½Cï¿½ï¿½ï¿½Ìƒoï¿½Oï¿½ÅCISE 5.2ï¿½ï¿½
+-- JP:ï¿½oï¿½[ï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½É‚È‚ï¿½ï¿½ï¿½D
+-- JP:ï¿½Â‚ï¿½ï¿½Å‚ÉCï¿½Xï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½ï¿½ï¿½[ï¿½h2ï¿½Å‰ï¿½ 8ï¿½ï¿½ï¿½ï¿½Ô‚æ‚¤ï¿½É‚ï¿½ï¿½ï¿½(ï¿½Â‚ï¿½ï¿½ï¿½)ï¿½D
+-- JP:ï¿½ï¿½ï¿½Ì‘ï¿½ï¿½×‚ï¿½ï¿½ÈCï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½ï¿½D
 --
 -- 15th,July,2002 modified by Kazuhiro Tsujikawa
 -- no comment;
@@ -225,9 +228,9 @@
 -------------------------------------------------------------------------------
 -- Document
 --
--- JP: ESE-VDP‚ÌƒgƒbƒvƒGƒ“ƒeƒBƒeƒB‚Å‚·BCPU‚Æ‚ÌƒCƒ“ƒ^[ƒtƒF[ƒXA
--- JP: ‰æ–Ê•`‰æƒ^ƒCƒ~ƒ“ƒO‚Ì¶¬AVDPƒŒƒWƒXƒ^‚ÌŽÀ‘•‚È‚Ç‚ªŠÜ‚Ü‚ê‚Ä
--- JP: ‚¢‚Ü‚·B
+-- JP: ESE-VDPï¿½Ìƒgï¿½bï¿½vï¿½Gï¿½ï¿½ï¿½eï¿½Bï¿½eï¿½Bï¿½Å‚ï¿½ï¿½BCPUï¿½Æ‚ÌƒCï¿½ï¿½ï¿½^ï¿½[ï¿½tï¿½Fï¿½[ï¿½Xï¿½A
+-- JP: ï¿½ï¿½ï¿½Ê•`ï¿½ï¿½ï¿½^ï¿½Cï¿½~ï¿½ï¿½ï¿½Oï¿½Ìï¿½ï¿½ï¿½ï¿½AVDPï¿½ï¿½ï¿½Wï¿½Xï¿½^ï¿½ÌŽï¿½ï¿½ï¿½È‚Ç‚ï¿½ï¿½Ü‚Ü‚ï¿½ï¿½ï¿½
+-- JP: ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B
 --
 
 
@@ -277,7 +280,7 @@ ENTITY VDP IS
 		DISP_PAL			: IN	STD_LOGIC -- caro
 
 		-- DEBUG OUTPUT
-	--	DEBUG_OUTPUT		: OUT	STD_LOGIC_VECTOR( 15 DOWNTO 0 )	-- š 
+	--	DEBUG_OUTPUT		: OUT	STD_LOGIC_VECTOR( 15 DOWNTO 0 )	-- ï¿½ï¿½ 
 	);
 END VDP;
 
@@ -374,8 +377,8 @@ ARCHITECTURE RTL OF VDP IS
 			PRAMDAT						: IN	STD_LOGIC_VECTOR(  7 DOWNTO 0 );
 			PRAMADR						: OUT	STD_LOGIC_VECTOR( 16 DOWNTO 0 );
 
-			-- JP: ƒXƒvƒ‰ƒCƒg‚ð•`‰æ‚µ‚½Žž‚É'1'‚É‚È‚éBƒJƒ‰[ƒR[ƒh0‚Å
-			-- JP: •`‰æ‚·‚éŽ–‚à‚Å‚«‚é‚Ì‚ÅA‚±‚Ìƒrƒbƒg‚ª•K—v
+			-- JP: ï¿½Xï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½ï¿½ï¿½`ï¿½æ‚µï¿½ï¿½ï¿½ï¿½ï¿½ï¿½'1'ï¿½É‚È‚ï¿½ï¿½Bï¿½Jï¿½ï¿½ï¿½[ï¿½Rï¿½[ï¿½h0ï¿½ï¿½
+			-- JP: ï¿½`ï¿½æ‚·ï¿½éŽ–ï¿½ï¿½ï¿½Å‚ï¿½ï¿½ï¿½ï¿½Ì‚ÅAï¿½ï¿½ï¿½Ìƒrï¿½bï¿½gï¿½ï¿½ï¿½Kï¿½v
 			SPCOLOROUT					: OUT	STD_LOGIC;
 			-- OUTPUT COLOR
 			SPCOLORCODE					: OUT	STD_LOGIC_VECTOR(  3 DOWNTO 0 )
@@ -1044,7 +1047,7 @@ BEGIN
 					REQ_HSYNC_INT_N;
 
 	INT_N		<=	'0' WHEN( (VSYNCINT_N = '0') OR (HSYNCINT_N = '0') )ELSE
-					'1';
+					'Z';
 
 	U_INTERRUPT: VDP_INTERRUPT
 	PORT MAP (
@@ -1173,7 +1176,7 @@ BEGIN
 			IF( H_CNT = ("00" & OFFSET_X & "10" ) ) THEN
 			ELSIF( H_CNT(1 DOWNTO 0) = "10") THEN 
 				IF( PREDOTCOUNTER_X = "111111111" ) THEN
-					-- JP: PREDOTCOUNTER_X ‚ª -1‚©‚ç0‚ÉƒJƒEƒ“ƒgƒAƒbƒv‚·‚éŽž‚ÉWINDOW‚ð1‚É‚·‚é
+					-- JP: PREDOTCOUNTER_X ï¿½ï¿½ -1ï¿½ï¿½ï¿½ï¿½0ï¿½ÉƒJï¿½Eï¿½ï¿½ï¿½gï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½éŽžï¿½ï¿½WINDOWï¿½ï¿½1ï¿½É‚ï¿½ï¿½ï¿½
 					PREWINDOW_X <= '1';
 				ELSIF( PREDOTCOUNTER_X = "011111111" ) THEN
 					PREWINDOW_X <= '0';
@@ -1246,16 +1249,16 @@ BEGIN
 			--
 			-- VRAM ACCESS ARBITER.
 			--
-			-- VRAMƒAƒNƒZƒXƒ^ƒCƒ~ƒ“ƒO‚ðAEIGHTDOTSTATE ‚É‚æ‚Á‚Ä§Œä‚µ‚Ä‚¢‚é
+			-- VRAMï¿½Aï¿½Nï¿½Zï¿½Xï¿½^ï¿½Cï¿½~ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½AEIGHTDOTSTATE ï¿½É‚ï¿½ï¿½ï¿½Äï¿½ï¿½ä‚µï¿½Ä‚ï¿½ï¿½ï¿½
 			IF( DOTSTATE = "10" ) THEN
 				IF( (PREWINDOW = '1') AND (REG_R1_DISP_ON = '1') AND 
 					((EIGHTDOTSTATE="000") OR (EIGHTDOTSTATE="001") OR (EIGHTDOTSTATE="010") OR
 					 (EIGHTDOTSTATE="011") OR (EIGHTDOTSTATE="100")) ) THEN
-					--	EIGHTDOTSTATE ‚ª 0`4 ‚ÅA•\Ž¦’†‚Ìê‡
+					--	EIGHTDOTSTATE ï¿½ï¿½ 0ï¿½`4 ï¿½ÅAï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½Ìê‡
 					VRAMACCESSSWITCH := VRAM_ACCESS_DRAW;
 				ELSIF( (PREWINDOW = '1') AND (REG_R1_DISP_ON = '1') AND
 						(TXVRAMREADEN = '1')) THEN
-					--	EIGHTDOTSTATE ‚ª 5`7 ‚ÅA•\Ž¦’†‚ÅAƒeƒLƒXƒgƒ‚[ƒh‚Ìê‡
+					--	EIGHTDOTSTATE ï¿½ï¿½ 5ï¿½`7 ï¿½ÅAï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ÅAï¿½eï¿½Lï¿½Xï¿½gï¿½ï¿½ï¿½[ï¿½hï¿½Ìê‡
 					VRAMACCESSSWITCH := VRAM_ACCESS_DRAW;
 				ELSIF( (PREWINDOW_X = '1') AND (PREWINDOW_Y_SP = '1') AND (SPVRAMACCESSING = '1') AND
 						(EIGHTDOTSTATE="101") AND (VDPMODETEXT1 = '0') AND (VDPMODETEXT2 = '0') ) THEN
@@ -1305,8 +1308,8 @@ BEGIN
 			--
 			IF( VRAMACCESSSWITCH = VRAM_ACCESS_CPUW )THEN
 				-- VRAM WRITE BY CPU
-				-- JP: GRAPHIC6,7‚Å‚ÍVRAMã‚ÌƒAƒhƒŒƒX‚Æ RAMã‚ÌƒAƒhƒŒƒX‚ÌŠÖŒW‚ª
-				-- JP: ‘¼‚Ì‰æ–Êƒ‚[ƒh‚ÆˆÙ‚é‚Ì‚Å’ˆÓ
+				-- JP: GRAPHIC6,7ï¿½Å‚ï¿½VRAMï¿½ï¿½ï¿½ÌƒAï¿½hï¿½ï¿½ï¿½Xï¿½ï¿½ RAMï¿½ï¿½ï¿½ÌƒAï¿½hï¿½ï¿½ï¿½Xï¿½ÌŠÖŒWï¿½ï¿½
+				-- JP: ï¿½ï¿½ï¿½Ì‰ï¿½ï¿½Êƒï¿½ï¿½[ï¿½hï¿½ÆˆÙ‚ï¿½ï¿½Ì‚Å’ï¿½ï¿½ï¿½
 				IF( (VDPMODEGRAPHIC6 = '1') OR (VDPMODEGRAPHIC7 = '1') )THEN
 					IRAMADR <= VDPVRAMACCESSADDR(0) & VDPVRAMACCESSADDR(16 DOWNTO 1);
 				ELSE
@@ -1332,8 +1335,8 @@ BEGIN
 					VDPVRAMACCESSADDRV := VDPVRAMACCESSADDR;
 				END IF;
 
-				-- JP: GRAPHIC6,7‚Å‚ÍVRAMã‚ÌƒAƒhƒŒƒX‚Æ RAMã‚ÌƒAƒhƒŒƒX‚ÌŠÖŒW‚ª
-				-- JP: ‘¼‚Ì‰æ–Êƒ‚[ƒh‚ÆˆÙ‚é‚Ì‚Å’ˆÓ
+				-- JP: GRAPHIC6,7ï¿½Å‚ï¿½VRAMï¿½ï¿½ï¿½ÌƒAï¿½hï¿½ï¿½ï¿½Xï¿½ï¿½ RAMï¿½ï¿½ï¿½ÌƒAï¿½hï¿½ï¿½ï¿½Xï¿½ÌŠÖŒWï¿½ï¿½
+				-- JP: ï¿½ï¿½ï¿½Ì‰ï¿½ï¿½Êƒï¿½ï¿½[ï¿½hï¿½ÆˆÙ‚ï¿½ï¿½Ì‚Å’ï¿½ï¿½ï¿½
 				IF( (VDPMODEGRAPHIC6 = '1') OR (VDPMODEGRAPHIC7 = '1') )THEN
 					IRAMADR <= VDPVRAMACCESSADDRV(0) & VDPVRAMACCESSADDRV(16 DOWNTO 1);
 				ELSE
@@ -1353,8 +1356,8 @@ BEGIN
 			ELSIF( VRAMACCESSSWITCH = VRAM_ACCESS_VDPW )THEN
 				-- VRAM WRITE BY VDP COMMAND
 				-- VDP COMMAND WRITE VRAM.
-				-- JP: GRAPHIC6,7‚Å‚ÍƒAƒhƒŒƒX‚Æ RAMã‚ÌˆÊ’u‚ª‘¼‚Ì‰æ–Êƒ‚[ƒh‚Æ
-				-- JP: ˆÙ‚é‚Ì‚Å’ˆÓ
+				-- JP: GRAPHIC6,7ï¿½Å‚ÍƒAï¿½hï¿½ï¿½ï¿½Xï¿½ï¿½ RAMï¿½ï¿½ï¿½ÌˆÊ’uï¿½ï¿½ï¿½ï¿½ï¿½Ì‰ï¿½ï¿½Êƒï¿½ï¿½[ï¿½hï¿½ï¿½
+				-- JP: ï¿½Ù‚ï¿½ï¿½Ì‚Å’ï¿½ï¿½ï¿½
 				IF( (VDPMODEGRAPHIC6 = '1') OR (VDPMODEGRAPHIC7 = '1') )THEN
 					IRAMADR <= VDPCMDVRAMACCESSADDR(0) & VDPCMDVRAMACCESSADDR(16 DOWNTO 1);
 				ELSE
@@ -1366,8 +1369,8 @@ BEGIN
 				VDPCMDVRAMWRACK <= NOT VDPCMDVRAMWRACK;
 			ELSIF( VRAMACCESSSWITCH = VRAM_ACCESS_VDPR )THEN
 				-- VRAM READ BY VDP COMMAND
-				-- JP: GRAPHIC6,7‚Å‚ÍƒAƒhƒŒƒX‚Æ RAMã‚ÌˆÊ’u‚ª‘¼‚Ì‰æ–Êƒ‚[ƒh‚Æ
-				-- JP: ˆÙ‚é‚Ì‚Å’ˆÓ
+				-- JP: GRAPHIC6,7ï¿½Å‚ÍƒAï¿½hï¿½ï¿½ï¿½Xï¿½ï¿½ RAMï¿½ï¿½ï¿½ÌˆÊ’uï¿½ï¿½ï¿½ï¿½ï¿½Ì‰ï¿½ï¿½Êƒï¿½ï¿½[ï¿½hï¿½ï¿½
+				-- JP: ï¿½Ù‚ï¿½ï¿½Ì‚Å’ï¿½ï¿½ï¿½
 				IF( (VDPMODEGRAPHIC6 = '1') OR (VDPMODEGRAPHIC7 = '1') )THEN
 					IRAMADR <= VDPCMDVRAMACCESSADDR(0) & VDPCMDVRAMACCESSADDR(16 DOWNTO 1);
 				ELSE
@@ -1685,7 +1688,7 @@ BEGIN
 		VDPMODEISVRAMINTERLEAVE		=> VDPMODEISVRAMINTERLEAVE		
 	);
 
-	-- š 
+	-- ï¿½ï¿½ 
 --	DEBUG_OUTPUT <= REG_R19_HSYNC_INT_LINE & REG_R23_VSTART_LINE;
 
 	-----------------------------------------------------------------------------
