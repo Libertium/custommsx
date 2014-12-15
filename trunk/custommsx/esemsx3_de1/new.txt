@@ -1,0 +1,11 @@
+Updated relize OCM on DE1 from 16.02.13
+---------------------------------------
+
+Added emulation of memory modules MegaRAM Volume 512 Kb,
+connected to slot 1. Setting the switch Sw(8) 1 (up) includes
+MegaRAM in Slot1, regardless of the position of the switch Sw(3).
+In the lower position Sw(8) mode Slot1 will depend on the state Sw(3).
+
+caro
+k2k@list.ru
+
