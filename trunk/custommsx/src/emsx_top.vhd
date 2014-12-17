@@ -1033,7 +1033,9 @@ begin
 	end if;
 end process;
 
-reset <= RstPower or (not pSW(0)); -- not pSltRst_n;
+-- Cesc ho fem amb el teclat
+-- reset <= RstPower or (not pSW(0)); -- not pSltRst_n;
+
 ----------------------------------------------------------------
 -- Operation mode
 ----------------------------------------------------------------
