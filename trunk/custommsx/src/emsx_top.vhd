@@ -166,7 +166,7 @@ end emsx_top;
 architecture rtl of emsx_top is
 
   component pll4x2                      -- Altera specific component
-    port(								-- 50*3/7 = 21428571 √ˆ
+    port(								-- 50*3/7 = 21428571 √É√∂
       inclk0 : in std_logic := '0';     -- 50.00MHz input to PLL    (external I/O pin, from crystal oscillator)
       c0     : out std_logic ;          -- 21.43MHz output from PLL (internal LEs, for VDP, internal-bus, etc.)
       c1     : out std_logic ;          -- 85.72MHz output from PLL (internal LEs, for SD-RAM)
@@ -462,9 +462,9 @@ architecture rtl of emsx_top is
 
   component scc_mix_mul
 	port(
-		a	: in	std_logic_vector( 15 downto 0 );	-- 16bit ¬Q¬¶’Ú–‘
-		b	: in	std_logic_vector(  2 downto 0 );	-- 3bit √o√C√i√ 
-		c	: out	std_logic_vector( 18 downto 0 )		-- 19bit ¬Q¬¶’Ú–‘
+		a	: in	std_logic_vector( 15 downto 0 );	-- 16bit √ÇQ√Ç¬¶√ï√≤√ê√î
+		b	: in	std_logic_vector(  2 downto 0 );	-- 3bit √Éo√ÉC√Éi√É√ä
+		c	: out	std_logic_vector( 18 downto 0 )		-- 19bit √ÇQ√Ç¬¶√ï√≤√ê√î
 	);
   end component;
 
@@ -975,8 +975,22 @@ begin
 	end if;
 end process;
 
+-- Cesc
+-- if( clkdiv3 = "10" )then cpuclk <= not cpuclk;
+-- clkdiv3  10 01 00 10 01 00 10 01 00 10 01 00 10 01 00 10 01 00 10 01 00 10 01 00 ...
+-- clkdiv   11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 ...  
+-- 21.48Mhz  1  2  3  4  5  6  1  2  3  4  5  6  1  2  3  4  5  6  1  2  3  4  5  6 ...
+--  3.58Mhz  *                 *                 *                 *                ...      
+-- cpuclk    1 		 0        1        0        1        0        1        0       ... 					
+
 pCpuClk <= cpuclk when (ff_turbo = '0') else clkdiv(0); -- TURBO
-pSltClk <= clkdiv(0); -- 3.58 MHz
+-- pCpuClk <= not clkdiv(1) when ((ff_turbo = '1') and (clkdiv3 ="00" and (clkdiv ="10" or clkdiv ="00"))) else cpuclk; -- Cesc: prova: Aixo no tira
+
+-- pSltClk <= clkdiv(0); -- 3.58 MHz
+-- pSltClk <= cpuclk ; -- clkdiv(1) when (clkdiv3 ="00" and (clkdiv ="10" or clkdiv ="00"));
+pSltClk <= clkdiv(1) when (clkdiv3 ="00" and (clkdiv ="10" or clkdiv ="00"));
+
+
 
 ----------------------------------------------------------------
 -- Reset control
@@ -1593,15 +1607,38 @@ end process;
 	end process;
 
 	-- SCC volume
+	--process( clk21m,lock_n )
+	--begin
+	--	if( clk21m'event and clk21m = '1' )then
+	--		if( lock_n = '0' )then
+	--			SccVol <= "111";	-- orignal "110";
+	--		elsif( Fkeys(2) /= vFKeys(2) )then	-- F10
+	--			if( Fkeys(7) = '1' )then		-- SHIFT
+	--				if( SccVol /= "000" )then	-- F10+SHIFT
+	--					SccVol <= SccVol - '1';
+	--				end if;
+	--			else
+	--				if( SccVol /= "111" )then	-- F10
+	--					SccVol <= SccVol + '1';
+	--				end if;
+	--			end if;
+	--		end if;
+	--	end if;
+	--end process;
+
+		-- SCC volume
+	-- Cesc: test F10+Shift -> Reset
 	process( clk21m,lock_n )
 	begin
 		if( clk21m'event and clk21m = '1' )then
+			reset <= RstPower or (not pSW(0));
 			if( lock_n = '0' )then
 				SccVol <= "111";	-- orignal "110";
 			elsif( Fkeys(2) /= vFKeys(2) )then	-- F10
 				if( Fkeys(7) = '1' )then		-- SHIFT
 					if( SccVol /= "000" )then	-- F10+SHIFT
 						SccVol <= SccVol - '1';
+						reset <= not RstPower;			
 					end if;
 				else
 					if( SccVol /= "111" )then	-- F10
@@ -1612,6 +1649,23 @@ end process;
 		end if;
 	end process;
 
+	-- Reset F9 Key (Cesc)	process( reset, clk21m )
+	-- reset <= RstPower or (not pSW(0)); -- not pSltRst_n;
+	--process( clk21m,lock_n )
+	--begin
+	--	if( clk21m'event and clk21m = '1' )then
+	--		if( Fkeys(3) /= vFKeys(3) )then	-- F9
+	--				reset <= not RstPower;
+	--		else 
+	--				reset <= RstPower or (not pSW(0)); -- not pSltRst_n;
+	--				if( lock_n = '0' )then
+	--					PsgVol <= "111";	-- original "011";
+	--				end if;
+	--		end if;
+	--	end if;
+	--end process;
+
+	
 	-- OPLL volume
 	process( clk21m,lock_n )
 	begin
