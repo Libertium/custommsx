@@ -1,0 +1,1 @@
+Based on Caro's implementation of the One chip MSX or OCM for DE1 boards, for the ESE MSX System 3. This is a re-implementation of an MSX2 computer that uses a single FPGA to implement all the electronics (except the RAM) of an MSX.
