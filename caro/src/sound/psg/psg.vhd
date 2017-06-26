@@ -47,6 +47,8 @@ entity psg is
         dbi         : out   std_logic_vector(  7 downto 0 );
         dbo         : in    std_logic_vector(  7 downto 0 );
 
+        mouse       : in    std_logic;
+        mdata       : in    std_logic_vector(  5 downto 0 );
         joya        : inout std_logic_vector(  5 downto 0 );
         stra        : out   std_logic;
         joyb        : inout std_logic_vector(  5 downto 0 );
@@ -115,7 +117,11 @@ begin
         elsif( clk21m'event and clk21m = '1' )then
             -- psg register #15 bit6 - joystick select : 0=porta, 1=portb
             if( regb(6) = '0' )then
-                rega(5 downto 0) <= joya;
+                if (mouse = '1') then
+                    rega(5 downto 0) <= mdata;  -- mouse data
+                else    
+                    rega(5 downto 0) <= joya;
+                end if;
             else
                 rega(5 downto 0) <= joyb;
             end if;

@@ -1,3 +1,20 @@
+new170417
+
+Updated relize OCM on DE1 from 17.04.17
+---------------------------------------
+Added work with PS2-mouse.
+Implemented the work of a mouse connected to the joystick
+port according to the standard adopted for MSX.
+While the mouse is working without a wheel.
+By default, the mouse works through the port of the joystick 1.
+The DE1 board does not provide for the connection of an
+additional PS/2 device, so to connect the mouse you will
+need to assemble the part of the scheme shown on the site.
+  
+caro
+k2k@list.ru
+
+
 Updated relize OCM on DE1 from 16.02.13
 ---------------------------------------
 

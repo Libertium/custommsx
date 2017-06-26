@@ -3,7 +3,7 @@
 --   ESE MSX-SYSTEM3 / MSX clone on a Cyclone FPGA (ALTERA)
 --   Revision 1.00
 --
--- modified for Altera DE1 by caro 2007..2013
+-- modified for Altera DE1 by caro 2007..2017
 --
 -- Copyright (c) 2006 Kazuhiro Tsujikawa (ESE Artists' factory)
 -- All rights reserved.
@@ -46,7 +46,7 @@ entity emsx_top is
     pClk24m	    : in std_logic;		-- Input clock DE1 24 MHz
     pClk27m     : in std_logic;		-- Input clock DE1 27 MHz
     pExtClk     : in std_logic;		-- Input external clock
-    
+-------------------------------------------------------------    
 --  pClk21m     : in std_logic;		-- VDP clock ... 21.48MHz
 --  pCpuClk     : out std_logic;	-- CPU clock ... 3.58MHz (up to 10.74MHz/21.48MHz)
 --  pCpuRst_n   : out std_logic;	-- CPU reset
@@ -95,6 +95,10 @@ entity emsx_top is
     pPs2Clk     : inout std_logic;
     pPs2Dat     : inout std_logic;
 
+    -- PS/2 mouse ports
+    pPs2mClk    : inout std_logic;
+    pPs2mDat    : inout std_logic;
+
     -- Joystick ports (Port_A, Port_B)
     pJoyA       : inout std_logic_vector( 5 downto 0);
     pStrA       : out std_logic;
@@ -104,73 +108,79 @@ entity emsx_top is
     -- SD/MMC slot ports
     pSd_Ck      : out std_logic;                        -- pin 5
     pSd_Cm      : out std_logic;                        -- pin 2
---  pSd_Dt	    : inout std_logic_vector( 3 downto 0);  -- pin 1(D3), 9(D2), 8(D1), 7(D0)
-    pSd_Dt3	    : inout std_logic;						-- pin 1
-    pSd_Dt0	    : inout std_logic;						-- pin 7
+--  pSd_Dt      : inout std_logic_vector( 3 downto 0);  -- pin 1(D3), 9(D2), 8(D1), 7(D0)
+    pSd_Dt3     : inout std_logic;                      -- pin 1
+    pSd_Dt0     : inout std_logic;                      -- pin 7
 
     -- DIP switch, Lamp ports
-    pSW		    : in std_logic_vector( 3 downto 0);	    -- 0 - press; 1 - unpress
+    pSW         : in std_logic_vector( 3 downto 0);     -- 0 - press; 1 - unpress
     pDip        : in std_logic_vector( 9 downto 0);     -- 0=ON,  1=OFF(default on shipment)
-    pLedG       : out std_logic_vector( 7 downto 0);   	-- 0=OFF, 1=ON(green)
-    pLedR	    : out std_logic_vector( 9 downto 0);    -- 0=OFF, 1=ON(red) ...Power & SD/MMC access lamp
+    pLedG       : out std_logic_vector( 7 downto 0);    -- 0=OFF, 1=ON(green)
+    pLedR       : out std_logic_vector( 9 downto 0);    -- 0=OFF, 1=ON(red) ...Power & SD/MMC access lamp
 
     -- Video, Audio/CMT ports
     pDac_VR     : inout std_logic_vector( 5 downto 0);  -- RGB_Red / Svideo_C
     pDac_VG     : inout std_logic_vector( 5 downto 0);  -- RGB_Grn / Svideo_Y
     pDac_VB     : inout std_logic_vector( 5 downto 0);  -- RGB_Blu / CompositeVideo
-    pDac_S		: out   std_logic;						-- Sound
-    pREM_out	: out   std_logic;						-- REM output; 1 - Tape On
-    pCMT_out	: out   std_logic;						-- CMT output
-    pCMT_in		: in    std_logic;						-- CMT input
+    pDac_S      : out   std_logic;			-- Sound
+    pREM_out	: out   std_logic;			-- REM output; 1 - Tape On
+    pCMT_out	: out   std_logic;			-- CMT output
+    pCMT_in	: in    std_logic;			-- CMT input
 
     pVideoHS_n  : out std_logic;                        -- Csync(RGB15K), HSync(VGA31K)
     pVideoVS_n  : out std_logic;                        -- Audio(RGB15K), VSync(VGA31K)
 
     -- DE1 SRAM
-    SRAM_DQ		: inout std_logic_vector(15 downto 0);
-    SRAM_ADDR	: out std_logic_vector(17 downto 0);
-    SRAM_UB_N	: out std_logic;
-    SRAM_LB_N	: out std_logic;
-    SRAM_WE_N	: out std_logic;
-    SRAM_CE_N	: out std_logic;
-    SRAM_OE_N	: out std_logic;
-	
+    SRAM_DQ     : inout std_logic_vector(15 downto 0);
+    SRAM_ADDR   : out std_logic_vector(17 downto 0);
+    SRAM_UB_N   : out std_logic;
+    SRAM_LB_N   : out std_logic;
+    SRAM_WE_N   : out std_logic;
+    SRAM_CE_N   : out std_logic;
+    SRAM_OE_N   : out std_logic;
+
     -- DE1 FLASH
-    FL_DQ	    : inout std_logic_vector(7 downto 0);
-    FL_ADDR	    : out std_logic_vector(21 downto 0);
-    FL_RST_N	: out std_logic;
-    FL_WE_N	    : out std_logic;
-    FL_OE_N	    : out std_logic;
-	
+    FL_DQ      : inout std_logic_vector(7 downto 0);
+    FL_ADDR    : out std_logic_vector(21 downto 0);
+    FL_RST_N   : out std_logic;
+    FL_WE_N    : out std_logic;
+    FL_OE_N    : out std_logic;
+
     -- DE1 7-SEG Display
-    HEX0	    : out std_logic_vector(6 downto 0);
-    HEX1	    : out std_logic_vector(6 downto 0);
-    HEX2	    : out std_logic_vector(6 downto 0);
-    HEX3	    : out std_logic_vector(6 downto 0);
+    HEX0      : out std_logic_vector(6 downto 0);
+    HEX1      : out std_logic_vector(6 downto 0);
+    HEX2      : out std_logic_vector(6 downto 0);
+    HEX3      : out std_logic_vector(6 downto 0);
 
     -- DE1 i2c
-    I2C_SCLK	: out std_logic;
-    I2C_SDAT	: inout std_logic;
+    I2C_SCLK  : out std_logic;
+    I2C_SDAT  : inout std_logic;
 
     -- DE1 Audio Codec
-    AUD_ADCLRCK	: out std_logic;
-    AUD_ADCDAT	: in std_logic;
-    AUD_XCK	    : out std_logic;
-    AUD_DACLRCK	: out std_logic;
-    AUD_DACDAT	: out std_logic;
-    AUD_BCLK	: out std_logic	
+    AUD_ADCLRCK : out std_logic;
+    AUD_ADCDAT  : in std_logic;
+    AUD_XCK     : out std_logic;
+    AUD_DACLRCK : out std_logic;
+    AUD_DACDAT  : out std_logic;
+    AUD_BCLK    : out std_logic;	
+
+    -- DE1 USART
+    UART_RXD    : in std_logic; 
+    UART_TXD    : out std_logic
+ 
+    -- pins for test
+--    test1       : out std_logic;
+--    test2       : out std_logic
+
 );
 end emsx_top;
-
 -- ====================================================================
 architecture rtl of emsx_top is
 
-  component pll4x2                      -- Altera specific component
-    port(								-- 50*3/7 = 21428571 Ãö
+  component pll4xde1                    -- Altera specific component
+    port(								-- 50*6 = 300 MÃö
       inclk0 : in std_logic := '0';     -- 50.00MHz input to PLL    (external I/O pin, from crystal oscillator)
-      c0     : out std_logic ;          -- 21.43MHz output from PLL (internal LEs, for VDP, internal-bus, etc.)
-      c1     : out std_logic ;          -- 85.72MHz output from PLL (internal LEs, for SD-RAM)
-      c2     : out std_logic ;          -- 85.72MHz output from PLL (external I/O pin, for SD-RAM)
+      c0     : out std_logic ;          -- 300.00MHz output from PLL (internal LEs, for VDP, internal-bus, etc.)
 	  locked : out std_logic
     );
   end component;
@@ -323,7 +333,7 @@ architecture rtl of emsx_top is
   -- V9958
   component vdp
     port(
-      -- VDP clock ... 21.477MHz
+      -- VDP clock ... 21.47727 MHz
       clk21m  	: in std_logic;
       reset   	: in std_logic;
       req     	: in std_logic;
@@ -381,6 +391,8 @@ architecture rtl of emsx_top is
       adr     : in std_logic_vector(15 downto 0);
       dbi     : out std_logic_vector(7 downto 0);
       dbo     : in std_logic_vector(7 downto 0);
+      mouse   : in std_logic;
+      mdata   : in std_logic_vector(5 downto 0);
       joya    : inout std_logic_vector(5 downto 0);
       stra    : out std_logic;
       joyb    : inout std_logic_vector(5 downto 0);
@@ -392,6 +404,18 @@ architecture rtl of emsx_top is
     );
   end component;
 
+  component ps2mouse
+    port(
+      clk     : in std_logic;
+      reset   : in std_logic;
+      mouse_en: out std_logic;
+      strob   : in std_logic;
+      mdata   : out std_logic_vector(5 downto 0);
+      ps2mdat : inout std_logic;
+      ps2mclk : inout std_logic
+    );
+  end component;
+      
   component megaram
     port(
       clk21m  : in std_logic;
@@ -562,12 +586,52 @@ end component;
 	);
   end component;
 
+-- Serial UART
+  component uart_16750
+    port (
+        CLK         : in std_logic;                             -- System Clock
+        CLK_UART    : in std_logic;                             -- Clock for UART
+        RST         : in std_logic;                             -- Reset
+        BAUDCE      : in std_logic;                             -- Baudrate generator clock enable
+        CS          : in std_logic;                             -- Chip select
+        WR          : in std_logic;                             -- Write to UART
+        RD          : in std_logic;                             -- Read from UART
+        A           : in std_logic_vector(2 downto 0);          -- Register select
+        DIN         : in std_logic_vector(7 downto 0);          -- Data bus input
+        DOUT        : out std_logic_vector(7 downto 0);         -- Data bus output
+        DDIS        : out std_logic;                            -- Driver disable
+        INT         : out std_logic;                            -- Interrupt output
+        OUT1N       : out std_logic;                            -- Output 1
+        OUT2N       : out std_logic;                            -- Output 2
+        RCLK        : in std_logic;                             -- Receiver clock (16x baudrate)
+        BAUDOUTN    : out std_logic;                            -- Baudrate generator output (16x baudrate)
+        RTSN        : out std_logic;                            -- RTS output
+        DTRN        : out std_logic;                            -- DTR output
+        CTSN        : in std_logic;                             -- CTS input
+        DSRN        : in std_logic;                             -- DSR input
+        DCDN        : in std_logic;                             -- DCD input
+        RIN         : in std_logic;                             -- RI input
+        SIN         : in std_logic;                             -- Receiver input
+        SOUT        : out std_logic                            -- Transmitter output
+    );
+  end component;
+
 -- ///////////////////////////////////////////////////////////////////
 -- *******************************************************************
 --	system timer
   signal  systim_req	: std_logic;
   signal  systim_ack	: std_logic;
   signal  systim_dbi	: std_logic_vector(7 downto 0);
+
+--	UART DE1
+  signal  uart_adr	: std_logic_vector(2 downto 0);
+  signal  uart_req	: std_logic;
+  signal  rd_io 	: std_logic;
+  signal  uart_clk	: std_logic;
+  signal  uart_int	: std_logic;
+  signal  uart_dbi	: std_logic_vector(7 downto 0);
+  signal  rclk      : std_logic;      -- Receiver clock (16x baudrate)
+  signal  baudoutn  : std_logic;      -- Baudrate generator output (16x baudrate)
 
   -- Operation mode
   signal KeyMode     : std_logic;               	-- Kana key board layout : 1=JIS layout
@@ -595,7 +659,6 @@ end component;
   signal lock_n       : std_logic;
   signal RstEna      : std_logic := '0';
   signal RstSeq      : std_logic_vector(4 downto 0) := (others => '0');
-  signal RstPower	 : std_logic := '1'; -- reset from POWER ON
   signal FreeCounter : std_logic_vector(15 downto 0) := (others => '0');
   signal ClkFkey	 : std_logic;
   signal VdpFkey	 : std_logic;
@@ -722,6 +785,11 @@ end component;
   signal Caps        : std_logic;
   signal Fkeys       : std_logic_vector(7 downto 0);
 
+  -- PS/2 mouse signals
+  signal strob  	 : std_logic;
+  signal mouse_en 	 : std_logic;
+  signal mdata       : std_logic_vector(5 downto 0);
+
   -- CMT signals
   signal CmtIn       : std_logic;
   alias  CmtOut      : std_logic is PpiPortC(5);
@@ -804,8 +872,8 @@ end component;
   signal Sound_R     : std_logic_vector(15 downto 0);
 
   signal MstrVol     : std_logic_vector(2 downto 0);
-  signal PsgVol     : std_logic_vector(2 downto 0);
-  signal SccVol     : std_logic_vector(2 downto 0);
+  signal PsgVol      : std_logic_vector(2 downto 0);
+  signal SccVol      : std_logic_vector(2 downto 0);
   signal OpllVol     : std_logic_vector(2 downto 0);
 
   signal vFKeys			: std_logic_vector(  7 downto 0 );
@@ -879,16 +947,43 @@ end component;
 -- port F4
   signal portF4_req  : std_logic;
   signal portF4_bit7 : std_logic; -- 1 - hard reset; 0 - soft reset
-  
-  signal ff_ldbios   : std_logic; -- 1 - load BIOS
 
+-- Phase AKK
+  signal acc         : std_logic_vector (23 downto 0);
+  signal uart_acc    : std_logic_vector (23 downto 0);
+  signal clk300m     : std_logic;
+  signal clkdivmy    : std_logic_vector (1 downto 0);
+--  
+  signal ff_ldbios   : std_logic; -- 1 - load BIOS
+  
 -- ***************************************************************
 begin
 ----------------------------------------------------------------
--- Clock generator (21.48MHz > 3.58MHz)
+-- Clock generator (21.47727 MHz > 3.58 MHz)
 -- pCpuClk should be independent from reset
 ----------------------------------------------------------------
--- clock enabler : 3.58MHz = 21.48MHz / 6
+-- Phase AKK
+process(clk300m)
+begin
+   if (clk300m'event and clk300m = '1') then
+      acc <= acc + 4804384;
+      uart_acc <= uart_acc + 103079;
+   end if;
+end process;
+
+memclk <= acc(23);	      -- F = 21.47727*4 = 85.90908 MHz
+pMemClk <= memclk;
+uart_clk <= uart_acc(23); -- F = 115200*16 = 1843200 Hz
+
+process(memclk)
+begin
+   if (memclk'event and memclk = '1') then
+      clkdivmy <= clkdivmy + 1;
+   end if;
+end process;
+clk21m<=clkdivmy(1); -- 21.47727 MHz
+
+-- clock enabler
 process( reset, clk21m )
 begin
 	if( reset = '1' )then
@@ -902,7 +997,7 @@ begin
 	end if;
 end process;
 
--- CPUCLK : 3.58MHz = 21.48MHz / 6
+-- CPUCLK : 3.58MHz = 21.47727 MHz / 6
 process( reset, clk21m )
 begin
 	if( reset = '1' )then
@@ -910,13 +1005,11 @@ begin
 	elsif (clk21m'event and clk21m = '1') then
 		if( clkdiv3 = "10" )then
 			cpuclk <= not cpuclk;
-		else
-			-- hold
 		end if;
 	end if;
 end process;
 
--- Prescaler : 21.48MHz / 3
+-- Prescaler : 21.47727 MHz / 3
 process( reset, clk21m )
 begin
 	if( reset = '1' )then
@@ -930,7 +1023,7 @@ begin
 	end if;
 end process;
 
--- Prescaler : 21.48MHz / 4
+-- Prescaler : 21.47727 MHz / 4
 process( reset, clk21m )
 begin
 	if( reset = '1' )then
@@ -976,8 +1069,7 @@ begin
 end process;
 
 pCpuClk <= cpuclk when (ff_turbo = '0') else clkdiv(0); -- TURBO
-pSltClk <= clkdiv(0); -- 3.58 MHz
-
+pSltClk <= pCpuClk; -- clkdiv(0); -- 3.58 MHz
 ----------------------------------------------------------------
 -- Reset control
 -- "RstSeq" should be cleared when power-on reset
@@ -1002,9 +1094,7 @@ process(memclk)
 begin
 	if (memclk'event and memclk = '1') then
 		if( (ff_mem_seq = "00") and (FreeCounter = X"FFFF") and (RstSeq /= "11111") )then
-			RstSeq <= RstSeq + 1;			-- 3ms (= 65536 / 21.48MHz)
-		else
-			RstPower <= '0';	
+			RstSeq <= RstSeq + 1;			-- 3ms (= 65536 / 21.47727 MHz)
 		end if;
 	end if;
 end process;
@@ -1019,7 +1109,7 @@ begin
 	end if;
 end process;
 
-reset <= RstPower or (not pSW(0)); -- not pSltRst_n;
+reset <= not (pSW(0) and lock_n);
 ----------------------------------------------------------------
 -- Operation mode
 ----------------------------------------------------------------
@@ -1071,7 +1161,7 @@ BEGIN
 		FF_CLK21M_CNT <= (OTHERS => '0');
 	ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
 		IF( w_10Hz = '1' )THEN
-			FF_CLK21M_CNT <= "1000001011001010001001";	-- 21.428571 MHZ / 10HZ = 2142857
+			FF_CLK21M_CNT <= "1000001100010110001111";  -- 21.477270 MHz / 10 Hz 
 		ELSE
 			FF_CLK21M_CNT <= FF_CLK21M_CNT - 1;
 		END IF;
@@ -1090,7 +1180,7 @@ pSltCs2_n   <=	pSltRd_n when( pSltAdr(15 downto 14) = "10" and pSltMerq_n = '0' 
 pSltCs12_n  <=  pSltCs1_n and pSltCs2_n; 
 pSltM1_n    <=	CpuM1_n;
 pSltRfsh_n  <=	CpuRfsh_n;
-pSltInt_n   <=	pVdpInt_n;
+pSltInt_n   <=	pVdpInt_n and (not uart_int);
 pSltSltsl_n <=	'1' when (Scc1Type /= "00" or MRAMmode = '1') else
 				'0' when ( pSltMerq_n = '0' and CpuRfsh_n = '1' and PriSltNum = "01")else
 				'1';
@@ -1195,8 +1285,6 @@ begin
         dlydbi <= RomDbi;
       elsif (mem = '1' and iSltErm = '1' and MmcEna = '1') then
         dlydbi <= MmcDbi;
---      elsif (mem = '0' and adr(7 downto 2)  = "100010") then
---        dlydbi <= VdpDbi;
       elsif (mem = '0' and adr(7 downto 2)  = "100110") then
         dlydbi <= VdpDbi;
       elsif (mem = '0' and adr(7 downto 2)  = "101000") then
@@ -1213,6 +1301,8 @@ begin
 		dlydbi <= systim_dbi;
       elsif (mem = '0' and adr(7 downto 0)  = "11110100") then	-- port F4
 		dlydbi <= portF4_bit7 & "1111111";
+      elsif (mem = '0' and adr(7 downto 3)  = "10000") then	    -- UART 80h..87h
+		dlydbi <= uart_dbi;
       else
         dlydbi <= (others => '1');
       end if;
@@ -1462,29 +1552,31 @@ OpllReq	<= req when( mem = '0' and adr(7 downto 2) = "011111")else '0';	-- I/O:7
 KanReq	<= req when( mem = '0' and adr(7 downto 2) = "110110")else '0';	-- I/O:D8-DBh	/ Kanji
 RomReq	<= req when( (rom_main or rom_opll or rom_extr or rom_free1 or rom_free2) = '1')else '0';
 
-MapReq	<= req when( mem = '0' and adr(7 downto 2) = "111111")else	        -- I/O:FC-FFh/ Memory-mapper
-           req when( iSltMap = '1') else '0';				                -- MEM/ Memory-mapper
+MapReq	<= req when( mem = '0' and adr(7 downto 2) = "111111")else	         -- I/O:FC-FFh/ Memory-mapper
+           req when( iSltMap = '1') else '0';				                 -- MEM/ Memory-mapper
 
-MRAMReq <= req when( mem = '0' and adr(7 downto 0) = "10001110")else	    -- I/O:8Eh/ Mega RAM
-           req when( iMEGA_RAM = '1') else '0';				                -- MEM/ Mega RAM
+MRAMReq <= req when( mem = '0' and adr(7 downto 0) = "10001110")else	     -- I/O:8Eh/ Mega RAM
+           req when( iMEGA_RAM = '1') else '0';				                 -- MEM/ Mega RAM
 
-Scc1Req	<= req when( iSltScc1 = '1')else '0';                               -- MEM:/ ESE-SCC 1
-Scc2Req	<= req when( iSltScc2 = '1')else '0';                               -- MEM:/ ESE-SCC 2
-ErmReq	<= req when( iSltErm  = '1')else '0';                               -- MEM:/ ESE-RAM, MegaSD
-RtcReq	<= req when( mem = '0' and adr(7 downto 1) = "1011010")else '0';    -- I/O:B4-B5h/ RTC(RP-5C01)
-systim_req <= req when( mem = '0' and adr(7 downto 1) = "1110011")else '0'; -- I/O:E6-E7h/ system timer
+Scc1Req	<= req when( iSltScc1 = '1')else '0';                                -- MEM:/ ESE-SCC 1
+Scc2Req	<= req when( iSltScc2 = '1')else '0';                                -- MEM:/ ESE-SCC 2
+ErmReq	<= req when( iSltErm  = '1')else '0';                                -- MEM:/ ESE-RAM, MegaSD
+RtcReq	<= req when( mem = '0' and adr(7 downto 1) = "1011010")else '0';     -- I/O:B4-B5h/ RTC(RP-5C01)
+systim_req <= req when( mem = '0' and adr(7 downto 1) = "1110011")else '0';  -- I/O:E6-E7h/ system timer
 portF4_req <= req when( mem = '0' and adr(7 downto 0) = "11110100")else '0'; -- I/O:F4h  port F4
--- uart_req <= req when( mem = '0' and adr(7 downto 3) = "10000")else '0';      -- I/O:80-87h UART
+uart_req   <= req when( mem = '0' and adr(7 downto 3) = "10000")else '0';    -- I/O:80-87h UART
+uart_adr   <= adr(2 downto 0);
+rd_io      <= not (pSltIorq_n or pSltRd_n);
 
-BusDir	<= '1' when( pSltAdr(7 downto 2) = "100110"  )else -- I/O:98-9Bh / VDP(V9958)
-           '1' when( pSltAdr(7 downto 2) = "101000"  )else -- I/O:A0-A3h / PSG(AY-3-8910)
-           '1' when( pSltAdr(7 downto 2) = "101010"  )else -- I/O:A8-ABh / PPI(8255)
-           '1' when( pSltAdr(7 downto 2) = "110110"  )else -- I/O:D8-DBh / Kanji
-           '1' when( pSltAdr(7 downto 2) = "111111"  )else -- I/O:FC-FFh / Memory-mapper
-           '1' when( pSltAdr(7 downto 1) = "1011010" )else -- I/O:B4-B5h / RTC(RP-5C01)
-           '1' when( pSltAdr(7 downto 1) = "1110011" )else -- I/O:E6-E7h / system timer
-           '1' when( pSltAdr(7 downto 0) = "11110100" )else-- I/O:F4h    / port F4
---           '1' when( pSltAdr(7 downto 3) = "10000" )else   -- I/O:80-87h / UART
+BusDir	<= '1' when( pSltAdr(7 downto 2) = "100110"   )else   -- I/O:98-9Bh / VDP(V9958)
+           '1' when( pSltAdr(7 downto 2) = "101000"   )else   -- I/O:A0-A3h / PSG(AY-3-8910)
+           '1' when( pSltAdr(7 downto 2) = "101010"   )else   -- I/O:A8-ABh / PPI(8255)
+           '1' when( pSltAdr(7 downto 2) = "110110"   )else   -- I/O:D8-DBh / Kanji
+           '1' when( pSltAdr(7 downto 2) = "111111"   )else   -- I/O:FC-FFh / Memory-mapper
+           '1' when( pSltAdr(7 downto 1) = "1011010"  )else   -- I/O:B4-B5h / RTC(RP-5C01)
+           '1' when( pSltAdr(7 downto 1) = "1110011"  )else   -- I/O:E6-E7h / system timer
+           '1' when( pSltAdr(7 downto 0) = "11110100" )else   -- I/O:F4h    / port F4
+           '1' when( pSltAdr(7 downto 3) = "10000"    )else   -- I/O:80-87h / UART
            '0';
 
   pLedR(9) <= MemMode;
@@ -1742,21 +1834,21 @@ end process;
   -- Slot map / SD-RAM memory map
   --
   -- Slot 0-0 : MainROM         610000-617FFF(  32KB)
-  -- Slot 0-1 : rom_free1       640000-64FFFF(  64KB) MegaSD(iSltErm)
-  -- Slot 0-2 : FM-BIOS         61C000-61FFFF(  16KB)
-  -- Slot 0-3 : rom_free2       650000-65FFFF(  64KB) MegaSD(iSltErm)
+  -- Slot 0-1 : rom_free1       630000-63FFFF(  64KB)
+  -- Slot 0-2 : FM-BIOS         62C000-62FFFF(  16KB)
+  -- Slot 0-3 : rom_free2       660000-66FFFF(  64KB)
 
   -- Slot 1   : (EXTERNAL-SLOT)
   --            / MegaRam1      400000-4FFFFF(1024KB)
   -- Slot 2   : (EXTERNAL-SLOT)
   --            / MegaRam2      500000-5FFFFF(1024KB)
+  -- Slot 1   : Mega RAM        680000-6FFFFF( 512KB)
 
   -- Slot 3-0 : Mapper          000000-3FFFFF(4096KB)
-  -- Slot 3-1 : ExtROM          618000-61BFFF(  16KB)
-  -- Slot 3-2 : MegaSD          600000-60FFFF(  64KB)
-  --            EseRAM          600000-63FFFF(BIOS:256KB)
-  -- Slot 1   : Mega RAM        680000-6FFFFF( 512KB)
-  -- Slot 3-3 : IPL-ROM         (blockRAM:512Bytes)
+  -- Slot 3-1 : ExtROM          628000-62BFFF(  16KB)
+  -- Slot 3-2 : Nextor/MegaSD   600000-61FFFF(  128KB)
+  --            EseRAM          600000-66FFFF(BIOS:512KB)
+  -- Slot 3-3 : IPL-ROM         (blockRAM:1024Bytes)
 
   -- VRAM     : VRAM            700000-71FFFF( 128KB)
 
@@ -1771,13 +1863,15 @@ end process;
                               Scc1Adr(19 downto 0) when iSltScc1  = '1' else -- 400000-4FFFFF (1024KB)
                               Scc2Adr(19 downto 0) when iSltScc2  = '1' else -- 500000-5FFFFF (1024KB)
                    "1"      & MRAMAdr(18 downto 0) when iMEGA_RAM = '1' else -- 680000-6FFFFF (512 KB) MEGA RAM
-                   "0"      & ErmAdr(18 downto 0)  when iSltErm   = '1' else -- 600000-67FFFF (512KB) ESE-RAM
-                   "001"    & KanAdr(16 downto 0)  when rom_kanj  = '1' else -- 620000-63FFFF (128KB) KANJI ROM
-                   "0100"   & adr(15 downto 0 )    when rom_free1 = '1' else -- 640000-64FFFF (64 KB)
-                   "0101"   & adr(15 downto 0 )    when rom_free2 = '1' else -- 650000-65FFFF (64 KB)
-                   "00010"  & adr(14 downto 0)     when rom_main  = '1' else -- 610000-617FFF (32 KB)
-                   "000110" & adr(13 downto 0)     when rom_extr  = '1' else -- 618000-61BFFF (16 KB)
-                   "000111" & adr(13 downto 0); --  when rom_opll  = '1' else -- 61C000-61FFFF (16 KB)
+                   "0"      & ErmAdr(18 downto 0)  when iSltErm   = '1' else -- 600000-67FFFF (512 KB) ESE-RAM
+--				   "000"												     -- 600000-61FFFF (128 KB) MEGA SD                  
+                   "00100"  & adr(14 downto 0)     when rom_main  = '1' else -- 620000-627FFF (32  KB)
+                   "001010" & adr(13 downto 0)     when rom_extr  = '1' else -- 628000-62BFFF (16  KB)
+                   "001011" & adr(13 downto 0)	   when rom_opll  = '1' else -- 62C000-62FFFF (16  KB)
+                   "0011"   & adr(15 downto 0 )    when rom_free1 = '1' else -- 630000-63FFFF (64  KB)
+                   "010"    & KanAdr(16 downto 0)  when rom_kanj  = '1' else -- 640000-65FFFF (128 KB) KANJI ROM
+                   "0110"   & adr(15 downto 0 )    when rom_free2 = '1' else -- 660000-66FFFF (64  KB)                   
+					(OTHERS => '1');
 ----------------------------------------------------------------
 -- SD-RAM access
 ----------------------------------------------------------------
@@ -2084,16 +2178,13 @@ pMemDat		<= SdrDat;
 	FL_OE_N		<= '1';
 
     AUD_ADCLRCK	<= 'Z';
-
 ----------------------------------------------------------------
 -- Connect components
 ----------------------------------------------------------------
-  U00 : pll4x2
+  U00 : pll4xde1
     port map(					-- for Altera DE1
       inclk0 => CLOCK_50,       -- 50 MHz external
-      c0     => clk21m,         -- 21.43MHz internal (50*3/7)
-      c1     => memclk,         -- 85.72MHz = 21.43MHz x 4
-      c2     => pMemClk,        -- 85.72MHz external
+      c0     => clk300m,        -- 300.00MHz internal (50*6)
       locked => lock_n
     );
 
@@ -2154,12 +2245,17 @@ pMemDat		<= SdrDat;
       		VideoDHClk, VideoDLClk, Reso_v, PAL_v );
 
   U21 : vencode
-    port map(clk21m, reset, VideoR, VideoG, videoB, VideoHS_n, VideoVS_n,
+    port map(clk21m, reset, VideoR, VideoG, VideoB, VideoHS_n, VideoVS_n,
       		 videoY, videoC, videoV);
 
   U30 : psg
     port map(clk21m, reset, clkena, PsgReq, Open, wrt, adr, PsgDbi, dbo,
-             pJoyA, pStrA, pJoyB, pStrB, Kana, CmtIn, KeyMode, PsgAmp);
+               mouse_en, mdata,
+               pJoyA, strob, pJoyB, pStrB, Kana, CmtIn, KeyMode, PsgAmp);
+  pStrA  <= strob;
+
+  U40 : ps2mouse
+    port map(clk21m, reset, mouse_en, strob, mdata, pPs2mDat, pPs2mClk);
 
   U31_1 : megaram
     port map(clk21m, reset, clkena, Scc1Req, Scc1Ack, wrt, adr, Scc1Dbi, dbo,
@@ -2239,16 +2335,16 @@ pMemDat		<= SdrDat;
 
   U35: a_codec
 	port map (
-	  iCLK	  => CLOCK_27,
-	  iSL     => SOUND_L,
-	  iSR     => SOUND_R,
-	  oAUD_XCK  => AUD_XCK,
-	  oAUD_DATA => AUD_DACDAT,
-	  oAUD_LRCK => AUD_DACLRCK,
-	  oAUD_BCK  => AUD_BCLK,
-	  iAUD_ADCDAT => AUD_ADCDAT,
+	  iCLK	       => CLOCK_27,
+	  iSL          => SOUND_L,
+	  iSR          => SOUND_R,
+	  oAUD_XCK     => AUD_XCK,
+	  oAUD_DATA    => AUD_DACDAT,
+	  oAUD_LRCK    => AUD_DACLRCK,
+	  oAUD_BCK     => AUD_BCLK,
+	  iAUD_ADCDAT  => AUD_ADCDAT,
 	  oAUD_ADCLRCK => AUD_ADCLRCK,
-	  o_tape => CmtIn
+	  o_tape       => CmtIn
 	);
 
   U36: I2C_AV_Config
@@ -2269,6 +2365,37 @@ pMemDat		<= SdrDat;
 	  dbi	 => systim_dbi,
 	  dbo	 => dbo
 	);
+
+-- Serial UART
+  U39: uart_16750
+    port map (
+        CLK      =>  clk21m,    -- System clock
+        CLK_UART =>  uart_clk,  -- Clock for UART
+        RST      =>  reset,     -- Reset
+        BAUDCE   =>  '1',       -- Baudrate generator clock enable
+        CS       =>  uart_req,  -- Chip select
+        WR       =>  wrt,       -- Write to UART
+        RD       =>  rd_io,     -- Read from I/O ports
+        A        =>  uart_adr,  -- Register select
+        DIN      =>  dbo,       -- Data bus input
+        DOUT     =>  uart_dbi,  -- Data bus output
+        DDIS     =>  Open,      -- Driver disable
+        INT      =>  uart_int,  -- Interrupt output
+        OUT1N    =>  Open,      -- Output 1
+        OUT2N    =>  Open,      -- Output 2
+        RCLK     =>  rclk,      -- Receiver clock (16x baudrate)
+        BAUDOUTN =>  baudoutn,  -- Baudrate generator output (16x baudrate)
+        RTSN     =>  Open,      -- RTS output
+        DTRN     =>  Open,      -- DTR output
+        CTSN     =>  '0',       -- CTS input
+        DSRN     =>  '0',       -- DSR input
+        DCDN     =>  '0',       -- DCD input
+        RIN      =>  '0',       -- RI input
+        SIN      =>  UART_RXD,  -- Receiver input
+        SOUT     =>  UART_TXD   -- Transmitter output
+    );
+--
+    rclk <= baudoutn;
 
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\	
 end rtl;
