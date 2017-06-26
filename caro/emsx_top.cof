@@ -17,8 +17,7 @@
 			<sof_filename>emsx_top.sof<compress_bitstream>1</compress_bitstream></sof_filename>
 		</bit0>
 	</sof_data>
-	<version>5</version>
-	<create_cvp_file>0</create_cvp_file>
+	<version>4</version>
 	<options>
 		<map_file>1</map_file>
 	</options>

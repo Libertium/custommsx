@@ -14,6 +14,16 @@ need to assemble the part of the scheme shown on the site.
 caro
 k2k@list.ru
 
+Updated relize OCM on DE1 from 17.03.17
+---------------------------------------
+1) Work with SDHC memory cards with a capacity of 4 to 32 Gigabytes has been added.
+   As a disk subsystem, Nextor DOS is used. 
+   The description of the system can be found on Konamiman's MSX page.
+2) The UART is added (standard 16750). The base port address is 0x80.  
+
+caro
+k2k@list.ru
+
 
 Updated relize OCM on DE1 from 16.02.13
 ---------------------------------------
