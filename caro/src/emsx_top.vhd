@@ -46,7 +46,7 @@ entity emsx_top is
     pClk24m	    : in std_logic;		-- Input clock DE1 24 MHz
     pClk27m     : in std_logic;		-- Input clock DE1 27 MHz
     pExtClk     : in std_logic;		-- Input external clock
--------------------------------------------------------------    
+    
 --  pClk21m     : in std_logic;		-- VDP clock ... 21.48MHz
 --  pCpuClk     : out std_logic;	-- CPU clock ... 3.58MHz (up to 10.74MHz/21.48MHz)
 --  pCpuRst_n   : out std_logic;	-- CPU reset
@@ -95,10 +95,6 @@ entity emsx_top is
     pPs2Clk     : inout std_logic;
     pPs2Dat     : inout std_logic;
 
-    -- PS/2 mouse ports
-    pPs2mClk    : inout std_logic;
-    pPs2mDat    : inout std_logic;
-
     -- Joystick ports (Port_A, Port_B)
     pJoyA       : inout std_logic_vector( 5 downto 0);
     pStrA       : out std_logic;
@@ -108,69 +104,69 @@ entity emsx_top is
     -- SD/MMC slot ports
     pSd_Ck      : out std_logic;                        -- pin 5
     pSd_Cm      : out std_logic;                        -- pin 2
---  pSd_Dt      : inout std_logic_vector( 3 downto 0);  -- pin 1(D3), 9(D2), 8(D1), 7(D0)
-    pSd_Dt3     : inout std_logic;                      -- pin 1
-    pSd_Dt0     : inout std_logic;                      -- pin 7
+--  pSd_Dt	    : inout std_logic_vector( 3 downto 0);  -- pin 1(D3), 9(D2), 8(D1), 7(D0)
+    pSd_Dt3	    : inout std_logic;						-- pin 1
+    pSd_Dt0	    : inout std_logic;						-- pin 7
 
     -- DIP switch, Lamp ports
-    pSW         : in std_logic_vector( 3 downto 0);     -- 0 - press; 1 - unpress
+    pSW		    : in std_logic_vector( 3 downto 0);	    -- 0 - press; 1 - unpress
     pDip        : in std_logic_vector( 9 downto 0);     -- 0=ON,  1=OFF(default on shipment)
-    pLedG       : out std_logic_vector( 7 downto 0);    -- 0=OFF, 1=ON(green)
-    pLedR       : out std_logic_vector( 9 downto 0);    -- 0=OFF, 1=ON(red) ...Power & SD/MMC access lamp
+    pLedG       : out std_logic_vector( 7 downto 0);   	-- 0=OFF, 1=ON(green)
+    pLedR	    : out std_logic_vector( 9 downto 0);    -- 0=OFF, 1=ON(red) ...Power & SD/MMC access lamp
 
     -- Video, Audio/CMT ports
     pDac_VR     : inout std_logic_vector( 5 downto 0);  -- RGB_Red / Svideo_C
     pDac_VG     : inout std_logic_vector( 5 downto 0);  -- RGB_Grn / Svideo_Y
     pDac_VB     : inout std_logic_vector( 5 downto 0);  -- RGB_Blu / CompositeVideo
-    pDac_S      : out   std_logic;			-- Sound
-    pREM_out	: out   std_logic;			-- REM output; 1 - Tape On
-    pCMT_out	: out   std_logic;			-- CMT output
-    pCMT_in	: in    std_logic;			-- CMT input
+    pDac_S		: out   std_logic;						-- Sound
+    pREM_out	: out   std_logic;						-- REM output; 1 - Tape On
+    pCMT_out	: out   std_logic;						-- CMT output
+    pCMT_in		: in    std_logic;						-- CMT input
 
     pVideoHS_n  : out std_logic;                        -- Csync(RGB15K), HSync(VGA31K)
     pVideoVS_n  : out std_logic;                        -- Audio(RGB15K), VSync(VGA31K)
 
     -- DE1 SRAM
-    SRAM_DQ     : inout std_logic_vector(15 downto 0);
-    SRAM_ADDR   : out std_logic_vector(17 downto 0);
-    SRAM_UB_N   : out std_logic;
-    SRAM_LB_N   : out std_logic;
-    SRAM_WE_N   : out std_logic;
-    SRAM_CE_N   : out std_logic;
-    SRAM_OE_N   : out std_logic;
-
+    SRAM_DQ		: inout std_logic_vector(15 downto 0);
+    SRAM_ADDR	: out std_logic_vector(17 downto 0);
+    SRAM_UB_N	: out std_logic;
+    SRAM_LB_N	: out std_logic;
+    SRAM_WE_N	: out std_logic;
+    SRAM_CE_N	: out std_logic;
+    SRAM_OE_N	: out std_logic;
+	
     -- DE1 FLASH
-    FL_DQ      : inout std_logic_vector(7 downto 0);
-    FL_ADDR    : out std_logic_vector(21 downto 0);
-    FL_RST_N   : out std_logic;
-    FL_WE_N    : out std_logic;
-    FL_OE_N    : out std_logic;
-
+    FL_DQ	    : inout std_logic_vector(7 downto 0);
+    FL_ADDR	    : out std_logic_vector(21 downto 0);
+    FL_RST_N	: out std_logic;
+    FL_WE_N	    : out std_logic;
+    FL_OE_N	    : out std_logic;
+	
     -- DE1 7-SEG Display
-    HEX0      : out std_logic_vector(6 downto 0);
-    HEX1      : out std_logic_vector(6 downto 0);
-    HEX2      : out std_logic_vector(6 downto 0);
-    HEX3      : out std_logic_vector(6 downto 0);
+    HEX0	    : out std_logic_vector(6 downto 0);
+    HEX1	    : out std_logic_vector(6 downto 0);
+    HEX2	    : out std_logic_vector(6 downto 0);
+    HEX3	    : out std_logic_vector(6 downto 0);
 
     -- DE1 i2c
-    I2C_SCLK  : out std_logic;
-    I2C_SDAT  : inout std_logic;
+    I2C_SCLK	: out std_logic;
+    I2C_SDAT	: inout std_logic;
 
     -- DE1 Audio Codec
-    AUD_ADCLRCK : out std_logic;
-    AUD_ADCDAT  : in std_logic;
-    AUD_XCK     : out std_logic;
-    AUD_DACLRCK : out std_logic;
-    AUD_DACDAT  : out std_logic;
-    AUD_BCLK    : out std_logic;	
+    AUD_ADCLRCK	: out std_logic;
+    AUD_ADCDAT	: in std_logic;
+    AUD_XCK	    : out std_logic;
+    AUD_DACLRCK	: out std_logic;
+    AUD_DACDAT	: out std_logic;
+    AUD_BCLK	: out std_logic;	
 
     -- DE1 USART
-    UART_RXD    : in std_logic; 
-    UART_TXD    : out std_logic
+	UART_RXD	: in std_logic; 
+	UART_TXD	: out std_logic;
  
     -- pins for test
---    test1       : out std_logic;
---    test2       : out std_logic
+    test1       : out std_logic;
+    test2       : out std_logic
 
 );
 end emsx_top;
@@ -391,8 +387,6 @@ architecture rtl of emsx_top is
       adr     : in std_logic_vector(15 downto 0);
       dbi     : out std_logic_vector(7 downto 0);
       dbo     : in std_logic_vector(7 downto 0);
-      mouse   : in std_logic;
-      mdata   : in std_logic_vector(5 downto 0);
       joya    : inout std_logic_vector(5 downto 0);
       stra    : out std_logic;
       joyb    : inout std_logic_vector(5 downto 0);
@@ -404,18 +398,6 @@ architecture rtl of emsx_top is
     );
   end component;
 
-  component ps2mouse
-    port(
-      clk     : in std_logic;
-      reset   : in std_logic;
-      mouse_en: out std_logic;
-      strob   : in std_logic;
-      mdata   : out std_logic_vector(5 downto 0);
-      ps2mdat : inout std_logic;
-      ps2mclk : inout std_logic
-    );
-  end component;
-      
   component megaram
     port(
       clk21m  : in std_logic;
@@ -785,11 +767,6 @@ end component;
   signal Caps        : std_logic;
   signal Fkeys       : std_logic_vector(7 downto 0);
 
-  -- PS/2 mouse signals
-  signal strob  	 : std_logic;
-  signal mouse_en 	 : std_logic;
-  signal mdata       : std_logic_vector(5 downto 0);
-
   -- CMT signals
   signal CmtIn       : std_logic;
   alias  CmtOut      : std_logic is PpiPortC(5);
@@ -872,8 +849,8 @@ end component;
   signal Sound_R     : std_logic_vector(15 downto 0);
 
   signal MstrVol     : std_logic_vector(2 downto 0);
-  signal PsgVol      : std_logic_vector(2 downto 0);
-  signal SccVol      : std_logic_vector(2 downto 0);
+  signal PsgVol     : std_logic_vector(2 downto 0);
+  signal SccVol     : std_logic_vector(2 downto 0);
   signal OpllVol     : std_logic_vector(2 downto 0);
 
   signal vFKeys			: std_logic_vector(  7 downto 0 );
@@ -970,7 +947,6 @@ begin
       uart_acc <= uart_acc + 103079;
    end if;
 end process;
-
 memclk <= acc(23);	      -- F = 21.47727*4 = 85.90908 MHz
 pMemClk <= memclk;
 uart_clk <= uart_acc(23); -- F = 115200*16 = 1843200 Hz
@@ -1109,7 +1085,7 @@ begin
 	end if;
 end process;
 
-reset <= not (pSW(0) and lock_n);
+reset <= not pSW(0); -- not pSltRst_n;
 ----------------------------------------------------------------
 -- Operation mode
 ----------------------------------------------------------------
@@ -1301,7 +1277,7 @@ begin
 		dlydbi <= systim_dbi;
       elsif (mem = '0' and adr(7 downto 0)  = "11110100") then	-- port F4
 		dlydbi <= portF4_bit7 & "1111111";
-      elsif (mem = '0' and adr(7 downto 3)  = "10000") then	    -- UART 80h..87h
+      elsif (mem = '0' and adr(7 downto 3)  = "10000") then	-- UART 80h..87h
 		dlydbi <= uart_dbi;
       else
         dlydbi <= (others => '1');
@@ -2185,6 +2161,8 @@ pMemDat		<= SdrDat;
     port map(					-- for Altera DE1
       inclk0 => CLOCK_50,       -- 50 MHz external
       c0     => clk300m,        -- 300.00MHz internal (50*6)
+--      c1     => memclk,         -- 85.72MHz = 21.43MHz x 4
+--      c2     => pMemClk,        -- 85.72MHz external
       locked => lock_n
     );
 
@@ -2245,17 +2223,12 @@ pMemDat		<= SdrDat;
       		VideoDHClk, VideoDLClk, Reso_v, PAL_v );
 
   U21 : vencode
-    port map(clk21m, reset, VideoR, VideoG, VideoB, VideoHS_n, VideoVS_n,
+    port map(clk21m, reset, VideoR, VideoG, videoB, VideoHS_n, VideoVS_n,
       		 videoY, videoC, videoV);
 
   U30 : psg
     port map(clk21m, reset, clkena, PsgReq, Open, wrt, adr, PsgDbi, dbo,
-               mouse_en, mdata,
-               pJoyA, strob, pJoyB, pStrB, Kana, CmtIn, KeyMode, PsgAmp);
-  pStrA  <= strob;
-
-  U40 : ps2mouse
-    port map(clk21m, reset, mouse_en, strob, mdata, pPs2mDat, pPs2mClk);
+             pJoyA, pStrA, pJoyB, pStrB, Kana, CmtIn, KeyMode, PsgAmp);
 
   U31_1 : megaram
     port map(clk21m, reset, clkena, Scc1Req, Scc1Ack, wrt, adr, Scc1Dbi, dbo,
