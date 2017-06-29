@@ -142,8 +142,8 @@ set_location_assignment PIN_M5 -to pMemUdq
 set_location_assignment PIN_R8 -to pMemWe_n
 set_location_assignment PIN_H15 -to pPs2Clk
 set_location_assignment PIN_J14 -to pPs2Dat
-set_location_assignment PIN_D19 -to pPs2mClk
-set_location_assignment PIN_D20 -to pPs2mDat
+# set_location_assignment PIN_D19 -to pPs2mClk
+# set_location_assignment PIN_D20 -to pPs2mDat
 set_location_assignment PIN_V20 -to pSd_Ck
 set_location_assignment PIN_Y20 -to pSd_Cm
 set_location_assignment PIN_W20 -to pSd_Dt0
@@ -218,10 +218,12 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2Clk
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2Clk
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2Dat
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2Dat
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mClk
-set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mClk
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mDat
-set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mDat
+
+#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mClk
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mClk
+#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mDat
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mDat
+
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pVideoVS_n
 set_instance_assignment -name CURRENT_STRENGTH_NEW 24MA -to pVideoVS_n
 set_instance_assignment -name SLOW_SLEW_RATE OFF -to pVideoVS_n
@@ -623,7 +625,7 @@ set_global_assignment -name VHDL_FILE src/peripheral/megasd.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/iplrom.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/systemtimer.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/mega_ram.vhd
-set_global_assignment -name VERILOG_FILE src/peripheral/ps2mouse.v
+# set_global_assignment -name VERILOG_FILE src/peripheral/ps2mouse.v
 set_global_assignment -name VHDL_FILE src/cpu/t80_alu.vhd
 set_global_assignment -name VHDL_FILE src/cpu/t80_reg.vhd
 set_global_assignment -name VHDL_FILE src/cpu/t80_mcode.vhd
@@ -636,6 +638,7 @@ set_global_assignment -name VERILOG_FILE src/de1/a_codec2.v
 set_global_assignment -name VERILOG_FILE src/de1/seg7_lut_4.v
 set_global_assignment -name VERILOG_FILE src/de1/seg7_lut.v
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+
 
 
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
