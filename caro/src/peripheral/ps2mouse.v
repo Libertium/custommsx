@@ -24,51 +24,52 @@
 
 module ps2mouse(clk,reset,strob,mouse_en,mdata,ps2mdat,ps2mclk);
 
-input   clk;		  //bus clock
-input   reset;		  //reset
-output	mouse_en=1;	  //mouse enable
-input   strob;		  //strob
-output  [5:0]mdata;   //mdata
-inout   ps2mdat;	  //mouse PS/2 data
-inout   ps2mclk;	  //mouse PS/2 clk
+input   clk;        //bus clock
+input   reset;      //reset
+output  mouse_en;   //mouse enable
+input   strob;      //strob
+output  [5:0]mdata; //mdata
+inout   ps2mdat;    //mouse PS/2 data
+inout   ps2mclk;    //mouse PS/2 clk
 //==========================================================
 //local signals
-reg [3:0]nibl;
-reg	[5:0]mdata;
-reg	[7:0]mbutton;
-reg	[7:0]ycount;
-reg	[7:0]xcount;
-reg	[7:0]coord_X;
-reg	[7:0]coord_Y;
+reg  mouse_en;
+reg  [3:0]nibl;
+reg  [5:0]mdata;
+reg  [7:0]mbutton;
+reg  [7:0]ycount;
+reg  [7:0]xcount;
+reg  [7:0]coord_X;
+reg  [7:0]coord_Y;
 
-reg	 mclkout=1; 	//mouse clk out
-wire mdatout;	    //mouse data out
-reg	 mdatb,mclkb,mclkc;	//input synchronization	
+reg  mclkout=1; 	//mouse clk out
+wire mdatout;	//mouse data out
+reg  mdatb,mclkb,mclkc;	//input synchronization	
 
 reg	[7:0]delta_Y;	//mouse delta y
 reg	[7:0]delta_X;	//mouse delta x
-reg fdelta;			//flag receive packets
+reg	fdelta;		//flag receive packets
 reg	[10:0]mreceive;	//mouse receive register
 reg	[11:0]msend;	//mouse send register
 reg	[15:0]mtimer;	//mouse timer
 reg	[2:0]mstate;	//mouse current state
-reg	[2:0]mnext;	    //mouse next state
+reg	[2:0]mnext;	//mouse next state
 reg	[15:0]msxtimer;	//MSX mouse timer
 reg	[3:0]msxstate;	//MSX mouse current state
 reg	[3:0]msxnext;	//MSX mouse next state
 
-wire mclkneg;	    //negative edge of mouse clock strobe
-reg	 mrreset;	    //mouse receive reset
-wire mrready;	    //mouse receive ready;
-reg	 msreset=1;	    //mosue send reset
-wire msready;	    //mouse send ready;
-reg	 mtreset;	    //mouse timer reset
-wire mtready;	    //mouse timer ready
-reg	 msxtreset;	    //MSX mouse timer reset
-reg	 mcreset;	    //MSX mouse coord reset
-wire msxtready;	    //MSX mouse timer ready
+wire mclkneg;	//negative edge of mouse clock strobe
+reg	 mrreset;	//mouse receive reset
+wire mrready;	//mouse receive ready;
+reg	 msreset;	//mouse send reset
+wire msready;	//mouse send ready;
+reg	 mtreset;	//mouse timer reset
+wire mtready;	//mouse timer ready
+reg  msxtreset;	//MSX mouse timer reset
+reg  mcreset;	//MSX mouse coord reset
+wire msxtready;	//MSX mouse timer ready
 wire mthalf;		//mouse timer somewhere halfway timeout
-reg	 [1:0]mpacket;	//mouse packet byte valid number
+reg [1:0]mpacket;	//mouse packet byte valid number
 
 //bidirectional open collector IO buffers
 assign ps2mclk=(mclkout)?1'bz:1'b0;
@@ -95,10 +96,16 @@ assign mrready = ~mreceive[0];
 
 //PS2 mouse send shifter
 always @(posedge clk)
-	if(msreset)
+	if(reset || msreset)
+	 begin
+	    mouse_en <= 0;
 		msend[11:0] <= 12'b110111101000; //send 0xf4 - mouse acktiv
+	 end
 	else if(!msready && mclkneg)
+	 begin
+		mouse_en <= 1;
 		msend[11:0] <= {1'b0,msend[11:1]};
+	 end
 assign msready = (msend[11:0]==12'b000000000001)?1:0;
 assign mdatout = (msreset)?1:msend[0];
 
@@ -122,7 +129,7 @@ assign msxtready = (msxtimer[15:0]==16'hffff)?1:0;
 //PS2 mouse packet decoding and handling
 always @(posedge clk)
 begin
-	if(reset)       //reset
+	if(reset)
 	  begin
 		mbutton[7:0] <= 8'hf7;
 		delta_X[7:0] <= 8'h00;	
@@ -179,11 +186,10 @@ always @(posedge clk)
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-
 //PS2 mouse state machine
 always @(posedge clk)
 	if(reset || mtready)    //master reset OR timeout
-			mstate <= 0;
+		mstate <= 0;
 	else 
 		mstate <= mnext;
 always @(mstate or mthalf or msready or mrready or mreceive)
@@ -411,7 +417,7 @@ begin
 				msxtreset <=0;
 				mcreset   <=0;
 				nibl = 4'h0;
-			    msxnext = 8;   // wait MSX timer overflow 3 msec
+			   msxnext = 8;   // wait MSX timer overflow 3 msec
 			end
 	endcase
 end

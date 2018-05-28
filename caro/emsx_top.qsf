@@ -140,10 +140,12 @@ set_location_assignment PIN_R7 -to pMemLdq
 set_location_assignment PIN_T5 -to pMemRas_n
 set_location_assignment PIN_M5 -to pMemUdq
 set_location_assignment PIN_R8 -to pMemWe_n
+#
 set_location_assignment PIN_H15 -to pPs2Clk
 set_location_assignment PIN_J14 -to pPs2Dat
-# set_location_assignment PIN_D19 -to pPs2mClk
-# set_location_assignment PIN_D20 -to pPs2mDat
+set_location_assignment PIN_D19 -to pPs2mClk
+set_location_assignment PIN_D20 -to pPs2mDat
+#
 set_location_assignment PIN_V20 -to pSd_Ck
 set_location_assignment PIN_Y20 -to pSd_Cm
 set_location_assignment PIN_W20 -to pSd_Dt0
@@ -198,10 +200,13 @@ set_location_assignment PIN_C14 -to pSltSltsl_n
 set_location_assignment PIN_C17 -to pSltSw1
 set_location_assignment PIN_D15 -to pSltSw2
 set_location_assignment PIN_K20 -to pSltWait_n
+# UART
 set_location_assignment PIN_G12 -to UART_TXD
 set_location_assignment PIN_F14 -to UART_RXD
+#
 set_location_assignment PIN_H12 -to test1
 set_location_assignment PIN_H14 -to test2
+#
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to test1
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to test1
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to test2
@@ -219,10 +224,10 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2Clk
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2Dat
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2Dat
 
-#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mClk
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mClk
-#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mDat
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mDat
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mClk
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mClk
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mDat
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mDat
 
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pVideoVS_n
 set_instance_assignment -name CURRENT_STRENGTH_NEW 24MA -to pVideoVS_n
@@ -622,10 +627,10 @@ set_global_assignment -name VHDL_FILE src/peripheral/keymap.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/eseps2.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/mapper.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/megasd.vhd
-set_global_assignment -name VHDL_FILE src/peripheral/iplrom.vhd
+set_global_assignment -name VHDL_FILE src/peripheral/iplrom2c.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/systemtimer.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/mega_ram.vhd
-# set_global_assignment -name VERILOG_FILE src/peripheral/ps2mouse.v
+set_global_assignment -name VERILOG_FILE src/peripheral/ps2mouse.v
 set_global_assignment -name VHDL_FILE src/cpu/t80_alu.vhd
 set_global_assignment -name VHDL_FILE src/cpu/t80_reg.vhd
 set_global_assignment -name VHDL_FILE src/cpu/t80_mcode.vhd
@@ -637,6 +642,9 @@ set_global_assignment -name VERILOG_FILE src/de1/i2c_av_config.v
 set_global_assignment -name VERILOG_FILE src/de1/a_codec2.v
 set_global_assignment -name VERILOG_FILE src/de1/seg7_lut_4.v
 set_global_assignment -name VERILOG_FILE src/de1/seg7_lut.v
+
+
+
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 
 

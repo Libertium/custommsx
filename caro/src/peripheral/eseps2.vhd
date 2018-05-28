@@ -32,6 +32,7 @@
 --------------------------------------------------------------------------------
 -- Update note
 --------------------------------------------------------------------------------
+-- Mar 14 2018 - Added Ctrl+Alt+Del = Res_CAD - RESET from KBD
 -- Oct 05 2006 - Removed 101/106 toggle switch. 
 -- Sep 23 2006 - Fixed a problem where some key events are lost after 101/106 
 --               keyboard type switching.
@@ -65,6 +66,7 @@ entity eseps2 is
     -- | b7  | b6   | b5   | b4   | b3  | b2  | b1  | b0  |
     -- | SHI | --   | PgUp | PgDn | F9  | F10 | F11 | F12 |
     Fkeys    : out std_logic_vector(7 downto 0);
+    Res_CAD  : out std_logic;	-- Reset Ctrl+Alt+DEL
 
     pPs2Clk  : inout std_logic;
     pPs2Dat  : inout std_logic;
@@ -122,7 +124,10 @@ begin
     variable Ps2Kana : std_logic;
     variable Ps2Paus : std_logic;
     variable Ps2Scro : std_logic; -- used for 101/106 key table switching
-    variable Ps2Shif : std_logic; -- real shift status 
+    variable Ps2Shif : std_logic; -- real shift status
+    variable Ps2Ctrl : std_logic; -- real Ctrl status
+    variable Ps2Alt  : std_logic; -- real Alt status
+    variable Ps2DEL  : std_logic; -- real DEL status
     variable Ps2Vshi : std_logic; -- virtual shift status
     variable oFkeys  : std_logic_vector(7 downto 0);
 
@@ -156,6 +161,10 @@ begin
       Reso    <= '0';
       
       oFkeys  := (others=>'0');
+      Res_CAD <= '0';
+	   Ps2Ctrl := '0';	
+	   Ps2Alt  := '0';	
+	   Ps2DEL  := '0';	
       
       Scro    <= Kmap; -- default keyboard layout / '0': Japanese-106, '1': English-101
 
@@ -346,6 +355,15 @@ begin
                 oFkeys(0) := not oFkeys(0);  -- toggle OnScreenDisplay enable.
               end if;
               Ps2Chg := '1';
+            elsif (Ps2Dat = X"14" and Ps2xE0 = '0' and Ps2xE1 = '0') then -- LeftCtrl make
+              Ps2Ctrl := not Ps2brk;
+              Ps2Chg := '1';
+            elsif (Ps2Dat = X"11" and Ps2xE0 = '0' and Ps2xE1 = '0') then -- LeftAlt make
+              Ps2Alt := not Ps2brk;
+              Ps2Chg := '1';
+            elsif (Ps2Dat = X"71" and Ps2xE0 = '1' and Ps2xE1 = '0') then -- DEL make
+              Ps2DEL := not Ps2brk;
+              Ps2Chg := '1';
             -- elsif (Ps2Dat = X"7E" and Ps2xE0 = '0' and Ps2xE1 = '0') then -- scroll-lock make
             --  if Ps2brk ='0' then
             --    Scro <= not Scro;  -- toggle scroll lock (currently used for 101/106 keyboard switch)
@@ -368,7 +386,6 @@ begin
             else
               Ps2Chg := '1';
             end if;
-
           end if;
 
         elsif (Ps2Clk = "011") then     -- clk active
@@ -405,6 +422,9 @@ begin
       end if;
     end if;
     Fkeys <= oFkeys;
+    if (Ps2Ctrl and Ps2Alt and Ps2DEL) = '1' then
+	     Res_CAD <= '1';
+	 end if;
   end process;
 --
   pPs2Clk <= 'Z';
