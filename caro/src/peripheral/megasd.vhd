@@ -103,15 +103,15 @@ begin
 -- =====================================================
   RamReq <= req when wrt = '0'                                      else	-- rd
             req when ErmBank0(7) = '1' and adr(14 downto 13) = "10" else	-- wr 4000..5fff
-            req when ErmBank2(7) = '1' and adr(14 downto 13) = "00" else	-- wr 8000..9fff
-            req when ErmBank3(7) = '1' and adr(14 downto 13) = "01" else	-- wr A000..Bfff
+            req when ErmBank2(7) = '1' and adr(14 downto 13) = "00" else	-- wr 0000..1fff
+            req when ErmBank3(7) = '1' and adr(14 downto 13) = "01" else	-- wr 2000..3fff
 			'0';
   RamWrt <= wrt;
 
   RamAdr <= ErmBank0(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "10" else	-- 4000..5fff
             ErmBank1(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "11" else	-- 6000..7fff
-            ErmBank2(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "00" else	-- 8000..9fff
-            ErmBank3(6 downto 0) & adr(12 downto 0);									-- A000..Bfff
+            ErmBank2(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "00" else	-- 0000..1fff
+            ErmBank3(6 downto 0) & adr(12 downto 0);									-- 2000..3fff
 
   RamDbo <= dbo;
   dbi    <= RamDbi;
@@ -142,7 +142,7 @@ begin
       epc_cs <= '1';
       epc_di <= 'Z';
     elsif (clk21m'event and clk21m = '1') then
-      if (ErmBank0(7 downto 6) = "01") then		-- 40h (4000..5fff)
+      if (ErmBank0(7 downto 6) = "01") then	-- 40h (4000..5fff)
         MmcEnx := '1';
       else
         MmcEnx := '0';
@@ -217,7 +217,7 @@ begin
 
 -- Memory mapped I/O port access on 4000-57FFh ... SD/MMC data register
       if (req = '1' and adr(15 downto 13) = "010" and adr(12 downto 11) /= "11" and 
-					MmcEnx = '1' and MmcSeq = "00000" and MmcMod(0) = '0') then
+          MmcEnx = '1' and MmcSeq = "00000" and MmcMod(0) = '0') then
         if (wrt = '1') then
           MmcDbo := dbo;
         else
