@@ -1,7 +1,7 @@
 set_global_assignment -name CYCLONE_CONFIGURATION_DEVICE AUTO
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "4.1 SP2"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "16:28:47  OCTOBER 07, 2004"
-set_global_assignment -name LAST_QUARTUS_VERSION 13.0
+set_global_assignment -name LAST_QUARTUS_VERSION 9.0
 set_global_assignment -name SAVE_DISK_SPACE OFF
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 484
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 8
@@ -223,12 +223,10 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2Clk
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2Clk
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2Dat
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2Dat
-
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mClk
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mClk
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pPs2mDat
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pPs2mDat
-
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pVideoVS_n
 set_instance_assignment -name CURRENT_STRENGTH_NEW 24MA -to pVideoVS_n
 set_instance_assignment -name SLOW_SLEW_RATE OFF -to pVideoVS_n
@@ -553,23 +551,25 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pSd_Dt3
 
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
-set_global_assignment -name VHDL_FILE src/uart/slib_clock_div.vhd
-set_global_assignment -name VHDL_FILE src/uart/slib_counter.vhd
-set_global_assignment -name VHDL_FILE src/uart/slib_edge_detect.vhd
-set_global_assignment -name VHDL_FILE src/uart/slib_fifo.vhd
-set_global_assignment -name VHDL_FILE src/uart/slib_input_filter.vhd
-set_global_assignment -name VHDL_FILE src/uart/slib_input_sync.vhd
-set_global_assignment -name VHDL_FILE src/uart/slib_mv_filter.vhd
-set_global_assignment -name VHDL_FILE src/uart/uart_baudgen.vhd
-set_global_assignment -name VHDL_FILE src/uart/uart_interrupt.vhd
-set_global_assignment -name VHDL_FILE src/uart/uart_receiver.vhd
-set_global_assignment -name VHDL_FILE src/uart/uart_transmitter.vhd
-set_global_assignment -name VHDL_FILE src/uart/uart_16750.vhd
+set_global_assignment -name MISC_FILE "D:/ALTERA/ESEMSX3.516/emsx_top.dpf"
+set_global_assignment -name VHDL_FILE src/UART/slib_clock_div.vhd
+set_global_assignment -name VHDL_FILE src/UART/slib_counter.vhd
+set_global_assignment -name VHDL_FILE src/UART/slib_edge_detect.vhd
+set_global_assignment -name VHDL_FILE src/UART/slib_fifo.vhd
+set_global_assignment -name VHDL_FILE src/UART/slib_input_filter.vhd
+set_global_assignment -name VHDL_FILE src/UART/slib_input_sync.vhd
+set_global_assignment -name VHDL_FILE src/UART/slib_mv_filter.vhd
+set_global_assignment -name VHDL_FILE src/UART/uart_baudgen.vhd
+set_global_assignment -name VHDL_FILE src/UART/uart_interrupt.vhd
+set_global_assignment -name VHDL_FILE src/UART/uart_receiver.vhd
+set_global_assignment -name VHDL_FILE src/UART/uart_transmitter.vhd
+set_global_assignment -name VHDL_FILE src/UART/uart_16750.vhd
 set_global_assignment -name VHDL_FILE src/emsx_top.vhd
 set_global_assignment -name VHDL_FILE src/sound/lpf/lpf.vhd
 set_global_assignment -name VHDL_FILE src/sound/lpf/lpf48.vhd
@@ -577,24 +577,24 @@ set_global_assignment -name VHDL_FILE src/sound/filter/tapram.vhd
 set_global_assignment -name VHDL_FILE src/sound/filter/esefir5.vhd
 set_global_assignment -name VHDL_FILE src/sound/dac/esepwm.vhd
 set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/vm2413.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/voicerom.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/attacktable.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/controller.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/envelopegenerator.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/envelopememory.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/feedbackmemory.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/lineartable.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/operator.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/outputgenerator.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/outputmemory.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/phasegenerator.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/phasememory.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/registermemory.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/sinetable.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/slotcounter.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/temporalmixer.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/voicememory.vhd
-set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/opll.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/VoiceRom.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/AttackTable.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/Controller.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/EnvelopeGenerator.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/EnvelopeMemory.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/FeedbackMemory.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/LinearTable.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/Operator.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/OutputGenerator.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/OutputMemory.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/PhaseGenerator.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/PhaseMemory.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/RegisterMemory.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/SineTable.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/SlotCounter.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/TemporalMixer.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/VoiceMemory.vhd
+set_global_assignment -name VHDL_FILE src/sound/opll/vm2413/Opll.vhd
 set_global_assignment -name VHDL_FILE src/sound/opll/eseopll.vhd
 set_global_assignment -name VHDL_FILE src/sound/scc/scc_wave.vhd
 set_global_assignment -name VHDL_FILE src/sound/scc/megaram.vhd
@@ -612,14 +612,14 @@ set_global_assignment -name VHDL_FILE src/video/vdp_ssg.vhd
 set_global_assignment -name VHDL_FILE src/video/vdp_text12.vhd
 set_global_assignment -name VHDL_FILE src/video/vdp_colordec.vhd
 set_global_assignment -name VHDL_FILE src/video/vdp_command.vhd
-set_global_assignment -name VHDL_FILE src/video/vdp_graphic123m.vhd
+set_global_assignment -name VHDL_FILE src/video/vdp_graphic123M.vhd
 set_global_assignment -name VHDL_FILE src/video/vdp_graphic4567.vhd
 set_global_assignment -name VHDL_FILE src/video/vdp_ntsc_pal.vhd
 set_global_assignment -name VHDL_FILE src/video/vdp_register.vhd
 set_global_assignment -name VHDL_FILE src/video/vdp_doublebuf.vhd
 set_global_assignment -name VHDL_FILE src/video/vdp_linebuf.vhd
 set_global_assignment -name VHDL_FILE src/video/vdp_wait_control.vhd
-set_global_assignment -name VHDL_FILE src/peripheral/pll4xde1.vhd
+set_global_assignment -name VHDL_FILE src/peripheral/PLL4xDE1.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/ram.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/kanji.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/rtc.vhd
@@ -629,24 +629,16 @@ set_global_assignment -name VHDL_FILE src/peripheral/mapper.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/megasd.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/iplrom2c.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/systemtimer.vhd
-set_global_assignment -name VHDL_FILE src/peripheral/mega_ram.vhd
+set_global_assignment -name VHDL_FILE SRC/peripheral/MEGA_RAM.VHD
 set_global_assignment -name VERILOG_FILE src/peripheral/ps2mouse.v
-set_global_assignment -name VHDL_FILE src/cpu/t80_alu.vhd
-set_global_assignment -name VHDL_FILE src/cpu/t80_reg.vhd
-set_global_assignment -name VHDL_FILE src/cpu/t80_mcode.vhd
-set_global_assignment -name VHDL_FILE src/cpu/t80.vhd
-set_global_assignment -name VHDL_FILE src/cpu/t80a.vhd
-set_global_assignment -name VHDL_FILE src/cpu/t80_pack.vhd
-set_global_assignment -name VERILOG_FILE src/de1/i2c_controller.v
-set_global_assignment -name VERILOG_FILE src/de1/i2c_av_config.v
-set_global_assignment -name VERILOG_FILE src/de1/a_codec2.v
-set_global_assignment -name VERILOG_FILE src/de1/seg7_lut_4.v
-set_global_assignment -name VERILOG_FILE src/de1/seg7_lut.v
-
-
-
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-
-
-
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name VHDL_FILE src/cpu/T80_ALU.vhd
+set_global_assignment -name VHDL_FILE src/cpu/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE src/cpu/T80_MCode.vhd
+set_global_assignment -name VHDL_FILE src/cpu/T80.vhd
+set_global_assignment -name VHDL_FILE src/cpu/T80a.vhd
+set_global_assignment -name VHDL_FILE src/cpu/T80_Pack.vhd
+set_global_assignment -name VERILOG_FILE src/de1/I2C_Controller.v
+set_global_assignment -name VERILOG_FILE src/de1/I2C_AV_Config.v
+set_global_assignment -name VERILOG_FILE SRC/DE1/A_CODEC2.V
+set_global_assignment -name VERILOG_FILE src/de1/SEG7_LUT_4.v
+set_global_assignment -name VERILOG_FILE src/de1/SEG7_LUT.v
