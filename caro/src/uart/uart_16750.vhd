@@ -539,7 +539,7 @@ begin
     UART_FCR: process (CLK, RST)
     begin
         if (RST = '1') then
-            iFCR_FIFOEnable     <= '0';
+            iFCR_FIFOEnable     <= '1'; -- default FIFO enable
             iFCR_RXFIFOReset    <= '0';
             iFCR_TXFIFOReset    <= '0';
             iFCR_DMAMode        <= '0';
@@ -583,7 +583,8 @@ begin
     UART_LCR: process (CLK, RST)
     begin
         if (RST = '1') then
-            iLCR <= (others => '0');
+            iLCR(5 downto 3) <= (others => '0');
+            iLCR(2 downto 0) <= "111";     -- default 2 stop, 8 bit
         elsif (CLK'event and CLK = '1') then
             if (iLCRWrite = '1') then
                 iLCR <= DIN;
