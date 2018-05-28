@@ -186,9 +186,9 @@ constant rom101 : rom_101 := (
         X"7F", X"7F", X"7F", X"7F", X"7F", X"7F", X"7F", X"7F", -- F8..FF
 -- ==================================================================
 -- 101 keyboard / Shift = ON
---             F9            F5     F3     F1     F2
+--             F9            F5     F3     F1     F2     F12
         X"FF", X"FF", X"FF", X"97", X"F6", X"D6", X"E6", X"FF", -- 00..07
---                    F8     F6     F4     TAB    `/~
+--             F10    F8     F6     F4     TAB    `/~
         X"FF", X"FF", X"E7", X"E6", X"87", X"B7", X"B1", X"FF", -- 08..0F
 --             ALT L  LSHFT         RCtrl  Q      1/!
         X"FF", X"A6", X"86", X"C6", X"96", X"E4", X"90", X"FF", -- 10..17
@@ -216,7 +216,7 @@ constant rom101 : rom_101 := (
         X"FF", X"C9", X"C1", X"F9", X"AA", X"FF", X"FF", X"FF", -- 68..6F
 --      [0]    [.]    [2]    [5]    [6]    [8]    ESC    NLock
         X"B9", X"FA", X"D9", X"8A", X"9A", X"BA", X"A7", X"FF", -- 70..77
---             [+]    [3]    [-]    [*]    [9]
+--      F11    [+]    [3]    [-]    [*]    [9]
         X"FF", X"99", X"E9", X"DA", X"89", X"BA", X"FF", X"FF", -- 78..7F
 --                           F7
         X"FF", X"FF", X"FF", X"C6", X"FF", X"FF", X"FF", X"FF", -- 80..87
