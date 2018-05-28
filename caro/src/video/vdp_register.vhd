@@ -1,5 +1,5 @@
 --
---  vdp_colordec.vhd
+--  vdp_register.vhd
 --
 --  Copyright (C) 2000-2006 Kunihiko Ohnaka
 --  All rights reserved.
