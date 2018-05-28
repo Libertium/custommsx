@@ -3,7 +3,7 @@
 --   ESE MSX-SYSTEM3 / MSX clone on a Cyclone FPGA (ALTERA)
 --   Revision 1.00
 --
--- modified for Altera DE1 by caro 2007..2017
+-- modified for Altera DE1 by caro 2007..2018
 --
 -- Copyright (c) 2006 Kazuhiro Tsujikawa (ESE Artists' factory)
 -- All rights reserved.
@@ -1390,7 +1390,7 @@ end process;
 ----------------------------------------------------------------
 -- PPI(8255) / primary-slot, keyboard, 1 bit sound port
 ----------------------------------------------------------------
-process(clk21m, reset)
+process(clk21m, reset, iReset, reset_soft)
 begin
    if (reset = '1') then
       if (iReset = '0') then
