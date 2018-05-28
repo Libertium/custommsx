@@ -1,0 +1,74 @@
+;****************************************
+;	Loader for OCM v.2.00		*
+;****************************************
+; VDP ports
+DATP 	EQU 	98H 	; VDP Data port
+CMDP 	EQU 	99H 	; VDP Command port
+;----------------------------------------
+.z80
+; Program starts here:
+	CSEG
+.phase	0h
+;
+begin:	di
+	ld	sp,-1
+; Set VDP mode and color palette
+	ld	hl, dat_99	;
+	ld	bc, 0E99h	; 14 byte -> 99h
+	otir	
+	ld	bc, 209Ah       ; 32 byte -> 9Ah
+	otir	
+;----------------------------------------
+; Set Pallete tables
+	xor	a 		;Set LSB (00000000)
+	out	(CMDP),a
+	ld	a,40h+0 	;Set MSB (01XXXXXX)
+	out	(CMDP),a	;Bits 7&6 = 00 for reads,
+				;           01 for writes
+	ld	hl,CHARS
+	ld	bc,CHARS_END-CHARS
+COPYCHARS:
+	ld	a,(hl)
+	out	(DATP),a
+	inc	hl
+	dec	bc
+	ld	a,b
+	or	c
+	jr	nz,COPYCHARS
+;============================================
+; Now let's clear VDP memory
+	ld	bc,4000h-(CHARS_END-CHARS)
+CLEAR1:	xor	a
+	out	(DATP),a
+	dec	bc
+	ld	a,b
+	or	c
+	jr	nz,CLEAR1
+;================================================
+; Set VRAM adress for print text
+	xor	a		;col=0
+	out	(CMDP),A
+	ld	a,48h+0		;str=0
+	out	(CMDP),a	;Adress VRAM = 0800h
+	ld	hl,head		;Send message to display
+;=======
+pr_str:	ld	a,(hl)
+	sub	20h
+	jr	c,start		; end print message
+	out	(DATP),a
+	inc	hl
+	jr	pr_str
+;===============================
+start:
+.dephase
+$INCLUDE	iplrom2c.inc
+$INCLUDE	unpack2.inc
+ end_p:
+;===============================
+.dephase
+$INCLUDE	vdp_sets.inc
+$INCLUDE	message.inc
+CHARS:
+$INCLUDE        zg6x8_L.inc
+CHARS_END:
+	END

@@ -1,0 +1,994 @@
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1
+
+
+                                ;****************************************
+                                ;	Loader for OCM v.2.00		*
+                                ;****************************************
+                                ; VDP ports
+  0098                          DATP 	EQU 	98H 	; VDP Data port
+  0099                          CMDP 	EQU 	99H 	; VDP Command port
+                                ;----------------------------------------
+                                .z80
+                                ; Program starts here:
+  0000'                         	CSEG
+                                .phase	0h
+                                ;
+  0000    F3                    begin:	di
+  0001    31 FFFF               	ld	sp,-1
+                                ; Set VDP mode and color palette
+  0004    21 03FA'              	ld	hl, dat_99	;
+  0007    01 0E99               	ld	bc, 0E99h	; 14 byte -> 99h
+  000A    ED B3                 	otir	
+  000C    01 209A               	ld	bc, 209Ah       ; 32 byte -> 9Ah
+  000F    ED B3                 	otir	
+                                ;----------------------------------------
+                                ; Set Pallete tables
+  0011    AF                    	xor	a 		;Set LSB (00000000)
+  0012    D3 99                 	out	(CMDP),a
+  0014    3E 40                 	ld	a,40h+0 	;Set MSB (01XXXXXX)
+  0016    D3 99                 	out	(CMDP),a	;Bits 7&6 = 00 for reads,
+                                				;           01 for writes
+  0018    21 04B6'              	ld	hl,CHARS
+  001B    01 0300               	ld	bc,CHARS_END-CHARS
+  001E                          COPYCHARS:
+  001E    7E                    	ld	a,(hl)
+  001F    D3 98                 	out	(DATP),a
+  0021    23                    	inc	hl
+  0022    0B                    	dec	bc
+  0023    78                    	ld	a,b
+  0024    B1                    	or	c
+  0025    20 F7                 	jr	nz,COPYCHARS
+                                ;============================================
+                                ; Now let's clear VDP memory
+  0027    01 3D00               	ld	bc,4000h-(CHARS_END-CHARS)
+  002A    AF                    CLEAR1:	xor	a
+  002B    D3 98                 	out	(DATP),a
+  002D    0B                    	dec	bc
+  002E    78                    	ld	a,b
+  002F    B1                    	or	c
+  0030    20 F8                 	jr	nz,CLEAR1
+                                ;================================================
+                                ; Set VRAM adress for print text
+  0032    AF                    	xor	a		;col=0
+  0033    D3 99                 	out	(CMDP),A
+  0035    3E 48                 	ld	a,48h+0		;str=0
+  0037    D3 99                 	out	(CMDP),a	;Adress VRAM = 0800h
+  0039    21 0428'              	ld	hl,head		;Send message to display
+                                ;=======
+  003C    7E                    pr_str:	ld	a,(hl)
+  003D    D6 20                 	sub	20h
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-1
+
+
+  003F    38 05                 	jr	c,start		; end print message
+  0041    D3 98                 	out	(DATP),a
+  0043    23                    	inc	hl
+  0044    18 F6                 	jr	pr_str
+                                ;===============================
+  0046                          start:
+                                .dephase
+                         C      $INCLUDE	iplrom2c.inc
+                         C      ;**************************************************
+                         C      ; IPLROM2 for OCM with boot from MMC/SD/SDHC-card *
+                         C      ;	with data compression			  *
+                         C      ;**************************************************
+                         C      ;
+  C000                   C      buffer	equ	0C000h	;buffer for data
+  FC00                   C      prog	equ	0FC00h	; for programm
+                         C      ;========================================
+                         C      ;start:
+  0046'   01 03A6        C      	ld	bc,end_p-st_prog; len prg
+  0049'   11 FC00        C      	ld	de,prog		; addr prg
+  004C'   21 0054'       C      	ld	hl,end_beg	;
+  004F'   ED B0          C      	ldir			; copy to RAM
+  0051'   C3 FC00        C      	jp	prog		; start programm
+  0054'                  C      end_beg:
+                         C      .phase	prog
+  FC00                   C      st_prog:
+                         C      ; -----
+  FC00    3E 40          C      	ld	a, 40h		;enable SD/MMC
+  FC02    32 6000        C      	ld	(6000h), a
+  FC05    01 0100        C      	ld	bc, 100h	;b=1 (1 sector)
+  FC08    51             C      	ld	d, c		;cde=0
+  FC09    59             C      	ld	e, c		; address MBR
+  FC0A    21 C000        C      	ld	hl, buffer	;buffer for sector
+  FC0D    CD FE26        C      	call	rd_card		;read MBR from SD/MMC
+  FC10    38 26          C      	jr	c, rd_EPCS	;error
+                         C      ; read OK
+  FC12    CD FE6F        C      	call	test_MBR	;search partition
+  FC15    38 21          C      	jr	c, rd_EPCS	; CY=1 no partition
+                         C      ; yes partition (cde = sector N)
+  FC17    D5             C      	push	de
+  FC18    C5             C      	push	bc
+  FC19    06 01          C      	ld	b, 1		;1 sector
+  FC1B    21 C000        C      	ld	hl, buffer	;buffer for DAT
+  FC1E    CD FE26        C      	call	rd_card		; read PBR
+  FC21    CD FE54        C      	call	src_FAT		; search "FAT"
+  FC24    C1             C      	pop	bc
+  FC25    D1             C      	pop	de
+  FC26    20 10          C      	jr	nz, rd_EPCS	; Z=0 - no FAT16
+                         C      ; yes "FAT"
+  FC28                   C      yes_FAT:
+                         C      ; cde = adress PBR
+  FC28    CD FE8B        C      	call	test_BIOS	;test BIOS on SD
+  FC2B    38 0B          C      	jr	c, rd_EPCS	; not BIOS on SD
+                         C      ; read BIOS from SD/MMC/SDHC
+                         C      ; c,d,e = sector address on SD/MMC/SDHC
+  FC2D    CD FD1B        C      	call	prm_SD		;Print message SD
+  FC30    21 FE21        C      	ld	hl,rd_16sd	;load 16 kbyte from SD-card
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-2
+
+
+  FC33    22 FC91        C      	ld	(p_read+1), hl
+  FC36    18 13          C      	jr	rd_SD		; read from SD
+                         C      ;---------------------------------------
+                         C      ;load BIOS from EPCS4
+  FC38                   C      rd_EPCS:
+  FC38    CD FD14        C      	call	prm_EPCS	;Print message EPCS
+  FC3B    21 FCAC        C      	ld	hl,ldz_EPCS	;load compress from EPCS4
+  FC3E    22 FC91        C      	ld	(p_read+1), hl
+                         C      ;
+  FC41    3E 60          C      	ld	a,60h		;EPCS ON
+  FC43    32 6000        C      	ld	(6000h), a
+  FC46    0E 04          C      	ld	c,04h		;cde=040000h
+  FC48    11 0000        C      	ld	de,0000h	;    byte adress in EPCS4
+  FC4B    CD FC7F        C      rd_SD:	call	ld_BIOS		;load BIOS
+  FC4E    38 10          C      	jr	c,err_ld	; error load
+                         C      ;=======================================
+                         C      ; START SYSTEM
+  FC50    3E 80          C      	ld	a, 80h		;enable
+  FC52    32 7000        C      	ld	(7000h), a	; ermbank
+  FC55    2A 8000        C      	ld	hl, (8000h)	; 2 first byte
+  FC58    AF             C      	xor	a		;CY=0
+  FC59    11 4241        C      	ld	de, 4241h	;="AB" ?
+  FC5C    ED 52          C      	sbc	hl, de
+  FC5E    28 05          C      	jr	z, st_bios	; start BIOS
+                         C      ; error BIOS
+  FC60    CD FD05        C      err_ld:	call	prm_error	; print message ERROR
+  FC63    18 FE          C      	jr	$		;cikl
+  FC65                   C      st_bios:
+  FC65    AF             C      	xor	a         	;MEGASD Off
+  FC66    32 6000        C      	ld	(6000h), a
+  FC69    3C             C      	inc	a
+  FC6A    32 6800        C      	ld	(6800h), a
+  FC6D    32 7000        C      	ld	(7000h), a
+  FC70    32 7800        C      	ld	(7800h), a
+  FC73    3E C0          C      	ld	a, 0C0h		;
+  FC75    D3 A8          C      	out	(0A8h),	a
+                         C      ; test BASIC.ROM
+  FC77    3A 0000        C      	ld	a,(0)		; first byte
+  FC7A    FE F3          C      	cp	0F3h		; = DI ?
+  FC7C    20 E2          C      	jr	nz,err_ld	; error BIOS
+  FC7E    C7             C      	rst	0		;reset MSX BASIC
+                         C      ;=================================	
+                         C      ; load BIOS from SD or EPCS4
+                         C      ; c,d,e = sector address in SD or byte address in EPCS4
+  FC7F                   C      ld_BIOS:
+  FC7F    CD FCF8        C      	call	prm_step	;print message :>>>
+  FC82    06 1C          C      	ld	b, 16+8+4	;16+8+4 page (28*16 Kb)
+  FC84    3E 80          C      	ld	a, 80h		;bit 7 = 1 enable ermmem
+                         C      ;/---- load 24 page (384 kb)
+  FC86    32 7000        C      c_load:	ld	(7000h), a	;ermbank2(8 kb)
+  FC89    3C             C      	inc	a
+  FC8A    32 7800        C      	ld	(7800h), a	;ermbank3(8 kb)
+  FC8D    3C             C      	inc	a
+  FC8E    F5             C      	push	af
+  FC8F    C5             C      	push	bc
+                         C      ; load page 16 kb
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-3
+
+
+  FC90    CD FE21        C      p_read:	call	rd_16sd		;read and load 16 kbyte
+  FC93    79             C      	ld	a,c		;save c (adress)
+  FC94    C1             C      	pop	bc
+  FC95    E1             C      	pop	hl
+  FC96    4F             C      	ld	c,a		;restore c
+  FC97    D8             C      	ret	c		;error
+  FC98    3E 1E          C      	ld	a,'>'-20h	; Print '>'
+  FC9A    D3 98          C      	out	(DATP),a
+  FC9C    7C             C      	ld	a, h		;
+  FC9D    10 E7          C      	djnz	c_load		;
+                         C      ;\----
+  FC9F    3E 00          C      	ld	a,' '-20h
+  FCA1    D3 98          C      	out	(DATP),a
+  FCA3    3E 2F          C      	ld	a,'O'-20h
+  FCA5    D3 98          C      	out	(DATP),a
+  FCA7    3E 2B          C      	ld	a,'K'-20h
+  FCA9    D3 98          C      	out	(DATP),a
+  FCAB    C9             C      	ret			;OK
+                         C      ;***********************************************
+                         C      ; load compressed page (16 kb) from EPCS4
+                         C      ; c,d,e = byte address in EPCS4
+                         C      ;***********************************************
+  FCAC                   C      ldz_EPCS:
+  FCAC    CD FCBF        C      	call	ld_epcs		;load block from EPCS
+  FCAF    D8             C      	ret	c		;error or end
+  FCB0    D5             C      	push	de
+  FCB1    C5             C      	push	bc
+  FCB2    21 C000        C      	ld	hl,buffer	;source
+  FCB5    11 8000        C      	ld	de,8000h	;destination
+  FCB8    CD FEE6        C      	call	unpack		;unpack block
+  FCBB    C1             C      	pop	bc
+  FCBC    D1             C      	pop	de
+  FCBD    AF             C      	xor	a		;cy=0 OK
+  FCBE    C9             C      	ret
+                         C      ;===========================================
+                         C      ; load block from EPCS4 -> 0C000h...
+                         C      ; INPUT:
+                         C      ; c,d,e - byte address in EPCS4
+  FCBF                   C      ld_epcs:
+  FCBF    D5             C      	push	de
+  FCC0    C5             C      	push	bc
+                         C      ;---
+  FCC1    21 4000        C      	ld	hl, 4000h	;/CS=0
+  FCC4    36 03          C      	ld	(hl), 03h	;CMD READ_from_EPCS4
+  FCC6    71             C      	ld	(hl), c
+  FCC7    72             C      	ld	(hl), d
+  FCC8    73             C      	ld	(hl), e		;address
+  FCC9    7E             C      	ld	a, (hl)
+  FCCA    11 C000        C      	ld	de,buffer	;buffer for block
+                         C      ; len compressed page = 4000h
+  FCCD    7E             C      	ld	a, (hl)		; =00h ?
+  FCCE    B7             C      	or	a
+  FCCF    20 20          C      	jr	nz,no_4000
+  FCD1    7E             C      	ld	a, (hl)		; =40h ?
+  FCD2    FE 40          C      	cp	40h
+  FCD4    20 1B          C      	jr	nz,no_4000
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-4
+
+
+                         C      ; len block
+  FCD6    4E             C      	ld	c, (hl)
+  FCD7    46             C      	ld	b, (hl)		;bc=len block
+  FCD8    C5             C      	push	bc
+  FCD9    0B             C      	dec	bc
+  FCDA    0B             C      	dec	bc
+  FCDB    0B             C      	dec	bc
+  FCDC    0B             C      	dec	bc		;len-4
+  FCDD    7E             C      ckl_rd:	ld	a,(hl)		;byte from EPCS4
+  FCDE    12             C      	ld	(de),a		; to buffer
+  FCDF    13             C      	inc	de
+  FCE0    0B             C      	dec	bc
+  FCE1    79             C      	ld	a,c
+  FCE2    B0             C      	or	b
+  FCE3    20 F8          C      	jr	nz,ckl_rd
+                         C      ;
+  FCE5    3A 5000        C      	ld	a, (5000h)	;/CS=1
+                         C      ; count new byte address in EPCS4
+  FCE8    E1             C      	pop	hl		; len block
+  FCE9    C1             C      	pop	bc
+  FCEA    D1             C      	pop	de		;cde = adress block
+  FCEB    19             C      	add	hl,de
+  FCEC    EB             C      	ex	de,hl
+  FCED    D0             C      	ret	nc   		;
+  FCEE    0C             C      	inc	c		;c,d,e -> new address
+  FCEF    AF             C      	xor	a		;cy=0 -> no error
+  FCF0    C9             C      	ret
+                         C      ; exit
+  FCF1    3A 5000        C      no_4000:ld	a, (5000h)	;/CS=1
+  FCF4    C1             C      	pop	bc
+  FCF5    D1             C      	pop	de
+  FCF6    37             C      	scf			;cy=1 -> error or end
+  FCF7    C9             C      	ret
+                         C      ;=============================================
+  FCF8                   C      prm_step:
+                         C      ; 7*40=280
+  FCF8    3E 18          C      	ld	A,LOW(7*40) 	;col=0, str=7
+  FCFA    D3 99          C      	OUT	(CMDP),A
+  FCFC    3E 49          C      	LD	A,40H+08h+HIGH(7*40)
+  FCFE    D3 99          C      	OUT	(CMDP),A
+  FD00    3E 1A          C      	ld	A,':'-20h
+  FD02    D3 98          C      	out	(DATP),A
+  FD04    C9             C      	ret
+  FD05                   C      prm_error:
+  FD05    C5             C      	push	bc
+  FD06    E5             C      	push	hl
+  FD07    21 FD54        C      	ld	hl,t_ERR
+                         C      ; 8*40=320
+  FD0A    3E 40          C      	ld	A,LOW(8*40)	;col=0, str=8
+  FD0C    0E 99          C      	ld	C,CMDP	;99H
+  FD0E    ED 79          C      	OUT	(C),A
+  FD10    3E 49          C      	LD	A,40H+08h+HIGH(8*40)
+  FD12    18 14          C      	jr	prm_2
+  FD14                   C      prm_EPCS:
+  FD14    C5             C      	push	bc
+  FD15    E5             C      	push	hl
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-5
+
+
+  FD16    21 FD42        C      	ld	hl,t_EPCS
+  FD19    18 05          C      	jr	prm_
+  FD1B    C5             C      prm_SD:	push	bc
+  FD1C    E5             C      	push	hl
+  FD1D    21 FD30        C      	LD	HL,t_SD	;Send message to display
+  FD20                   C      prm_:
+                         C      ; 6*40=240
+  FD20    3E F0          C      	ld	A,6*40	;col=0, str=6
+  FD22    0E 99          C      	ld	C,CMDP	;99H
+  FD24    ED 79          C      	OUT	(C),A
+  FD26    3E 48          C      	LD	A,40H+08h
+  FD28                   C      prm_2:
+  FD28    ED 79          C      	OUT	(C),A	;Adress VRAM = 0800h
+  FD2A    CD FEDC        C      	call	print
+  FD2D    E1             C      	pop	hl
+  FD2E    C1             C      	pop	bc
+  FD2F    C9             C      	ret
+                         C      ;---------------------------------------------
+  FD30    4C 6F 61 64    C      t_SD:	db	'Load from SD-card',0
+  FD34    20 66 72 6F    C      
+  FD38    6D 20 53 44    C      
+  FD3C    2D 63 61 72    C      
+  FD40    64 00          C      
+  FD42    4C 6F 61 64    C      t_EPCS:	db	'Load from EPCS4  ',0
+  FD46    20 66 72 6F    C      
+  FD4A    6D 20 45 50    C      
+  FD4E    43 53 34 20    C      
+  FD52    20 00          C      
+  FD54    45 72 72 6F    C      t_ERR:	db	'Error BIOS',0
+  FD58    72 20 42 49    C      
+  FD5C    4F 53 00       C      
+                         C      ;=============================================
+                         C      ;=============================================
+  FD5F                   C      set41CMD:
+  FD5F    21 4000        C      	ld	hl,4000h
+  FD62    7E             C      	ld	a,(hl)
+  FD63    36 69          C      	ld	(hl), 40h+41	;CMD41
+  FD65    36 40          C      	ld	(hl), 40h
+  FD67    36 00          C      	ld	(hl), 0
+  FD69    36 00          C      	ld	(hl), 0
+  FD6B    36 00          C      	ld	(hl), 0
+  FD6D    36 95          C      	ld	(hl), 95h	;CRC
+  FD6F    18 36          C      	jr	set_		;
+                         C      ;=============================================
+  FD71                   C      set8CMD:
+  FD71    21 4000        C      	ld	hl,4000h
+  FD74    7E             C      	ld	a,(hl)
+  FD75    36 48          C      	ld	(hl), 40h+8	;CMD8
+  FD77    36 00          C      	ld	(hl), 0
+  FD79    36 00          C      	ld	(hl), 0
+  FD7B    36 01          C      	ld	(hl), 01h
+  FD7D    36 AA          C      	ld	(hl), 0AAh
+  FD7F    36 87          C      	ld	(hl), 87h	;CRC
+  FD81    18 24          C      	jr	set_
+                         C      ;==========================================
+                         C      ; (b) -> CMD
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-6
+
+
+  FD83    0E 00          C      set0cmd:ld	c,0		;parametr = 0
+  FD85    11 0000        C      	ld	de,0		;
+                         C      ;=============================================
+                         C      ; for SD/MMC
+  FD88                   C      set_cmd:	
+  FD88    21 4000        C      	ld	hl, 4000h	;
+  FD8C                   C      type_c	equ	$+1
+  FD8B    3E 00          C      	ld	a, 0		;card type
+  FD8D    BE             C      	cp	(hl)		;
+  FD8E    70             C      	ld	(hl), b		;CMD
+  FD8F    CB 4F          C      	bit	1,a
+  FD91    28 07          C      	jr	z,set_sd	;bit1 = 1 (SDHC)
+                         C      ; for SDHC
+  FD93    36 00          C      	ld	(hl), 0
+  FD95    71             C      	ld	(hl), c
+  FD96    72             C      	ld	(hl), d
+  FD97    73             C      	ld	(hl), e
+  FD98    18 0B          C      	jr	set_crc		;
+                         C      ; for SD/MMC
+  FD9A                   C      set_sd:	
+  FD9A    CB 23          C      	sla	e		;number of sector
+  FD9C    CB 12          C      	rl	d		; -> number of byte
+  FD9E    CB 11          C      	rl	c		; cde*2
+  FDA0    71             C      	ld	(hl), c
+  FDA1    72             C      	ld	(hl), d
+  FDA2    73             C      	ld	(hl), e
+  FDA3    36 00          C      	ld	(hl), 0
+  FDA5    36 95          C      set_crc:ld	(hl), 95h	;CS=95h
+  FDA7    7E             C      set_:	ld	a, (hl)
+  FDA8    06 10          C      	ld	b, 16
+                         C      ;/-----
+  FDAA    7E             C      cikl_4:	ld	a, (hl)
+  FDAB    FE FF          C      	cp	0FFh
+  FDAD    3F             C      	ccf	
+  FDAE    D0             C      	ret	nc		;no ERROR
+  FDAF    10 F9          C      	djnz	cikl_4
+                         C      ;\-----
+  FDB1    37             C      	scf			;ERROR
+  FDB2    C9             C      	ret	
+                         C      ;=================================
+                         C      ; SD Init
+  FDB3                   C      init_sd:
+  FDB3    06 0A          C      	ld	b, 10		;
+  FDB5    3A 5000        C      init_c:	ld	a, (5000h)	; /CS=1 (bit12)
+  FDB8    10 FB          C      	djnz	init_c
+                         C      ;\-----
+  FDBA    06 40          C      	ld	b, 40h+0	; CMD=0 GO_IDLE_STATE
+  FDBC    CD FD83        C      	call	set0CMD
+  FDBF    D8             C      	ret	c		; error
+  FDC0    E6 F7          C      	and	0F7h		;
+  FDC2    FE 01          C      	cp	01h		;bit0 - in idle state ?
+  FDC4    37             C      	scf			;CY=1
+  FDC5    C0             C      	ret	nz		; error
+                         C      ; bit 0=1 (in idle state)
+                         C      ;--------------------------------
+  FDC6    CD FD71        C      	call	set8CMD		; CMD8
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-7
+
+
+  FDC9    FE 01          C      	cp	01h
+  FDCB    20 18          C      	jr	nz, mmc_	; Not SD-card
+  FDCD    7E             C      	ld	a,(hl)
+  FDCE    7E             C      	ld	a,(hl)
+  FDCF    7E             C      	ld	a,(hl)
+  FDD0    E6 0F          C      	and	0Fh
+  FDD2    FE 01          C      	cp	01h		;
+  FDD4    37             C      	scf			;CY=1
+  FDD5    C0             C      	ret	nz		; error
+  FDD6    7E             C      	ld	a,(hl)
+  FDD7    FE AA          C      	cp	0AAh
+  FDD9    37             C      	scf			;CY=1
+  FDDA    C0             C      	ret	nz		; error
+                         C      ;--------------------------------
+  FDDB    06 77          C      cikl_i:	ld	b, 40h+55	; CMD=55 APP_CMD
+  FDDD    CD FD83        C      	call	set0CMD
+  FDE0    D8             C      	ret	c		; error
+  FDE1    E6 04          C      	and	4		;bit 2=1 - illegal command
+  FDE3    28 0B          C      	jr	z, com_OK	;command OK
+                         C      ; command for MMC-card
+  FDE5    AF             C      mmc_:	xor	a		; type_c = 0 (MM-card)
+  FDE6    32 FD8C        C      	ld	(type_c),a	; Card type 0-MM, 1 - SD
+  FDE9    06 41          C      	ld	b, 40h+1	; CMD=1 SEND_OP_COND
+  FDEB    CD FD83        C      	call	set0CMD
+  FDEE    18 08          C      	jr	corr
+                         C      ; command for SD-card
+  FDF0    3E 01          C      com_OK:	ld	a,1		; type_c = 1 (SD-card)
+  FDF2    32 FD8C        C      	ld	(type_c),a
+  FDF5    CD FD5F        C      	call	set41CMD	; ACMD=41 APP_SEND_OP_COND
+  FDF8    D8             C      corr:	ret	c		; error
+  FDF9    FE 01          C      	cp	01h		; in_idle_state=1 ?
+  FDFB    28 DE          C      	jr	z, cikl_i	; yes, repeat
+                         C      ;\-------------------------------
+                         C      ; in_idle_state = 0
+  FDFD    B7             C      	or	a		; CY=0
+  FDFE    28 02          C      	jr	z,init0ok	;	Ok
+  FE00    37             C      	scf			; CY=1
+  FE01    C9             C      	ret			; 	error
+  FE02                   C      init0ok:
+  FE02    3A FD8C        C      	ld	a,(type_c)
+  FE05    B7             C      	or	a		; if MMC
+  FE06    C8             C      	ret	z		;	return
+                         C      ; select SD or SDHC
+  FE07    06 7A          C      	ld	b,40h+58	; CMD58 READ_OCR
+  FE09    CD FD83        C      	call	set0CMD
+  FE0C    D8             C      	ret	c		; error
+  FE0D    7E             C      	ld	a,(hl)		; read CCS (bit 6)
+  FE0E    BE             C      	cp	(hl)
+  FE0F    BE             C      	cp	(hl)
+  FE10    BE             C      	cp	(hl)
+  FE11    CB 77          C      	bit	6,a		; CCS=1 ?
+  FE13    C8             C      	ret	z		; SD-card   CCS=0
+  FE14    3E 02          C      	ld	a,2		; SDHC-card CCS=1
+  FE16    32 FD8C        C      	ld	(type_c),a
+  FE19    C9             C      	ret
+                         C      ;==========================================
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-8
+
+
+                         C      ; reinit SD-card
+  FE1A    CD FDB3        C      reinit:	call	init_sd
+  FE1D    C1             C      	pop	bc
+  FE1E    D1             C      	pop	de
+  FE1F    E1             C      	pop	hl
+  FE20    D8             C      	ret	c		;error
+                         C      ;***********************************************
+                         C      ; load (b) sectors from MMC/SD/SDHC
+                         C      ; c,d,e = sector number
+                         C      ; hl = adress for load
+                         C      ;***********************************************
+  FE21    06 20          C      rd_16sd:ld	b,32		;32*512=16kb
+  FE23    21 8000        C      	ld	hl,8000h	; eseram
+  FE26    E5             C      rd_card:push	hl
+  FE27    D5             C      	push	de
+  FE28    C5             C      	push	bc
+  FE29    06 51          C      	ld	b, 51h		;CMD17 - READ_SINGLE_BLOCK
+  FE2B    CD FD88        C      	call	set_cmd
+  FE2E    38 EA          C      	jr	c, reinit	;error
+                         C      ;
+  FE30    C1             C      	pop	bc
+  FE31    D1             C      	pop	de
+  FE32    E1             C      	pop	hl
+  FE33    B7             C      	or	a
+  FE34    37             C      	scf	
+  FE35    C0             C      	ret	nz		;error
+                         C      ;
+  FE36    D5             C      	push	de
+  FE37    C5             C      	push	bc
+  FE38    EB             C      	ex	de, hl		;de = adress for load
+  FE39    01 0200        C      	ld	bc, 200h	;512 byte
+  FE3C    21 4000        C      	ld	hl, 4000h
+                         C      ;/------
+  FE3F    7E             C      cikl_5:	ld	a, (hl)
+  FE40    FE FE          C      	cp	0FEh
+  FE42    20 FB          C      	jr	nz, cikl_5
+                         C      ;\------
+  FE44    ED B0          C      	ldir			;read sector
+  FE46    EB             C      	ex	de, hl
+  FE47    1A             C      	ld	a, (de)
+  FE48    C1             C      	pop	bc
+  FE49    1A             C      	ld	a, (de)
+  FE4A    D1             C      	pop	de
+  FE4B    13             C      	inc	de		;sector+1
+  FE4C    7A             C      	ld	a, d
+  FE4D    B3             C      	or	e
+  FE4E    20 01          C      	jr	nz, pass_2
+                         C      ;
+  FE50    0C             C      	inc	c
+  FE51    10 D3          C      pass_2:	djnz	rd_card		;next sector
+                         C      ;
+  FE53    C9             C      	ret	
+                         C      ;=================================
+                         C      ; search "FAT"
+  FE54                   C      src_FAT:
+  FE54    21 C000        C      	ld	hl, buffer	;buffer
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-9
+
+
+  FE57    01 0080        C      	ld	bc, 80h
+                         C      ;/-----
+  FE5A    3E 46          C      cikl_6:	ld	a,'F'
+  FE5C    ED B1          C      	cpir	
+  FE5E    28 01          C      	jr	z, pass_3
+  FE60    C9             C      	ret			;Z=0, no FAT
+                         C      ;-------
+  FE61    E5             C      pass_3:	push	hl
+  FE62    56             C      	ld	d, (hl)
+  FE63    23             C      	inc	hl
+  FE64    5E             C      	ld	e, (hl)
+  FE65    21 4154        C      	ld	hl,'AT'
+  FE68    B7             C      	or	a
+  FE69    ED 52          C      	sbc	hl, de
+  FE6B    E1             C      	pop	hl
+  FE6C    20 EC          C      	jr	nz, cikl_6
+                         C      ;\------ yes marker "FAT"
+  FE6E    C9             C      	ret			;Z=1 yes FAT
+                         C      ;=================================
+                         C      ; test MBR - search partition
+  FE6F                   C      test_MBR:
+  FE6F    06 04          C      	ld	b, 4		;number partition
+  FE71    DD 21 C1BE     C      	ld	ix, buffer+1beh	;offset in sector
+                         C      ;/-----
+  FE75    DD 5E 08       C      cikl_7:	ld	e, (ix+8)	;
+  FE78    DD 56 09       C      	ld	d, (ix+9)	;
+  FE7B    DD 4E 0A       C      	ld	c, (ix+10)	;cde - start sector
+  FE7E    79             C      	ld	a, c
+  FE7F    B2             C      	or	d
+  FE80    B3             C      	or	e		;cde /= 0 OK
+  FE81    C0             C      	ret	nz		;Yes partition (CY=0)
+                         C      ; next partition
+  FE82    11 0010        C      	ld	de, 16
+  FE85    DD 19          C      	add	ix, de
+  FE87    10 EC          C      	djnz	cikl_7
+                         C      ;\----- no partition
+  FE89    37             C      	scf			;CY=1 error
+  FE8A    C9             C      	ret	
+                         C      ;=========================================
+                         C      ; test BIOS on MMC/SD/SDHC
+  FE8B                   C      test_BIOS:
+  FE8B    DD 21 C000     C      	ld	ix, buffer	;PBR sector
+                         C      ;
+  FE8F    DD 6E 0E       C      	ld	l, (ix+0Eh)	;number of reserved
+  FE92    DD 66 0F       C      	ld	h, (ix+0Fh)	;sectors
+  FE95    79             C      	ld	a, c
+  FE96    19             C      	add	hl, de
+  FE97    CE 00          C      	adc	a, 0
+  FE99    4F             C      	ld	c, a
+                         C      ;---
+  FE9A    DD 5E 11       C      	ld	e, (ix+11h)	;number of root
+  FE9D    DD 56 12       C      	ld	d, (ix+12h)     ;directory entries
+  FEA0    7B             C      	ld	a, e
+  FEA1    E6 0F          C      	and	0Fh
+  FEA3    06 04          C      	ld	b, 4
+  FEA5    CB 3A          C      cikl_1:	srl	d
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-10
+
+
+  FEA7    CB 1B          C      	rr	e
+  FEA9    10 FA          C      	djnz	cikl_1
+                         C      ;
+  FEAB    B7             C      	or	a
+  FEAC    28 01          C      	jr	z, pass_1
+                         C      ;
+  FEAE    13             C      	inc	de
+  FEAF    D5             C      pass_1:	push	de
+  FEB0    DD 46 10       C      	ld	b, (ix+10h)	; number of FAT
+                         C      ;
+  FEB3    DD 5E 16       C      	ld	e, (ix+16h)	; number of sectors
+  FEB6    DD 56 17       C      	ld	d, (ix+17h)	; per FAT
+  FEB9    79             C      	ld	a, c
+  FEBA    19             C      cikl_2:	add	hl, de
+  FEBB    CE 00          C      	adc	a, 0
+  FEBD    10 FB          C      	djnz	cikl_2
+                         C      ;\------
+  FEBF    D1             C      	pop	de
+  FEC0    19             C      	add	hl, de
+  FEC1    EB             C      	ex	de, hl
+  FEC2    4F             C      	ld	c, a
+                         C      ;
+  FEC3    D5             C      	push	de
+  FEC4    C5             C      	push	bc
+  FEC5    06 01          C      	ld	b, 1		;1 sector
+  FEC7    21 C000        C      	ld	hl, buffer	; buffer
+  FECA    CD FE26        C      	call	rd_card		; read MMC/SD/SDHC
+  FECD    D8             C      	ret	c		;  error
+                         C      ;
+  FECE    2A C000        C      	ld	hl, (buffer)	;2 first byte
+  FED1    11 4241        C      	ld	de,'BA'		;'AB' marker disk BIOS
+  FED4    B7             C      	or	a
+  FED5    ED 52          C      	sbc	hl, de		;compare
+  FED7    C1             C      	pop	bc
+  FED8    D1             C      	pop	de
+  FED9    C8             C      	ret	z		;yes marker
+  FEDA    37             C      	scf			;CY=1, error
+  FEDB    C9             C      	ret
+                         C      ;--------------------------------------
+  FEDC    AF             C      PRINT:	xor	A	;Print a string in [HL] up to <20h
+  FEDD    7E             C      	ld	A,(HL)
+  FEDE    23             C      	inc	HL
+  FEDF    D6 20          C      	sub	20H
+  FEE1    D8             C      	ret	c	;exit if < 20h
+  FEE2    D3 98          C      	out	(DATP),A
+  FEE4    18 F7          C      	jr	PRINT+1
+                         C      ;-------------------------------
+                         C      ; end iplromz2.inc
+                         C      $INCLUDE	unpack2.inc
+                         C      ; pletter v0.5c msx unpacker
+                         C      ; call unpack with hl pointing to some pletter5 data, 
+                         C      ; and de pointing to the destination.
+                         C      ; changes all registers
+                         C      ; define lengthindata when the original size is written 
+                         C      ; in the pletter data
+                         C      ;  define LENGTHINDATA
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-11
+
+
+                         C      ;  module pletter
+                         C      ;
+                         C      .z80
+                         C      ;--------------------------------------
+                         C      GETBIT  macro
+                         C      	add a,a
+                         C      	jr nz,$+5
+                         C      ;getbit:
+                         C      	ld a,(hl)
+                         C      	inc hl
+                         C      	rla
+                         C      	endm
+                         C      ;
+                         C      GETBITEXX  macro 
+                         C      	add a,a
+                         C      	jr nz,$+7
+                         C      ;getbitexx:
+                         C      	exx
+                         C      	ld a,(hl)
+                         C      	inc hl
+                         C      	exx
+                         C      	rla
+                         C      	endm
+                         C      ;=====================================
+  FEE6                   C      unpack:
+                         C      ;  ifdef LENGTHINDATA
+                         C      ;  inc hl
+                         C      ;  inc hl
+                         C      ;  endif
+  FEE6    7E             C      	ld a,(hl)
+  FEE7    23             C      	inc hl
+  FEE8    D9             C      	exx
+                         C      ; set modeX
+  FEE9    11 0000        C      	ld de,0
+  FEEC    87             C      	add a,a
+  FEED    3C             C      	inc a
+  FEEE    CB 13          C      	rl e
+  FEF0    87             C      	add a,a
+  FEF1    CB 13          C      	rl e
+  FEF3    87             C      	add a,a
+  FEF4    CB 13          C      	rl e
+  FEF6    CB 13          C      	rl e
+  FEF8    21 FF9A        C      	ld hl,modes
+  FEFB    19             C      	add hl,de
+  FEFC    5E             C      	ld e,(hl)
+  FEFD    DD 6B          C      	ld ixl,e
+  FEFF    23             C      	inc hl
+  FF00    5E             C      	ld e,(hl)
+  FF01    DD 63          C      	ld ixh,e	;ix=modeX
+  FF03    1E 01          C      	ld e,1
+  FF05    D9             C      	exx
+  FF06    FD 21 FF0C     C      	ld iy,loop
+                         C      ;---
+  FF0A    ED A0          C      literal:ldi		;load byte
+  FF0C                   C      loop:	GETBIT
+  FF0C    87             C+     	add a,a
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-12
+
+
+  FF0D    20 03          C+     	jr nz,$+5
+  FF0F    7E             C+     	ld a,(hl)
+  FF10    23             C+     	inc hl
+  FF11    17             C+     	rla
+  FF12    30 F6          C      	jr nc,literal
+                         C      ;---
+  FF14    D9             C      	exx
+  FF15    62             C      	ld h,d
+  FF16    6B             C      	ld l,e
+  FF17                   C      getlen:	GETBITEXX
+  FF17    87             C+     	add a,a
+  FF18    20 05          C+     	jr nz,$+7
+  FF1A    D9             C+     	exx
+  FF1B    7E             C+     	ld a,(hl)
+  FF1C    23             C+     	inc hl
+  FF1D    D9             C+     	exx
+  FF1E    17             C+     	rla
+  FF1F    30 2A          C      	jr nc,.lenok
+                         C      ;----
+  FF21                   C      .lus:	GETBITEXX
+  FF21    87             C+     	add a,a
+  FF22    20 05          C+     	jr nz,$+7
+  FF24    D9             C+     	exx
+  FF25    7E             C+     	ld a,(hl)
+  FF26    23             C+     	inc hl
+  FF27    D9             C+     	exx
+  FF28    17             C+     	rla
+  FF29    ED 6A          C      	adc hl,hl
+  FF2B    D8             C      	ret c		;exit
+                         C      	GETBITEXX
+  FF2C    87             C+     	add a,a
+  FF2D    20 05          C+     	jr nz,$+7
+  FF2F    D9             C+     	exx
+  FF30    7E             C+     	ld a,(hl)
+  FF31    23             C+     	inc hl
+  FF32    D9             C+     	exx
+  FF33    17             C+     	rla
+  FF34    30 15          C      	jr nc,.lenok
+                         C      ;
+                         C      	GETBITEXX
+  FF36    87             C+     	add a,a
+  FF37    20 05          C+     	jr nz,$+7
+  FF39    D9             C+     	exx
+  FF3A    7E             C+     	ld a,(hl)
+  FF3B    23             C+     	inc hl
+  FF3C    D9             C+     	exx
+  FF3D    17             C+     	rla
+  FF3E    ED 6A          C      	adc hl,hl
+  FF40    D8             C      	ret c		;exit
+                         C      	GETBITEXX
+  FF41    87             C+     	add a,a
+  FF42    20 05          C+     	jr nz,$+7
+  FF44    D9             C+     	exx
+  FF45    7E             C+     	ld a,(hl)
+  FF46    23             C+     	inc hl
+  FF47    D9             C+     	exx
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-13
+
+
+  FF48    17             C+     	rla
+  FF49    38 D6          C      	jr c,.lus
+                         C      ;----
+  FF4B    23             C      .lenok:	inc hl
+  FF4C    D9             C      	exx
+  FF4D    4E             C      	ld c,(hl)
+  FF4E    23             C      	inc hl
+  FF4F    06 00          C      	ld b,0
+  FF51    CB 79          C      	bit 7,c
+  FF53    28 36          C      	jr z,offsok
+  FF55    DD E9          C      	jp (ix)
+                         C      ;---------------------------------
+  FF57                   C      mode6:	GETBIT
+  FF57    87             C+     	add a,a
+  FF58    20 03          C+     	jr nz,$+5
+  FF5A    7E             C+     	ld a,(hl)
+  FF5B    23             C+     	inc hl
+  FF5C    17             C+     	rla
+  FF5D    CB 10          C      	rl b
+  FF5F                   C      mode5:	GETBIT
+  FF5F    87             C+     	add a,a
+  FF60    20 03          C+     	jr nz,$+5
+  FF62    7E             C+     	ld a,(hl)
+  FF63    23             C+     	inc hl
+  FF64    17             C+     	rla
+  FF65    CB 10          C      	rl b
+  FF67                   C      mode4:	GETBIT
+  FF67    87             C+     	add a,a
+  FF68    20 03          C+     	jr nz,$+5
+  FF6A    7E             C+     	ld a,(hl)
+  FF6B    23             C+     	inc hl
+  FF6C    17             C+     	rla
+  FF6D    CB 10          C      	rl b
+  FF6F                   C      mode3:	GETBIT
+  FF6F    87             C+     	add a,a
+  FF70    20 03          C+     	jr nz,$+5
+  FF72    7E             C+     	ld a,(hl)
+  FF73    23             C+     	inc hl
+  FF74    17             C+     	rla
+  FF75    CB 10          C      	rl b
+  FF77                   C      mode2:	GETBIT
+  FF77    87             C+     	add a,a
+  FF78    20 03          C+     	jr nz,$+5
+  FF7A    7E             C+     	ld a,(hl)
+  FF7B    23             C+     	inc hl
+  FF7C    17             C+     	rla
+  FF7D    CB 10          C      	rl b
+                         C      	GETBIT
+  FF7F    87             C+     	add a,a
+  FF80    20 03          C+     	jr nz,$+5
+  FF82    7E             C+     	ld a,(hl)
+  FF83    23             C+     	inc hl
+  FF84    17             C+     	rla
+  FF85    30 04          C      	jr nc,offsok
+  FF87    B7             C      	or a
+  FF88    04             C      	inc b
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-14
+
+
+  FF89    CB B9          C      	res 7,c
+  FF8B    03             C      offsok:	inc bc
+  FF8C    E5             C      	push hl
+  FF8D    D9             C      	exx
+  FF8E    E5             C      	push hl
+  FF8F    D9             C      	exx
+  FF90    6B             C      	ld l,e
+  FF91    62             C      	ld h,d
+  FF92    ED 42          C      	sbc hl,bc
+  FF94    C1             C      	pop bc
+  FF95    ED B0          C      	ldir		;load
+  FF97    E1             C      	pop hl
+  FF98    FD E9          C      	jp (iy)		;jp loop
+                         C      ;----------------------------
+  FF9A    FF8B           C      modes:	dw	offsok
+  FF9C    FF77           C      	dw	mode2
+  FF9E    FF6F           C      	dw	mode3
+  FFA0    FF67           C      	dw	mode4
+  FFA2    FF5F           C      	dw	mode5
+  FFA4    FF57           C      	dw	mode6
+                         C      ;----------------------------
+                         C      ;	endmodule
+                         C      
+                         C      ;eof
+                         C      ;	end
+  FFA6                           end_p:
+                                ;===============================
+                                .dephase
+                         C      $INCLUDE	vdp_sets.inc
+                         C      ; vdp_sets.inc
+                         C      ;-------------------------------
+                         C      ; VDP port 99H (set register)
+  03FA'   00 80          C      dat_99:	db	00h,80h	; 00h -> R0
+  03FC'   50 81          C      	db	50h,81h	; 50h -> R1 (40X24, TEXT Mode)
+  03FE'   02 82          C      	db	02h,82h	; 02h -> R2
+  0400'   00 84          C      	db	00h,84h	; 00h -> R4
+  0402'   F4 87          C      	db	0F4h,87h;0F4h -> R7 Set Color (White on Blue)
+  0404'   00 89          C      	db	00h,89h	; 00h -> R9  (PAL-mode)
+  0406'   00 90          C      	db	00h,90h	; 00h -> R16 (Palette)
+                         C      ; VDP port 9Ah (set color palette)
+                         C      ;	   Red/Blue,Green
+  0408'   00 00          C      dat_9A:	db	0  ,0	;0
+  040A'   00 00          C      	db	0  ,0	;1
+  040C'   11 06          C      	db	11h,6	;2
+  040E'   33 07          C      	db	33h,7	;3
+  0410'   17 01          C      	db	17h,1	;4
+  0412'   27 03          C      	db	27h,3	;5
+  0414'   51 01          C      	db	51h,1	;6
+  0416'   27 06          C      	db	27h,6	;7
+  0418'   71 01          C      	db	71h,1	;8
+  041A'   73 03          C      	db	73h,3	;9
+  041C'   61 06          C      	db	61h,6	;10
+  041E'   64 06          C      	db	64h,6	;11
+  0420'   11 04          C      	db	11h,4	;12
+  0422'   65 02          C      	db	65h,2	;13
+  0424'   55 05          C      	db	55h,5	;14
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page 1-15
+
+
+  0426'   77 07          C      	db	77h,7	;15
+                         C      ;===============================
+                         C      ; end vdp_sets
+                         C      $INCLUDE	message.inc
+                         C      ;----------------------------------------------------
+  0428'   49 6E 69 74    C      Head:	DB 'Initial Program Loader for OneChipMSX   '
+  042C'   69 61 6C 20    C      
+  0430'   50 72 6F 67    C      
+  0434'   72 61 6D 20    C      
+  0438'   4C 6F 61 64    C      
+  043C'   65 72 20 66    C      
+  0440'   6F 72 20 4F    C      
+  0444'   6E 65 43 68    C      
+  0448'   69 70 4D 53    C      
+  044C'   58 20 20 20    C      
+  0450'   4C 6F 61 64    C      	DB 'Load ROMs from MMC/SD/SDHC-card or EPCS '
+  0454'   20 52 4F 4D    C      
+  0458'   73 20 66 72    C      
+  045C'   6F 6D 20 4D    C      
+  0460'   4D 43 2F 53    C      
+  0464'   44 2F 53 44    C      
+  0468'   48 43 2D 63    C      
+  046C'   61 72 64 20    C      
+  0470'   6F 72 20 45    C      
+  0474'   50 43 53 20    C      
+  0478'   52 65 76 69    C      	DB 'Revision 2.00 with data compession      '
+  047C'   73 69 6F 6E    C      
+  0480'   20 32 2E 30    C      
+  0484'   30 20 77 69    C      
+  0488'   74 68 20 64    C      
+  048C'   61 74 61 20    C      
+  0490'   63 6F 6D 70    C      
+  0494'   65 73 73 69    C      
+  0498'   6F 6E 20 20    C      
+  049C'   20 20 20 20    C      
+  04A0'   42 75 69 6C    C      	DB 'Build date 18.04.2018',0
+  04A4'   64 20 64 61    C      
+  04A8'   74 65 20 31    C      
+  04AC'   38 2E 30 34    C      
+  04B0'   2E 32 30 31    C      
+  04B4'   38 00          C      
+                         C      ; end message.inc
+  04B6'                         CHARS:
+                         C      $INCLUDE        zg6x8_L.inc
+                         C      ; zg68.inc
+                         C      .LIST
+                         C      ; end zg6x8.inc
+  07B6'                         CHARS_END:
+                                	END
+Macro Assembler-80 v2.22D   (c) 1995,1996,1997 MOA  Page S
+
+
+Macros:
+GETBIT                                   GETBITEXX
+
+Symbols:
+FF21    .LUS                             FF4B    .LENOK
+0092    ..MODE..                         0000    BEGIN
+C000    BUFFER                           0099    CMDP
+FDF8    CORR                             04B6'   CHARS
+FEA5    CIKL_1                           FEBA    CIKL_2
+FDAA    CIKL_4                           FE3F    CIKL_5
+FE5A    CIKL_6                           FE75    CIKL_7
+FDDB    CIKL_I                           FCDD    CKL_RD
+002A    CLEAR1                           FDF0    COM_OK
+FC86    C_LOAD                           07B6'   CHARS_END
+001E    COPYCHARS                        0098    DATP
+03FA'   DAT_99                           0408'   DAT_9A
+FFA6    END_P                            FC60    ERR_LD
+0054'   END_BEG                          FF17    GETLEN
+0428'   HEAD                             FDB5    INIT_C
+FE02    INIT0OK                          FDB3    INIT_SD
+FF0C    LOOP                             FC7F    LD_BIOS
+FCBF    LD_EPCS                          FF0A    LITERAL
+FCAC    LDZ_EPCS                         FDE5    MMC_
+FF77    MODE2                            FF6F    MODE3
+FF67    MODE4                            FF5F    MODE5
+FF57    MODE6                            FF9A    MODES
+FCF1    NO_4000                          FF8B    OFFSOK
+FD20    PRM_                             FC00    PROG
+FEDC    PRINT                            FD28    PRM_2
+FEAF    PASS_1                           FE51    PASS_2
+FE61    PASS_3                           FD1B    PRM_SD
+003C    PR_STR                           FC90    P_READ
+FD14    PRM_EPCS                         FCF8    PRM_STEP
+FD05    PRM_ERROR                        FC4B    RD_SD
+FE1A    REINIT                           FE21    RD_16SD
+FE26    RD_CARD                          FC38    RD_EPCS
+FDA7    SET_                             0046    START
+FD9A    SET_SD                           FD83    SET0CMD
+FD71    SET8CMD                          FD88    SET_CMD
+FDA5    SET_CRC                          FE54    SRC_FAT
+FC65    ST_BIOS                          FC00    ST_PROG
+FD5F    SET41CMD                         FD30    T_SD
+FD54    T_ERR                            FD8C    TYPE_C
+FD42    T_EPCS                           FE6F    TEST_MBR
+FE8B    TEST_BIOS                        FEE6    UNPACK
+FC28    YES_FAT                          04B6'   ZG_68
+
+%DOS 16 bit detect: 5.00 loaded into low memory
+%Symbol table use 3 Kb (AVL-balanced B-Tree, intravel)
+%Start: 18 Apr 2018 16:48, Elapsed time: 00:00:00
+%Passes: 2
+
+No Fatal error(s)
+
