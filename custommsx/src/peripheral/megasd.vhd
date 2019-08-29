@@ -103,15 +103,15 @@ begin
 -- =====================================================
   RamReq <= req when wrt = '0'                                      else	-- rd
             req when ErmBank0(7) = '1' and adr(14 downto 13) = "10" else	-- wr 4000..5fff
-            req when ErmBank2(7) = '1' and adr(14 downto 13) = "00" else	-- wr 8000..9fff
-            req when ErmBank3(7) = '1' and adr(14 downto 13) = "01" else	-- wr A000..Bfff
+            req when ErmBank2(7) = '1' and adr(14 downto 13) = "00" else	-- wr 0000..1fff
+            req when ErmBank3(7) = '1' and adr(14 downto 13) = "01" else	-- wr 2000..3fff
 			'0';
   RamWrt <= wrt;
 
   RamAdr <= ErmBank0(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "10" else	-- 4000..5fff
             ErmBank1(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "11" else	-- 6000..7fff
-            ErmBank2(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "00" else	-- 8000..9fff
-            ErmBank3(6 downto 0) & adr(12 downto 0);									-- A000..Bfff
+            ErmBank2(6 downto 0) & adr(12 downto 0) when adr(14 downto 13) = "00" else	-- 0000..1fff
+            ErmBank3(6 downto 0) & adr(12 downto 0);									-- 2000..3fff
 
   RamDbo <= dbo;
   dbi    <= RamDbi;

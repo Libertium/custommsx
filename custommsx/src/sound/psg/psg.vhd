@@ -30,6 +30,7 @@
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -- 
 -- fix caro 17/05/2013
+-- fix caro 2017 for mouse suport
 --
 library ieee;
     use ieee.std_logic_1164.all;
@@ -47,6 +48,9 @@ entity psg is
         dbi         : out   std_logic_vector(  7 downto 0 );
         dbo         : in    std_logic_vector(  7 downto 0 );
 
+        mouse       : in    std_logic;
+        mdata       : in    std_logic_vector(  5 downto 0 );
+        strob       : out   std_logic;
         joya        : inout std_logic_vector(  5 downto 0 );
         stra        : out   std_logic;
         joyb        : inout std_logic_vector(  5 downto 0 );
@@ -114,9 +118,13 @@ begin
             rega <= (others => '0');
         elsif( clk21m'event and clk21m = '1' )then
             -- psg register #15 bit6 - joystick select : 0=porta, 1=portb
-            if( regb(6) = '0' )then
+            if( regb(6) = '0' )then  -- porta
+               if (mouse = '1') then
+                    rega(5 downto 0) <= mdata;  -- mouse data
+               else
                 rega(5 downto 0) <= joya;
-            else
+               end if;
+            else                                -- portb
                 rega(5 downto 0) <= joyb;
             end if;
 
@@ -144,7 +152,11 @@ begin
         if( clk21m'event and clk21m = '1' )then
             -- strobe output
             strb <= regb(5);
-            stra <= regb(4);
+			if mouse = '0' then
+				stra <= regb(4);	-- joyA
+			else
+				strob <= regb(4);	-- mouse
+			end if;	 
         end if;
     end process;
 
