@@ -16,8 +16,9 @@ set_global_assignment -name AUTO_ENABLE_SMART_COMPILE ON
 set_global_assignment -name DEVICE EP2C20F484C8
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
-set_global_assignment -name OPTIMIZE_HOLD_TIMING OFF
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
 set_global_assignment -name OPTIMIZE_TIMING OFF
+#set_global_assignment -name FITTER_EFFORT "AUTO FIT"
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD LVTTL
@@ -139,12 +140,12 @@ set_location_assignment PIN_R7 -to pMemLdq
 set_location_assignment PIN_T5 -to pMemRas_n
 set_location_assignment PIN_M5 -to pMemUdq
 set_location_assignment PIN_R8 -to pMemWe_n
-#
 set_location_assignment PIN_H15 -to pPs2Clk
 set_location_assignment PIN_J14 -to pPs2Dat
+
 set_location_assignment PIN_D19 -to pPs2mClk
 set_location_assignment PIN_D20 -to pPs2mDat
-#
+
 set_location_assignment PIN_V20 -to pSd_Ck
 set_location_assignment PIN_Y20 -to pSd_Cm
 set_location_assignment PIN_W20 -to pSd_Dt0
@@ -306,31 +307,21 @@ set_location_assignment PIN_W14 -to FL_RST_N
 set_location_assignment PIN_Y14 -to FL_WE_N
 set_location_assignment PIN_AA15 -to FL_OE_N
 
+
 # UART
-set_location_assignment PIN_F14 -to UART_RXD
+#set_location_assignment PIN_F14 -to UART_RXD
+#set_location_assignment PIN_G12 -to UART_TXD
+# set_location_assignment PIN_R22 -to KEY[0]
+#set_location_assignment PIN_R21 -to KEY[1]
+#set_location_assignment PIN_T22 -to KEY[2]
+#set_location_assignment PIN_T21 -to KEY[3]
+
+
 set_location_assignment PIN_G12 -to UART_TXD
+set_location_assignment PIN_F14 -to UART_RXD
 
-
-
-#
 set_location_assignment PIN_H12 -to test1
 set_location_assignment PIN_H14 -to test2
-#
-
-
-set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
-set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
-set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
-
-
-
-set_location_assignment PIN_C18 -to pSltSlts11_n
-set_location_assignment PIN_C20 -to pSltSlts12_n
-set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
-set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to test1
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to test1
@@ -342,6 +333,18 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to UART_TXD
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to UART_RXD
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to UART_RXD
 
+
+
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
+set_location_assignment PIN_C18 -to pSltSlts11_n
+set_location_assignment PIN_C20 -to pSltSlts12_n
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_instance_assignment -name CLOCK_SETTINGS pCpuClk -to pCpuClk
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pSd_Ck
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pSd_Ck
@@ -498,7 +501,6 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pMemDat[14]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pMemDat[14]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to pMemDat[15]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pMemDat[15]
-
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pDac_VR[2]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pDac_VR[3]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to pDac_VR[4]
@@ -641,9 +643,12 @@ set_global_assignment -name VHDL_FILE src/peripheral/eseps2.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/mapper.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/megasd.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/iplrom2c.vhd
+set_global_assignment -name VERILOG_FILE src/peripheral/ps2mouse.v
+
+
 set_global_assignment -name VHDL_FILE src/peripheral/systemtimer.vhd
 set_global_assignment -name VHDL_FILE src/peripheral/mega_ram.vhd
-set_global_assignment -name VERILOG_FILE src/peripheral/ps2mouse.v
+
 set_global_assignment -name VHDL_FILE src/cpu/t80_alu.vhd
 set_global_assignment -name VHDL_FILE src/cpu/t80_reg.vhd
 set_global_assignment -name VHDL_FILE src/cpu/t80_mcode.vhd
@@ -669,10 +674,14 @@ set_global_assignment -name VHDL_FILE src/uart/uart_receiver.vhd
 set_global_assignment -name VHDL_FILE src/uart/uart_transmitter.vhd
 set_global_assignment -name VHDL_FILE src/uart/uart_16750.vhd
 
-
 set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
-set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIXII "MINIMIZE AREA WITH CHAINS"
+set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIXII NORMAL
+set_global_assignment -name FINAL_PLACEMENT_OPTIMIZATION ALWAYS
+set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION ALWAYS
+set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING "EXTRA EFFORT"
 
 
+
+set_global_assignment -name ALM_REGISTER_PACKING_EFFORT HIGH
 
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

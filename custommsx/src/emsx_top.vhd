@@ -46,6 +46,7 @@ entity emsx_top is
     pClk24m	    : in std_logic;		-- Input clock DE1 24 MHz
     pClk27m     : in std_logic;		-- Input clock DE1 27 MHz
     pExtClk     : in std_logic;		-- Input external clock
+    
 -------------------------------------------------------------    
 --  pClk21m     : in std_logic;		-- VDP clock ... 21.48MHz
 --  pCpuClk     : out std_logic;	-- CPU clock ... 3.58MHz (up to 10.74MHz/21.48MHz)
@@ -53,9 +54,14 @@ entity emsx_top is
 
     -- MSX cartridge slot ports
     pSltClk     : out std_logic;	-- pCpuClk returns here, for Z80, etc.
+    -- pSltRst_n   : in std_logic;		-- pCpuRst_n returns here
     pSltRst_n   : out std_logic;	-- pCpuRst_n returns here
     pSltSltsl_n : inout std_logic;
     pSltSlts2_n : inout std_logic;
+
+    pSltSlts11_n: inout std_logic; -- Cesc Pin per activar subslot 1-1
+    pSltSlts12_n: inout std_logic; -- Cesc Pin per activar subslot 1-2
+
     pSltIorq_n  : inout std_logic;
     pSltRd_n    : inout std_logic;
     pSltWr_n    : inout std_logic;
@@ -108,60 +114,60 @@ entity emsx_top is
     -- SD/MMC slot ports
     pSd_Ck      : out std_logic;                        -- pin 5
     pSd_Cm      : out std_logic;                        -- pin 2
---  pSd_Dt      : inout std_logic_vector( 3 downto 0);  -- pin 1(D3), 9(D2), 8(D1), 7(D0)
-    pSd_Dt3     : inout std_logic;                      -- pin 1
-    pSd_Dt0     : inout std_logic;                      -- pin 7
+--  pSd_Dt	    : inout std_logic_vector( 3 downto 0);  -- pin 1(D3), 9(D2), 8(D1), 7(D0)
+    pSd_Dt3	    : inout std_logic;						-- pin 1
+    pSd_Dt0	    : inout std_logic;						-- pin 7
 
     -- DIP switch, Lamp ports
-    pSW         : in std_logic_vector( 3 downto 0);     -- 0 - press; 1 - unpress
+    pSW		    : in std_logic_vector( 3 downto 0);	    -- 0 - press; 1 - unpress
     pDip        : in std_logic_vector( 9 downto 0);     -- 0=ON,  1=OFF(default on shipment)
-    pLedG       : out std_logic_vector( 7 downto 0);    -- 0=OFF, 1=ON(green)
-    pLedR       : out std_logic_vector( 9 downto 0);    -- 0=OFF, 1=ON(red) ...Power & SD/MMC access lamp
+    pLedG       : out std_logic_vector( 7 downto 0);   	-- 0=OFF, 1=ON(green)
+    pLedR	    : out std_logic_vector( 9 downto 0);    -- 0=OFF, 1=ON(red) ...Power & SD/MMC access lamp
 
     -- Video, Audio/CMT ports
     pDac_VR     : inout std_logic_vector( 5 downto 0);  -- RGB_Red / Svideo_C
     pDac_VG     : inout std_logic_vector( 5 downto 0);  -- RGB_Grn / Svideo_Y
     pDac_VB     : inout std_logic_vector( 5 downto 0);  -- RGB_Blu / CompositeVideo
-    pDac_S      : out   std_logic;			-- Sound
-    pREM_out	: out   std_logic;			-- REM output; 1 - Tape On
-    pCMT_out	: out   std_logic;			-- CMT output
-    pCMT_in	: in    std_logic;			-- CMT input
+    pDac_S		: out   std_logic;						-- Sound
+    pREM_out	: out   std_logic;						-- REM output; 1 - Tape On
+    pCMT_out	: out   std_logic;						-- CMT output
+    pCMT_in		: in    std_logic;						-- CMT input
 
     pVideoHS_n  : out std_logic;                        -- Csync(RGB15K), HSync(VGA31K)
     pVideoVS_n  : out std_logic;                        -- Audio(RGB15K), VSync(VGA31K)
 
     -- DE1 SRAM
-    SRAM_DQ     : inout std_logic_vector(15 downto 0);
-    SRAM_ADDR   : out std_logic_vector(17 downto 0);
-    SRAM_UB_N   : out std_logic;
-    SRAM_LB_N   : out std_logic;
-    SRAM_WE_N   : out std_logic;
-    SRAM_CE_N   : out std_logic;
-    SRAM_OE_N   : out std_logic;
-
+    SRAM_DQ		: inout std_logic_vector(15 downto 0);
+    SRAM_ADDR	: out std_logic_vector(17 downto 0);
+    SRAM_UB_N	: out std_logic;
+    SRAM_LB_N	: out std_logic;
+    SRAM_WE_N	: out std_logic;
+    SRAM_CE_N	: out std_logic;
+    SRAM_OE_N	: out std_logic;
+	
     -- DE1 FLASH
-    FL_DQ      : inout std_logic_vector(7 downto 0);
-    FL_ADDR    : out std_logic_vector(21 downto 0);
-    FL_RST_N   : out std_logic;
-    FL_WE_N    : out std_logic;
-    FL_OE_N    : out std_logic;
-
+    FL_DQ	    : inout std_logic_vector(7 downto 0);
+    FL_ADDR	    : out std_logic_vector(21 downto 0);
+    FL_RST_N	: out std_logic;
+    FL_WE_N	    : out std_logic;
+    FL_OE_N	    : out std_logic;
+	
     -- DE1 7-SEG Display
-    HEX0      : out std_logic_vector(6 downto 0);
-    HEX1      : out std_logic_vector(6 downto 0);
-    HEX2      : out std_logic_vector(6 downto 0);
-    HEX3      : out std_logic_vector(6 downto 0);
+    HEX0	    : out std_logic_vector(6 downto 0);
+    HEX1	    : out std_logic_vector(6 downto 0);
+    HEX2	    : out std_logic_vector(6 downto 0);
+    HEX3	    : out std_logic_vector(6 downto 0);
 
     -- DE1 i2c
-    I2C_SCLK  : out std_logic;
-    I2C_SDAT  : inout std_logic;
+    I2C_SCLK	: out std_logic;
+    I2C_SDAT	: inout std_logic;
 
     -- DE1 Audio Codec
-    AUD_ADCLRCK : out std_logic;
-    AUD_ADCDAT  : in std_logic;
-    AUD_XCK     : out std_logic;
-    AUD_DACLRCK : out std_logic;
-    AUD_DACDAT  : out std_logic;
+    AUD_ADCLRCK	: out std_logic;
+    AUD_ADCDAT	: in std_logic;
+    AUD_XCK	    : out std_logic;
+    AUD_DACLRCK	: out std_logic;
+    AUD_DACDAT	: out std_logic;
     AUD_BCLK    : out std_logic;	
 
     -- DE1 USART
@@ -171,14 +177,14 @@ entity emsx_top is
     -- pins for test
 --    test1       : out std_logic;
 --    test2       : out std_logic
-
 );
 end emsx_top;
+
 -- ====================================================================
 architecture rtl of emsx_top is
 
   component pll4xde1                    -- Altera specific component
-    port(								-- 50*6 = 300 MÃö
+    port(								-- 50*6 = 300 MÃƒÃ¶
       inclk0 : in std_logic := '0';     -- 50.00MHz input to PLL    (external I/O pin, from crystal oscillator)
       c0     : out std_logic ;          -- 300.00MHz output from PLL (internal LEs, for VDP, internal-bus, etc.)
 	  locked : out std_logic
@@ -349,7 +355,7 @@ architecture rtl of emsx_top is
       pRamAdr 	: out std_logic_vector(16 downto 0);
       pRamDbi 	: in  std_logic_vector(15 downto 0);
       pRamDbo 	: out std_logic_vector(7 downto 0);
-      HiSpeed_Mode: in std_logic;
+	  HiSpeed_Mode: in std_logic;
       -- Video Output
       pVideoR 	: out std_logic_vector( 5 downto 0);
       pVideoG 	: out std_logic_vector( 5 downto 0);
@@ -419,7 +425,7 @@ architecture rtl of emsx_top is
       ps2mclk : inout std_logic
     );
   end component;
-      
+
   component megaram
     port(
       clk21m  : in std_logic;
@@ -490,9 +496,9 @@ architecture rtl of emsx_top is
 
   component scc_mix_mul
 	port(
-		a	: in	std_logic_vector( 15 downto 0 );	-- 16bit ÂQÂ¦ÕòÐÔ
-		b	: in	std_logic_vector(  2 downto 0 );	-- 3bit ÃoÃCÃiÃÊ
-		c	: out	std_logic_vector( 18 downto 0 )		-- 19bit ÂQÂ¦ÕòÐÔ
+		a	: in	std_logic_vector( 15 downto 0 );	-- 16bit Ã‚QÃ‚Å Ã•Ã²ÃÃ”
+		b	: in	std_logic_vector(  2 downto 0 );	-- 3bit ÃƒoÃƒCÃƒiÃƒÃŠ
+		c	: out	std_logic_vector( 18 downto 0 )		-- 19bit Ã‚QÃ‚Å Ã•Ã²ÃÃ”
 	);
   end component;
 
@@ -617,7 +623,7 @@ end component;
         RIN         : in std_logic;                             -- RI input
         SIN         : in std_logic;                             -- Receiver input
         SOUT        : out std_logic                            -- Transmitter output
-    );
+	);
   end component;
 
 -- ///////////////////////////////////////////////////////////////////
@@ -636,9 +642,8 @@ end component;
   signal  uart_dbi   : std_logic_vector(7 downto 0);
   signal  rclk       : std_logic;      -- Receiver clock (16x baudrate)
   signal  baudoutn   : std_logic;      -- Baudrate generator output (16x baudrate)
-
   -- Operation mode
-  signal KeyMode     : std_logic;         -- Kana key board layout : 1=JIS layout
+  signal KeyMode     : std_logic;               	-- Kana key board layout : 1=JIS layout
   signal VdpMode     : std_logic;
   signal VdpScan     : std_logic;         -- Scanline Mode VDP
   signal ipSW        : std_logic_vector(3 downto 0);
@@ -646,12 +651,12 @@ end component;
   signal rDipLed     : std_logic_vector(9 downto 0);
   signal DispSel     : std_logic_vector(1 downto 0);-- Select Dislay mode
   alias	 MemMode     : std_logic is rDipLed(9);	    -- '0': 2 Mbyte			'1': 4 MByte
-  alias	 MRAMmode    : std_logic is rDipLed(8);	    -- '0': Cart in Slot1,	'1': MEGA RAM
-  alias  ClkMode     : std_logic is iDipLed(7);     -- '0': CPU_3.58MHz,    '1': CPU_10.74MHz
-  alias  Kmap        : std_logic is rDipLed(6);     -- '0': English-101,    '1': Japanese-106
+  alias	 MRAMmode    : std_logic is rDipLed(8);		-- '0': Cart in Slot1,	'1': MEGA RAM
+  alias  ClkMode     : std_logic is iDipLed(7); 	-- '0': CPU_3.58MHz,    '1': CPU_10.74MHz
+  alias  Kmap        : std_logic is rDipLed(6); 	-- '0': English-101,    '1': Japanese-106
   alias  MegType     : std_logic_vector(1 downto 0) is rDipLed(5 downto 4); -- "01" - SCC2
-  alias	 Slt1Mode    : std_logic is rDipLed(3);	    -- '0': Cart in Slot1,	'1': SCC1
-  alias  MmcMode     : std_logic is rDipLed(2);     -- '0': enable SD/MMC,  '1': disable SD/MMC
+  alias	 Slt1Mode    : std_logic is rDipLed(3);		-- '0': Cart in Slot1,	'1': SCC1
+  alias  MmcMode     : std_logic is rDipLed(2); 	-- '0': enable SD/MMC,  '1': disable SD/MMC
   alias  DispMode    : std_logic_vector(1 downto 0) is iDipLed(1 downto 0);	-- '0x': VGA out; '1x': TV out
 
   -- Clock, Reset control signals
@@ -665,12 +670,12 @@ end component;
   signal reset_hard  : std_logic;
   signal reset_soft  : std_logic;
   signal iReset      : std_logic := '0';
-  signal lock_n      : std_logic;
+  signal lock_n       : std_logic;
   signal RstEna      : std_logic := '0';
   signal RstSeq      : std_logic_vector(4 downto 0) := (others => '0');
   signal FreeCounter : std_logic_vector(15 downto 0) := (others => '0');
-  signal ClkFkey     : std_logic;
-  signal VdpFkey     : std_logic;
+  signal ClkFkey	 : std_logic;
+  signal VdpFkey	 : std_logic;
 
   -- MSX cartridge slot control signals
   signal BusDir      : std_logic;
@@ -706,9 +711,11 @@ end component;
 -- Primary, Expansion slot signals
   signal ExpDbi      : std_logic_vector(7 downto 0);
   signal ExpSlot0    : std_logic_vector(7 downto 0);
+  signal ExpSlot1    : std_logic_vector(7 downto 0); -- Cesc
   signal ExpSlot3    : std_logic_vector(7 downto 0);
   signal PriSltNum   : std_logic_vector(1 downto 0);
   signal ExpSltNum0  : std_logic_vector(1 downto 0);
+  signal ExpSltNum1  : std_logic_vector(1 downto 0); -- Cesc
   signal ExpSltNum3  : std_logic_vector(1 downto 0);
 
   -- Slot decode signals
@@ -729,6 +736,8 @@ end component;
   signal rom_kanj    : std_logic;
   signal rom_free1   : std_logic;
   signal rom_free2   : std_logic;
+
+  --signal ISSLT11  	: std_logic; -- Cesc
 
   -- IPL-ROM signals
   signal RomDbi      : std_logic_vector(7 downto 0);
@@ -783,6 +792,7 @@ end component;
   signal W_PAGE_DEC		: STD_LOGIC_VECTOR(  3 DOWNTO 0 );
   signal W_PRISLT_DEC	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );
   signal W_EXPSLT0_DEC	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );
+  signal W_EXPSLT1_DEC	: STD_LOGIC_VECTOR(  3 DOWNTO 0 ); -- Cesc
   signal W_EXPSLT3_DEC	: STD_LOGIC_VECTOR(  3 DOWNTO 0 );
 
   -- PS/2 signals
@@ -882,8 +892,8 @@ end component;
   signal Sound_R     : std_logic_vector(15 downto 0);
 
   signal MstrVol     : std_logic_vector(2 downto 0);
-  signal PsgVol      : std_logic_vector(2 downto 0);
-  signal SccVol      : std_logic_vector(2 downto 0);
+  signal PsgVol     : std_logic_vector(2 downto 0);
+  signal SccVol     : std_logic_vector(2 downto 0);
   signal OpllVol     : std_logic_vector(2 downto 0);
 
   signal vFKeys			: std_logic_vector(  7 downto 0 );
@@ -957,7 +967,7 @@ end component;
 -- port F4
   signal portF4_req  : std_logic;
   signal portF4_bit7 : std_logic; -- 1 - hard reset; 0 - soft reset
-
+  
 -- Phase AKK
   signal acc         : std_logic_vector (23 downto 0);
   signal uart_acc    : std_logic_vector (23 downto 0);
@@ -965,7 +975,7 @@ end component;
   signal clkdivmy    : std_logic_vector (1 downto 0);
 --  
   signal ff_ldbios   : std_logic; -- 1 - load BIOS
-  
+
 -- ***************************************************************
 begin
 ----------------------------------------------------------------
@@ -1045,16 +1055,35 @@ end process;
 ----------------------------------------------------------------
 -- Clock selector
 ----------------------------------------------------------------
+--process( reset, clk21m )
+--begin
+--	if( reset = '1' )then
+--		ClkFkey	<= '0';
+--		VdpFkey	<= '0';
+--	elsif( clk21m'event and clk21m = '1' )then
+--		if( Fkeys(0) /= vFKeys(0) )then
+--			if( Fkeys(7) = '0' )then
+--				ClkFkey <= not ClkFkey;		-- F12 = Togle Clock
+--			else
+--				VdpFkey <= not VdpFkey;		-- SHIFT+F12 = Togle VDP Turbo
+--			end if;
+--		end if;
+--	end if;
+--end process;
+----------------------------------------------------------------
+-- Clock selector
+----------------------------------------------------------------
 process( reset, clk21m )
 begin
 	if( reset = '1' )then
 		ClkFkey	<= '0';
 	elsif( clk21m'event and clk21m = '1' )then
 		if( Fkeys(0) /= vFKeys(0) )then
-			ClkFkey <= not ClkFkey;		-- F12 = Togle Clock
+			ClkFkey <= not ClkFkey;		-- F12 = Togle Clock 
 		end if;
 	end if;
 end process;
+
 
 process (reset, clk21m)
 begin
@@ -1073,8 +1102,25 @@ begin
 	end if;
 end process;
 
+-- Cesc
+-- if( clkdiv3 = "10" )then cpuclk <= not cpuclk;
+-- clkdiv3  10 01 00 10 01 00 10 01 00 10 01 00 10 01 00 10 01 00 10 01 00 10 01 00 ...
+-- clkdiv   11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 ...  
+-- 21.48Mhz  1  2  3  4  5  6  1  2  3  4  5  6  1  2  3  4  5  6  1  2  3  4  5  6 ...
+--  3.58Mhz  *                 *                 *                 *                ...      
+-- cpuclk    1 		 0        1        0        1        0        1        0       ... 					
+
 pCpuClk <= cpuclk when (ff_turbo = '0') else clkdiv(0); -- TURBO
 pSltClk <= pCpuClk; -- clkdiv(0); -- 3.58 MHz
+
+-- pCpuClk <= not clkdiv(1) when ((ff_turbo = '1') and (clkdiv3 ="00" and (clkdiv ="10" or clkdiv ="00"))) else cpuclk; -- Cesc: prova: Aixo no tira
+
+-- pSltClk <= clkdiv(0); -- 3.58 MHz
+-- pSltClk <= cpuclk ; -- clkdiv(1) when (clkdiv3 ="00" and (clkdiv ="10" or clkdiv ="00"));
+-- pSltClk <= clkdiv(1) when (clkdiv3 ="00" and (clkdiv ="10" or clkdiv ="00"));
+
+
+
 ----------------------------------------------------------------
 -- Reset control
 -- "RstSeq" should be cleared when power-on reset
@@ -1086,9 +1132,21 @@ begin
 	end if;
 end process;
 
+-- Caro 2018-04-18
+-- process(memclk)
+-- begin
+--	if (memclk'event and memclk = '1') then
+--		if (ff_mem_seq = "00") then
+--			FreeCounter <= FreeCounter + 1;
+--		end if;
+--	end if;
+--end process;
+
 process(memclk)
 begin
-	if (memclk'event and memclk = '1') then
+	if (pSW(1) = '0') then -- Cesc amb els 4 slots, calia un hardreset per arrancar la primera vegada, pero 
+			FreeCounter <= X"0000"; -- al modificar aquesta inicialitzacio) el problema queda resolt.	
+	elsif (memclk'event and memclk = '1') then
 		if (ff_mem_seq = "00") then
 			FreeCounter <= FreeCounter + 1;
 		end if;
@@ -1097,9 +1155,14 @@ end process;
 
 process(memclk)
 begin
-	if (memclk'event and memclk = '1') then
+
+	if (pSW(1) = '0') then
+		   RstSeq <= "00000";
+	elsif (memclk'event and memclk = '1') then
 		if( (ff_mem_seq = "00") and (FreeCounter = X"FFFF") and (RstSeq /= "11111") )then
 			RstSeq <= RstSeq + 1;			-- 3ms (= 65536 / 21.47727 MHz)
+		-- else -- Caro ara aixo ho comenta, pq?
+--			RstPower <= '0';	
 		end if;
 	end if;
 end process;
@@ -1114,10 +1177,15 @@ begin
 	end if;
 end process;
 
+-- Cesc ho fem amb el teclat
+-- reset <= RstPower or (not pSW(0)); -- not pSltRst_n;
+
 reset_hard <= not ipSW(0) or not lock_n;
 reset_soft <= not ipSW(1) or Res_CAD;
 reset      <= reset_hard  or reset_soft;
 pSltRst_n  <= CpuRst_n;
+
+
 ----------------------------------------------------------------
 -- Operation mode
 ----------------------------------------------------------------
@@ -1189,10 +1257,45 @@ pSltCs2_n   <=	pSltRd_n when( pSltAdr(15 downto 14) = "10" and pSltMerq_n = '0' 
 pSltCs12_n  <=  pSltCs1_n and pSltCs2_n; 
 pSltM1_n    <=	CpuM1_n;
 pSltRfsh_n  <=	CpuRfsh_n;
-pSltInt_n   <=	pVdpInt_n and (not uart_int);
+-- pSltInt_n   <=	pVdpInt_n;
+pSltInt_n   <=	pVdpInt_n and (not uart_int); -- Caro
+-- cESc
+-- emsx_top.qsf: modificacions Cesc per Subslots 1-0, 1-1 i 1-2
+-- set_location_assignment PIN_C14 -to pSltSltsl_n
+-- set_location_assignment PIN_E15 -to pSltSlts2_n
+-- GPIO_1[10] PIN_C14 GPIO Connection 1[10] 	IO_B9	CSX SLTSL10
+-- GPIO_1[ 5] PIN_E15 GPIO Connection 1[ 5] 	IO_B4	CSX SLTSL2
+
+-- set_location_assignment PIN_C18 -to pSltSlts11_n
+-- set_location_assignment PIN_C20 -to pSltSlts12_n
+-- GPIO_1[15] PIN_C18 GPIO Connection 1[15]	IO_B12	CSX NONE4
+-- GPIO_1[17] PIN_C20 GPIO Connection 1[17] 	IO_B14	CSX NONÂºE5
+-- cESc
+
+-- Cesc
 pSltSltsl_n <=	'1' when (Scc1Type /= "00" or MRAMmode = '1') else
-				'0' when ( pSltMerq_n = '0' and CpuRfsh_n = '1' and PriSltNum = "01")else
+				'0' when ( pSltMerq_n = '0' and CpuRfsh_n = '1' and PriSltNum = "01"
+				and (EXPSLTNUM1 = "00" or EXPSLTNUM1 = "11") )else
 				'1';
+-- Cesc Begin: 	Aquesta part no esta clara, la idea es activar aquesta senyal si es tria el subslot 2-1 ??
+--				Cal tenir present que pSltSltsl i pSltSlts2 son amb logica negativa, per tant "pSltSltsl_n <=	'1' when (Scc1Type /= "00" or MRAMmode = '1')"
+--				vol dir que aquest senyal no es actiu '1' si Scc1Type /= "00" o MRAMmode = '1'
+--				alias	 MRAMmode    : std_logic is rDipLed(8);		-- '0': Cart in Slot1,	'1': MEGA RAM
+--				DIPS.TXT:	Sw(8) - MegaRAM 	'0' : Free Slot 1  '1': 512 Kb MegaRAM in Slot 1
+--				DIPS.TXT:	Sw(3) - SCC1		'0' : Free Slot 1  '1': SCC-I 1024 Kb
+-- Test OK
+-- pSltSlts11_n <= pSltSltsl_n; -- Cesc test atencio nomes per validad que el senyal arriba al slot
+-- pSltSlts12_n <= pSltSlts2_n; -- Cesc test atencio nomes per validad que el senyal arriba al slot
+
+pSltSlts11_n <=	'1' when (Scc1Type /= "00" or MRAMmode = '1') else  
+				'0' when (pSltMerq_n = '0' and CpuRfsh_n = '1' and PriSltNum = "01" and EXPSLTNUM1 = "01")else
+				'1';
+
+-- 				Aquesta part no esta clara, la idea es activar aquesta senyal si es tria el subslot 2-2 ??
+pSltSlts12_n <=	'1' when (Scc1Type /= "00" or MRAMmode = '1') else
+				'0' when (pSltMerq_n = '0' and CpuRfsh_n = '1' and PriSltNum = "01" and EXPSLTNUM1 = "10")else
+				'1';
+-- Cesc End
 pSltSlts2_n <=	'1' when MegType /= "00" else
 				'0' when (pSltMerq_n = '0' and CpuRfsh_n = '1' and PriSltNum = "10") else
 				'1';
@@ -1202,6 +1305,10 @@ pSltDat     <= (others => 'Z') when pSltRd_n = '1' else
 				dbi when( pSltMerq_n = '0' and PriSltNum = "00" )else
 				dbi when( pSltMerq_n = '0' and PriSltNum = "11" )else
 				dbi when( pSltMerq_n = '0' and PriSltNum = "01" and (Scc1Type /= "00" or MRAMmode = '1'))else
+				-- cesc: amb aixo podem fer la lectura del registre de subslots a l'slot 1.
+				dbi when( pSltMerq_n = '0' and PriSltNum = "01" and Scc1Type = "00" and MRAMmode /= '1' and adr = X"FFFF" )else 
+				--dbi when( pSltMerq_n = '0' and PriSltNum = "01" and EXPSLTNUM1 = "00" and (Scc1Type /= "00" or MRAMmode = '1'))else
+				--dbi when( pSltMerq_n = '0' and PriSltNum = "01" and (EXPSLTNUM1 = "01" or EXPSLTNUM1 = "10" ) and adr = X"FFFF" )else
 				dbi when( pSltMerq_n = '0' and PriSltNum = "10" and MegType  /= "00" )else
 				(others => 'Z');
 pSltRsv5    <= '1';
@@ -1242,7 +1349,15 @@ begin
 			pSltWait_n <= '0';
 		elsif (ff_turbo = '1' and OpllReq = '1' and OpllAck = '0') then
 			pSltWait_n <= '0';
-		elsif (ErmReq = '1' and adr(15 downto 13) = "010" and MmcAct = '1') then
+
+-- AMR: Some weirdness here - this line appears to be designed to delay the CPU until the
+-- SPI transaction is finished, however, because ErmReq is simply a filtered version of the
+-- req pulse, it does essentially nothing.  Fixing it by changing "and" to "or" works, and
+-- allows the SPI clock to be reduced to accommodate the MUX in the Turbo Chameleon 64, but
+-- breaks writing; either I'm misunderstanding something here or the previous buggy behaviour
+-- is worked around in the MegaSD ROM.
+--		elsif (ErmReq = '1' or (adr(15 downto 13) = "010" and MmcAct = '1')) then -- Cesc aixo no funciona al CSX
+		elsif (ErmReq = '1' and adr(15 downto 13) = "010" and MmcAct = '1') then 
 			pSltWait_n <= '0';
 		elsif (SdPaus = '1') then
 			pSltWait_n <= '0';
@@ -1294,6 +1409,8 @@ begin
         dlydbi <= RomDbi;
       elsif (mem = '1' and iSltErm = '1' and MmcEna = '1') then
         dlydbi <= MmcDbi;
+--      elsif (mem = '0' and adr(7 downto 2)  = "100010") then
+--        dlydbi <= VdpDbi;
       elsif (mem = '0' and adr(7 downto 2)  = "100110") then
         dlydbi <= VdpDbi;
       elsif (mem = '0' and adr(7 downto 2)  = "101000") then
@@ -1347,6 +1464,7 @@ begin
         end if;
       elsif (iSltMap = '1' or rom_main = '1' or rom_opll = '1' or rom_extr = '1'
 				or rom_free1 = '1' or rom_free2 = '1') then
+				-- or rom_free1 = '1' or rom_free2 = '1' or ISSLT11 ='1') then --Cesc
           jSltMem <= '1';
       else
           jSltMem <= '0';
@@ -1380,7 +1498,7 @@ dbi     <= Scc1Dbi when (jSltScc1 = '1') else
 process(clk21m, reset_hard)
 begin
    if (reset_hard = '1') then
-      portF4_bit7 <= '1';			-- view LOGO MSX
+      portF4_bit7 <= '1';					-- view LOGO MSX
    elsif (clk21m'event and clk21m = '1')then
            if (portF4_req = '1' and wrt = '1')then
                 portF4_bit7 <= dbo(7);
@@ -1395,7 +1513,7 @@ begin
    if (reset = '1') then
       if (iReset = '0') then
           if (reset_soft = '0') then
-              PpiPortA <= "11111111"; -- primary slot : page 0 => boot-rom, page 1/2 => ese-mmc, page 3 => mapper
+      PpiPortA <= "11111111"; -- primary slot : page 0 => boot-rom, page 1/2 => ese-mmc, page 3 => mapper
               ff_ldbios <= '1';
           else
               PpiPortA <= "11110000"; -- primary slot : page 0,1 => basic
@@ -1454,6 +1572,23 @@ PpiDbi <= PpiPortA when adr(1 downto 0) = "00" else
 		END IF;
 	END PROCESS;
 
+-- Cesc Begin: Sembla que aquesta part gestiona l'acces al EXPSLOT2 si l'slot2 esta seleccionat al port A del PPI
+-- SLOT #1
+	PROCESS( RESET, CLK21M )
+	BEGIN
+		IF( RESET = '1' )THEN
+		    EXPSLOT1 <= (OTHERS => '0');
+			 -- EXPSLOT2 <= "00010111";			 -- PRIMARY SLOT : PAGE 0 => IPLROM, PAGE 1/2 => SUBSLOT 1-1, PAGE 3 => MAPPER
+		ELSIF( CLK21M'EVENT AND CLK21M = '1' )THEN
+			-- MEMORY MAPPED I/O PORT ACCESS ON FFFFH ... EXPANSION SLOT REGISTER (MASTER MODE)
+			IF( REQ = '1' AND ISLTMERQ_N = '0' AND WRT = '1' AND ADR = X"FFFF" )THEN
+				IF( PPIPORTA(7 DOWNTO 6) = "01" )THEN
+					EXPSLOT1 <= DBO;
+				END IF;
+			END IF;
+		END IF;
+	END PROCESS;
+-- Cesc End
 -- SLOT #3
 	PROCESS( RESET, CLK21M )
 	BEGIN
@@ -1482,6 +1617,14 @@ PpiDbi <= PpiPortA when adr(1 downto 0) = "00" else
 		EXPSLOT0(3 DOWNTO 2) WHEN "01",
 		EXPSLOT0(5 DOWNTO 4) WHEN "10",
 		EXPSLOT0(7 DOWNTO 6) WHEN OTHERS;
+-- Cesc Begin
+-- EXPANSION SLOT NUMBER : SLOT 1 (MASTER MODE)
+	WITH ADR(15 DOWNTO 14) SELECT EXPSLTNUM1 <=
+		EXPSLOT1(1 DOWNTO 0) WHEN "00",
+		EXPSLOT1(3 DOWNTO 2) WHEN "01",
+		EXPSLOT1(5 DOWNTO 4) WHEN "10",
+		EXPSLOT1(7 DOWNTO 6) WHEN OTHERS;
+-- Cesc End
 
 -- EXPANSION SLOT NUMBER : SLOT 3 (MASTER MODE)
 	WITH ADR(15 DOWNTO 14) SELECT EXPSLTNUM3 <=
@@ -1493,6 +1636,7 @@ PpiDbi <= PpiPortA when adr(1 downto 0) = "00" else
 -- EXPANSION SLOT REGISTER READ
 	WITH PPIPORTA(7 DOWNTO 6) SELECT EXPDBI <=
 		NOT EXPSLOT0		 WHEN "00",
+		NOT EXPSLOT1		 WHEN "01", -- Cesc
 		NOT EXPSLOT3		 WHEN "11",
 		(OTHERS => '1')		 WHEN OTHERS;
 ----------------------------------------------------------------
@@ -1519,6 +1663,14 @@ PpiDbi <= PpiPortA when adr(1 downto 0) = "00" else
 		"1000"		WHEN "11",
 		"XXXX"		WHEN OTHERS;
 
+-- Cesc Begin
+	WITH( EXPSLTNUM1 ) SELECT W_EXPSLT1_DEC <=
+		"0001"		WHEN "00",
+		"0010"		WHEN "01",
+		"0100"		WHEN "10",
+		"1000"		WHEN "11",
+		"XXXX"		WHEN OTHERS;
+-- Cesc End
 	WITH( EXPSLTNUM3 ) SELECT W_EXPSLT3_DEC <=
 		"0001"		WHEN "00",
 		"0010"		WHEN "01",
@@ -1542,6 +1694,9 @@ ISLTSCC1	<=	MEM	WHEN( (W_PRISLT_DEC(1) AND (W_PAGE_DEC(1) OR W_PAGE_DEC(2))) = '
 				'0';
 IMEGA_RAM	<=	MEM	WHEN( (W_PRISLT_DEC(1) AND (W_PAGE_DEC(1) OR W_PAGE_DEC(2))) = '1' AND MRAMmode = '1' )ELSE
 				'0';
+--CESC SLOT1-1
+--ISSLT11	<=	MEM	WHEN( (W_PRISLT_DEC(1) AND (W_EXPSLT1_DEC(1) or W_EXPSLT1_DEC(2)                ) ) = '1'  AND ADR /= X"FFFF" )ELSE
+--				'0';
 -- SLOT2
 ISLTSCC2	<=	MEM	WHEN( (W_PRISLT_DEC(2) AND (W_PAGE_DEC(1) OR W_PAGE_DEC(2))) = '1' AND MEGTYPE  /= "00" )ELSE
 				'0';
@@ -1569,34 +1724,36 @@ OpllReq	<= req when( mem = '0' and adr(7 downto 2) = "011111")else '0';	-- I/O:7
 KanReq	<= req when( mem = '0' and adr(7 downto 2) = "110110")else '0';	-- I/O:D8-DBh	/ Kanji
 RomReq	<= req when( (rom_main or rom_opll or rom_extr or rom_free1 or rom_free2) = '1')else '0';
 
-MapReq	<= req when( mem = '0' and adr(7 downto 2) = "111111")else	         -- I/O:FC-FFh/ Memory-mapper
-           req when( iSltMap = '1') else '0';				                 -- MEM/ Memory-mapper
+MapReq	<= req when( mem = '0' and adr(7 downto 2) = "111111")else	        -- I/O:FC-FFh/ Memory-mapper
+           req when( iSltMap = '1') else '0';				                -- MEM/ Memory-mapper
 
-MRAMReq <= req when( mem = '0' and adr(7 downto 0) = "10001110")else	     -- I/O:8Eh/ Mega RAM
-           req when( iMEGA_RAM = '1') else '0';				                 -- MEM/ Mega RAM
+MRAMReq <= req when( mem = '0' and adr(7 downto 0) = "10001110")else	    -- I/O:8Eh/ Mega RAM
+           req when( iMEGA_RAM = '1') else '0';				                -- MEM/ Mega RAM
 
-Scc1Req	<= req when( iSltScc1 = '1')else '0';                                -- MEM:/ ESE-SCC 1
-Scc2Req	<= req when( iSltScc2 = '1')else '0';                                -- MEM:/ ESE-SCC 2
-ErmReq	<= req when( iSltErm  = '1')else '0';                                -- MEM:/ ESE-RAM, MegaSD
-RtcReq	<= req when( mem = '0' and adr(7 downto 1) = "1011010")else '0';     -- I/O:B4-B5h/ RTC(RP-5C01)
-systim_req <= req when( mem = '0' and adr(7 downto 1) = "1110011")else '0';  -- I/O:E6-E7h/ system timer
+Scc1Req	<= req when( iSltScc1 = '1')else '0';                               -- MEM:/ ESE-SCC 1
+Scc2Req	<= req when( iSltScc2 = '1')else '0';                               -- MEM:/ ESE-SCC 2
+ErmReq	<= req when( iSltErm  = '1')else '0';                               -- MEM:/ ESE-RAM, MegaSD
+RtcReq	<= req when( mem = '0' and adr(7 downto 1) = "1011010")else '0';    -- I/O:B4-B5h/ RTC(RP-5C01)
+systim_req <= req when( mem = '0' and adr(7 downto 1) = "1110011")else '0'; -- I/O:E6-E7h/ system timer
 portF4_req <= req when( mem = '0' and adr(7 downto 0) = "11110100")else '0'; -- I/O:F4h  port F4
 uart_req   <= req when( mem = '0' and adr(7 downto 3) = "10000")else '0';    -- I/O:80-87h UART
 uart_adr   <= adr(2 downto 0);
 rd_io      <= not (pSltIorq_n or pSltRd_n);
 
-BusDir	<= '1' when( pSltAdr(7 downto 2) = "100110"   )else   -- I/O:98-9Bh / VDP(V9958)
-           '1' when( pSltAdr(7 downto 2) = "101000"   )else   -- I/O:A0-A3h / PSG(AY-3-8910)
-           '1' when( pSltAdr(7 downto 2) = "101010"   )else   -- I/O:A8-ABh / PPI(8255)
-           '1' when( pSltAdr(7 downto 2) = "110110"   )else   -- I/O:D8-DBh / Kanji
-           '1' when( pSltAdr(7 downto 2) = "111111"   )else   -- I/O:FC-FFh / Memory-mapper
-           '1' when( pSltAdr(7 downto 1) = "1011010"  )else   -- I/O:B4-B5h / RTC(RP-5C01)
-           '1' when( pSltAdr(7 downto 1) = "1110011"  )else   -- I/O:E6-E7h / system timer
-           '1' when( pSltAdr(7 downto 0) = "11110100" )else   -- I/O:F4h    / port F4
+BusDir	<= '1' when( pSltAdr(7 downto 2) = "100110"  )else -- I/O:98-9Bh / VDP(V9958)
+           '1' when( pSltAdr(7 downto 2) = "101000"  )else -- I/O:A0-A3h / PSG(AY-3-8910)
+           '1' when( pSltAdr(7 downto 2) = "101010"  )else -- I/O:A8-ABh / PPI(8255)
+           '1' when( pSltAdr(7 downto 2) = "110110"  )else -- I/O:D8-DBh / Kanji
+           '1' when( pSltAdr(7 downto 2) = "111111"  )else -- I/O:FC-FFh / Memory-mapper
+           '1' when( pSltAdr(7 downto 1) = "1011010" )else -- I/O:B4-B5h / RTC(RP-5C01)
+           '1' when( pSltAdr(7 downto 1) = "1110011" )else -- I/O:E6-E7h / system timer
+           '1' when( pSltAdr(7 downto 0) = "11110100" )else-- I/O:F4h    / port F4
            '1' when( pSltAdr(7 downto 3) = "10000"    )else   -- I/O:80-87h / UART
            '0';
+
   ----------------------------------------------------------------
-  pLedR(9) <= mouse_en;
+-- Cesc: fer una ullada per documentar
+  pLedR(9) <= mouse_en; --   pLedR(9) <= MemMode;
   pLedR(8) <= MRAMmode;
   pLedR(7) <= ff_turbo;
   pLedR(6) <= Kmap;
@@ -1620,10 +1777,13 @@ BusDir	<= '1' when( pSltAdr(7 downto 2) = "100110"   )else   -- I/O:98-9Bh / VDP
           pDac_VR <= videoC;
           pDac_VG <= videoY;
           pDac_VB <= videoV;
-          pVideoHS_n <= VideoCS_n;
-          pVideoVS_n <= DACout;
-          Reso_v  <= '0';			-- Hsync:15kHz
-          PAL_v   <= '0';			-- Vsync:60Hz
+          pVideoHS_n <= VideoCS_n;	-- Synhro
+          pVideoVS_n <= DACout;		-- sound
+          -- Cesc
+--        Reso_v  <= '0';			-- Hsync:15kHz Caro
+          Reso_v  <= '1';			-- Hsync:31kHz
+--          PAL_v   <= '0';			-- Vsync:60Hz Caro
+          PAL_v   <= '1';			-- Vsync:50Hz
       elsif ( DispSel = "10" ) then	-- RGB 15KHz
           pDac_VR <= videoR;
           pDac_VG <= videoG;
@@ -1653,14 +1813,14 @@ BusDir	<= '1' when( pSltAdr(7 downto 2) = "100110"   )else   -- I/O:98-9Bh / VDP
       if ( lock_n = '0' ) then
           DispSel <= DispMode;
           VdpScan <= '0';
-	  iReso := Reso;
-      elsif (iReso /= Reso) then    -- Print Screen
+		  iReso := Reso;
+      elsif (iReso /= Reso) then	-- Print Screen
           if (FKeys(7) = '0') then  -- SHIFT
- 	      DispSel <= DispSel + 1;
+ 			 DispSel <= DispSel + 1;
  	  else
  	      VdpScan <= not VdpScan;
  	  end if;
-	  iReso := Reso;
+		  iReso := Reso;
       end if;
     end if;
 end process;
@@ -1726,6 +1886,24 @@ end process;
 		end if;
 	end process;
 
+
+	-- Reset F9 Key (Cesc)	process( reset, clk21m )
+	-- reset <= RstPower or (not pSW(0)); -- not pSltRst_n;
+	--process( clk21m,lock_n )
+	--begin
+	--	if( clk21m'event and clk21m = '1' )then
+	--		if( Fkeys(3) /= vFKeys(3) )then	-- F9
+	--				reset <= not RstPower;
+	--		else 
+	--				reset <= RstPower or (not pSW(0)); -- not pSltRst_n;
+	--				if( lock_n = '0' )then
+	--					PsgVol <= "111";	-- original "011";
+	--				end if;
+	--		end if;
+	--	end if;
+	--end process;
+
+	
 	-- OPLL volume
 	process( clk21m,lock_n )
 	begin
@@ -1856,9 +2034,9 @@ end process;
   -- Slot map / SD-RAM memory map
   --
   -- Slot 0-0 : MainROM         610000-617FFF(  32KB)
-  -- Slot 0-1 : rom_free1       630000-63FFFF(  64KB)
+  -- Slot 0-1 : rom_free1       630000-63FFFF(  64KB) MegaSD(iSltErm)
   -- Slot 0-2 : FM-BIOS         62C000-62FFFF(  16KB)
-  -- Slot 0-3 : rom_free2       660000-66FFFF(  64KB)
+  -- Slot 0-3 : rom_free2       660000-66FFFF(  64KB) MegaSD(iSltErm)
 
   -- Slot 1   : (EXTERNAL-SLOT)
   --            / MegaRam1      400000-4FFFFF(1024KB)
@@ -1885,7 +2063,7 @@ end process;
                               Scc1Adr(19 downto 0) when iSltScc1  = '1' else -- 400000-4FFFFF (1024KB)
                               Scc2Adr(19 downto 0) when iSltScc2  = '1' else -- 500000-5FFFFF (1024KB)
                    "1"      & MRAMAdr(18 downto 0) when iMEGA_RAM = '1' else -- 680000-6FFFFF (512 KB) MEGA RAM
-                   "0"      & ErmAdr(18 downto 0)  when iSltErm   = '1' else -- 600000-67FFFF (512 KB) ESE-RAM
+                   "0"      & ErmAdr(18 downto 0)  when iSltErm   = '1' else -- 600000-67FFFF (512KB) ESE-RAM
 --                 "000"                                                     -- 600000-61FFFF (128 KB) MEGA SD
                    "00100"  & adr(14 downto 0)     when rom_main  = '1' else -- 620000-627FFF (32  KB)
                    "001010" & adr(13 downto 0)     when rom_extr  = '1' else -- 628000-62BFFF (16  KB)
@@ -1918,7 +2096,7 @@ begin
 	if( memclk'event and memclk = '1' )then
 		if( ff_sdr_seq = "111" )then
 			if( RstSeq(4 downto 2) = "000" )then
-				SdrSta <= "000";				-- Idle
+				SdrSta <= "000";					-- Idle
 			elsif( RstSeq(4 downto 2) = "001" )then
 				case RstSeq(1 downto 0) is
 					when "00"	=> SdrSta <= "000";	-- Idle
@@ -2020,11 +2198,11 @@ begin
 	if( memclk'event and memclk = '1' )then
 		case ff_sdr_seq is
 		when "000" =>
-			if( SdrSta(2) = '0' )then					-- set command mode
+			if( SdrSta(2) = '0' )then						-- set command mode
 				--         single   CL=2  WT=0(seq) BL=1
 				SdrAdr <= "00100" & "010" & "0" & "000";
 				SdrBa  <= "00";
-			else								-- set row address
+			else											-- set row address
 				if   ( RstSeq(4 downto 2) = "010" )then
 					SdrAdr <= ClrAdr(11 downto 0);			-- clear VRAM(128KB)
 					SdrBa <= "11";
@@ -2042,7 +2220,7 @@ begin
 					SdrBa <= "11";
 				end if;
 			end if;
-		when "010" =>								-- set collumn address
+		when "010" =>										-- set collumn address
 			SdrAdr(11 downto 8) <= "0100";					-- A10=1 => enable auto precharge
 			-- clear memory
 			if   ( RstSeq(4 downto 2) = "010" )then
@@ -2200,6 +2378,7 @@ pMemDat		<= SdrDat;
 	FL_OE_N		<= '1';
 
     AUD_ADCLRCK	<= 'Z';
+
 ----------------------------------------------------------------
 -- Connect components
 ----------------------------------------------------------------
@@ -2207,6 +2386,8 @@ pMemDat		<= SdrDat;
     port map(					-- for Altera DE1
       inclk0 => CLOCK_50,       -- 50 MHz external
       c0     => clk300m,        -- 300.00MHz internal (50*6)
+--      c1     => memclk,         -- 85.72MHz = 21.43MHz x 4
+--      c2     => pMemClk,        -- 85.72MHz external
       locked => lock_n
     );
 
@@ -2262,9 +2443,9 @@ pMemDat		<= SdrDat;
 
   U20 : vdp
     port map(clk21m, reset, VdpReq, Open, wrt, adr, VdpDbi, dbo, pVdpInt_n,
-             Open, WeVdp_n, VdpAdr, VrmDbi, VrmDbo,
-             VdpMode,
-             VideoR, VideoG, VideoB, VideoHS_n, VideoVS_n, VideoCS_n,
+		    Open, WeVdp_n, VdpAdr, VrmDbi, VrmDbo,
+		    VdpMode,
+      		VideoR, VideoG, VideoB, VideoHS_n, VideoVS_n, VideoCS_n,
              VideoDHClk, VideoDLClk, Reso_v, PAL_v, VdpScan );
 
   U21 : vencode
@@ -2274,16 +2455,17 @@ pMemDat		<= SdrDat;
   U30 : psg
     port map(clk21m, reset, clkena, PsgReq, Open, wrt, adr, PsgDbi, dbo,
                mouse_en, mdata, strob,
-               pJoyA, pStrA, pJoyB, pStrB, Kana, CmtIn, KeyMode, PsgAmp);
+             pJoyA, pStrA, pJoyB, pStrB, Kana, CmtIn, KeyMode, PsgAmp);
 
   U40 : ps2mouse
     port map(clk21m, reset, mouse_en, strob, mdata, pPs2mDat, pPs2mClk);
-
   U31_1 : megaram
     port map(clk21m, reset, clkena, Scc1Req, Scc1Ack, wrt, adr, Scc1Dbi, dbo,
              Scc1Ram, Scc1Wrt, Scc1Adr, RamDbi, Open, Scc1Type, Scc1AmpL, Open);
-	Scc1Type <= "10" when (Slt1Mode = '0') else "00";
 --	Slt1Mode: '0' - SCC1 in Slot 1; '1' - cartridge
+--	Scc1Type <= "10" when (Slt1Mode = '0') else "00";  -- Caro al 2018-04-19
+	Scc1Type <= "00" when (Slt1Mode = '0') else "10";  -- Cesc: amb els 4 slots, calia un hardreset per arrancar la primera vegada, pero 
+	-- al modificar la part de contadors de reset amb( FreeCounter <= X"0000";) el problema queda resolt.
 
   U31_2 : megaram
     port map(clk21m, reset, clkena, Scc2Req, Scc2Ack, wrt, adr, Scc2Dbi, dbo,
@@ -2357,16 +2539,16 @@ pMemDat		<= SdrDat;
 
   U35: a_codec
 	port map (
-	  iCLK	       => CLOCK_27,
-	  iSL          => SOUND_L,
-	  iSR          => SOUND_R,
-	  oAUD_XCK     => AUD_XCK,
-	  oAUD_DATA    => AUD_DACDAT,
-	  oAUD_LRCK    => AUD_DACLRCK,
-	  oAUD_BCK     => AUD_BCLK,
-	  iAUD_ADCDAT  => AUD_ADCDAT,
+	  iCLK	  => CLOCK_27,
+	  iSL     => SOUND_L,
+	  iSR     => SOUND_R,
+	  oAUD_XCK  => AUD_XCK,
+	  oAUD_DATA => AUD_DACDAT,
+	  oAUD_LRCK => AUD_DACLRCK,
+	  oAUD_BCK  => AUD_BCLK,
+	  iAUD_ADCDAT => AUD_ADCDAT,
 	  oAUD_ADCLRCK => AUD_ADCLRCK,
-	  o_tape       => CmtIn
+	  o_tape => CmtIn
 	);
 
   U36: I2C_AV_Config
@@ -2387,7 +2569,6 @@ pMemDat		<= SdrDat;
 	  dbi	 => systim_dbi,
 	  dbo	 => dbo
 	);
-
 -- Serial UART
   U39: uart_16750
     port map (
